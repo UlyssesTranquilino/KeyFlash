@@ -141,6 +141,7 @@
 
 .feature-background {
   background-image: radial-gradient(at top right, #002a9e, #000 75%);
+  box-shadow: 0px 0px 40px #002a9e;
 }
 
 .feature-background2 {
@@ -152,6 +153,7 @@
   );
   background-size: 190% 100%;
   background-repeat: no-repeat;
+  box-shadow: 0px 0px 36px #002a9e;
 }
 
 .feature-background3 {
@@ -163,6 +165,7 @@
   );
   background-size: 60% 100%;
   background-repeat: no-repeat;
+  box-shadow: 0px 0px 30px #002a9e;
 }
 
 .feature-background4 {
@@ -174,4 +177,20 @@
   );
   background-size: 120% 170%;
   background-repeat: no-repeat;
+  box-shadow: 0px 0px 50px #002a9e;
+}
+
+.feature-background-light {
+  background-image: radial-gradient(at top right, #0065a8, #000 75%);
+  box-shadow: 0px 0px 3px #00719e;
+}
+
+.feature-background-light2 {
+  background-image: radial-gradient(at top left, #00568f, #000 65%);
+  box-shadow: 0px 0px 3px #00719e;
+}
+
+.feature-background-light3 {
+  background-image: radial-gradient(at top, #005085, #000 65%);
+  box-shadow: 0px 0px 3px #00719e;
 }

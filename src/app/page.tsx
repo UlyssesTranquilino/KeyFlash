@@ -3,13 +3,16 @@ import Navbar from "./ui/navbar/navbar";
 import { Folder, ClipboardList, Keyboard } from "lucide-react";
 import Intro from "./ui/home/intro";
 import Features from "./ui/home/features";
+import WhyItWorks from "./ui/home/whyitworks";
+import HowItWorks from "./ui/home/howitworks";
+import WhoIsItFor from "./ui/home/whoisitfor";
 
 export default function Home() {
   return (
     <div className="fle flex-col items-center justify-items-center">
       <Navbar />
-      <main className="flex flex-col items-center justify-center ">
-        <div className="text-center pt-5 pb-10 w-full">
+      <main className="flex flex-col items-center justify-center max-w-[1150px]">
+        <div className="text-center pt-8 pb-10 w-full">
           <h1 className="text-3xl sm:text-5xl  lg:text-6xl px-4 max-w-90 sm:max-w-120 lg:max-w-150 mx-auto  sm:leading-15 lg:leading-20">
             Master What You Learn By Typing It.
           </h1>
@@ -81,6 +84,12 @@ export default function Home() {
         <Intro />
 
         <Features />
+
+        <WhyItWorks />
+
+        <HowItWorks />
+
+        <WhoIsItFor />
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center"></footer>
     </div>

@@ -1,6 +1,6 @@
 export default function Intro() {
   return (
-    <div className="mt-130 sm:mt-80 flex flex-col items-center justify-items-center">
+    <div className="mt-120 sm:mt-60 flex flex-col items-center justify-items-center">
       <div className="text-center pt-5 pb-10 w-full">
         <h1 className="text-3xl sm:text-5xl  lg:text-6xl px-4 max-w-90 sm:max-w-120 lg:max-w-150 mx-auto  sm:leading-15 lg:leading-20">
           Study Smarter
