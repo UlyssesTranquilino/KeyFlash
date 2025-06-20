@@ -6,11 +6,12 @@ import Features from "./ui/home/features";
 import WhyItWorks from "./ui/home/whyitworks";
 import HowItWorks from "./ui/home/howitworks";
 import WhoIsItFor from "./ui/home/whoisitfor";
+import Ready from "./ui/home/ready";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="fle flex-col items-center justify-items-center">
-      <Navbar />
       <main className="flex flex-col items-center justify-center max-w-[1150px]">
         <div className="text-center pt-8 pb-10 w-full">
           <h1 className="text-3xl sm:text-5xl  lg:text-6xl px-4 max-w-90 sm:max-w-120 lg:max-w-150 mx-auto  sm:leading-15 lg:leading-20">
@@ -63,7 +64,10 @@ export default function Home() {
             <div className="absolute -top-3 sm:-top-10 -right-4 -z-1 size-60 rounded-full bg-radial-[at_50%_50%] from-blue-500/70  to-black to-80%"></div>
           </div>
 
-          <div className="relative group transition-all duration-300 ease-in-out sm:col-span-2 sm:mx-auto sm:w-1/2 lg:col-span-1 lg:w-full lg:mx-0">
+          <Link
+            href="/typing/story"
+            className="relative group transition-all duration-300 ease-in-out sm:col-span-2 sm:mx-auto sm:w-1/2 lg:col-span-1 lg:w-full lg:mx-0"
+          >
             <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
               <Keyboard
                 size={55}
@@ -74,11 +78,11 @@ export default function Home() {
                 Practice Typing
               </h1>
               <p className="text-xs md:text-sm w-60">
-                Just want to warm up? Start with a random lesson.
+                Warm up with stories, quotes, random words, or code snippets.
               </p>
             </div>
             <div className="absolute -top-5 -right-3 -z-1 size-65 rounded-full bg-radial-[at_50%_50%] from-blue-500/70  to-black to-70%"></div>
-          </div>
+          </Link>
         </div>
 
         <Intro />
@@ -90,8 +94,27 @@ export default function Home() {
         <HowItWorks />
 
         <WhoIsItFor />
+
+        <Ready />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center"></footer>
+
+      <footer className="mt-20 sm:mt-40 w-full border-t border-white/10 py-8 px-4 text-sm text-center text-white/80">
+        <div className="flex flex-col sm:flex-row items-center justify-between max-w-6xl mx-auto gap-4">
+          <p>© 2025 KeyFlash. All rights reserved.</p>
+
+          <div className="flex gap-6 text-white/60 text-sm">
+            <a href="#about" className="hover:text-white transition">
+              About
+            </a>
+            <a href="#contact" className="hover:text-white transition">
+              Contact
+            </a>
+            <a href="#privacy" className="hover:text-white transition">
+              Privacy
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

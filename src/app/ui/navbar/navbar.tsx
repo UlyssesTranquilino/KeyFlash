@@ -19,7 +19,7 @@ export default function Navbar() {
   };
   // <nav className="p-7 grid grid-cols-3 items-center w-full max-w-300"></nav>
   return (
-    <nav className=" sm:px-7 sm:py-2 md:px-10 flex justify-between flex-row-reverse items-center w-full">
+    <nav className="bg-gray-950  sm:px-7 sm:py-2 md:px-10 flex justify-between flex-row-reverse items-center w-full">
       <div className="hidden lg:flex items-center gap-3">
         <button
           className="flex  items-center cursor-pointer text-gray-200 hover:text-white scale-95"
@@ -39,7 +39,7 @@ export default function Navbar() {
         </button>
       </div>
 
-      <header className="flex justify-end h-20 w-20 gap-3 shrink-0 items-center px-4 md:px-6 lg:px-0">
+      <header className="flex justify-end h-20 w-20 gap-3 shrink-0 items-center px-3  lg:px-0">
         <button
           className="flex lg:hidden  items-center cursor-pointer text-gray-200 hover:text-white scale-95"
           onClick={toggleTheme}
@@ -92,13 +92,13 @@ export default function Navbar() {
           <span className="sr-only">Acme Inc</span>
         </Link>
         <nav className="ml-auto hidden lg:flex gap-6 w-full justify-center">
-          <Link className="text-gray-200 hover:text-white " href="/">
+          <Link className="text-gray-400 hover:text-white " href="/">
             Home
           </Link>
-          <Link className="text-gray-200 hover:text-white " href="/">
+          <Link className="text-gray-400 hover:text-white " href="/">
             About
           </Link>
-          <Link className="text-gray-200 hover:text-white " href="/">
+          <Link className="text-gray-400 hover:text-white " href="/">
             Contact
           </Link>
         </nav>
