@@ -18,8 +18,15 @@ import { useTimer } from "@/app/context/TimerContext";
 const QuoteType = () => {
   // Contexts
   const { quote, setQuote } = useQuote();
-  const { time, setTime, remaining, isRunning, startTimer, resetTimer } =
-    useTimer();
+  const {
+    time,
+    setTime,
+    remaining,
+    setRemaining,
+    isRunning,
+    startTimer,
+    resetTimer,
+  } = useTimer();
 
   const [author, setAuthor] = useState("");
   const [userInput, setUserInput] = useState("");
@@ -167,9 +174,9 @@ const QuoteType = () => {
           if (index >= userInput.length) {
             className += "text-gray-500";
           } else if (char === userInput[index]) {
-            className += "text-blue-100";
+            className += "text-blue-300";
           } else {
-            className += "text-red-700/80";
+            className += "text-red-600/75";
           }
 
           // Add fixed width to maintain layout
@@ -221,7 +228,7 @@ const QuoteType = () => {
     <div className="mt-22 relative">
       <div className="h-70 sm:h-50 w-full max-w-[800px] mx-auto px-5">
         {/* Timer */}
-        <div className="px-1 mb-3">{remaining}</div>
+        <div className="px-1 mb-3">{isRunning ? remaining : time}</div>
 
         {/* Display the quote with color highlighting and cursor */}
         <div

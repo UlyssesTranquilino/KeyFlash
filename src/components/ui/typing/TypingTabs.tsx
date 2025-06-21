@@ -67,7 +67,7 @@ const tabs = [
   { label: "Code", icon: Code, path: "/typing/code" },
 ];
 
-const time = [
+const allTime = [
   {
     value: 10,
     label: "10",
@@ -91,7 +91,7 @@ const time = [
 ];
 
 export default function TypingTabs() {
-  const { setTime, setRemaining } = useTimer();
+  const { time, setTime, setRemaining, resetTimer } = useTimer();
 
   const [openTopic, setOpenTopic] = useState(false);
   const [openLang, setOpenLang] = useState(false);
@@ -116,7 +116,6 @@ export default function TypingTabs() {
   const { lowerCaseQuote, startCaseQuote } = useQuote();
 
   const [openTime, setOpenTime] = useState(false);
-  const [selectedTime, setSelectedTime] = useState(30);
   return (
     <div className="mt-3 px-4 sm:px-9 flex items-center max-w-[1000px] mx-auto lg:mt-3">
       <div className="w-full flex flex-wrap justify-between gap-3 sm:gap-6 p-3 h-15 rounded-md px-5 bg-blue-950/30 items-center">
@@ -255,7 +254,7 @@ export default function TypingTabs() {
                 aria-expanded={openTime}
                 className="justify-between flex items-center"
               >
-                {selectedTime > 0 ? selectedTime : <Infinity />}
+                {time > 0 ? time : <Infinity />}
                 <Timer className="text-gray-400" />
               </Button>
             </PopoverTrigger>
@@ -264,15 +263,16 @@ export default function TypingTabs() {
                 <CommandList>
                   <CommandEmpty>No topic found.</CommandEmpty>
                   <CommandGroup>
-                    {time.map((topic) => (
+                    {allTime.map((topic: any) => (
                       <CommandItem
                         key={topic.value}
                         value={topic.value.toString()}
                         onSelect={(current) => {
                           const parsed = parseInt(current, 10);
-                          setSelectedTime(parsed === selectedTime ? 0 : parsed);
+                          const newTime = parsed === time ? 0 : parsed;
 
-                          setTime(parsed);
+                          setTime(newTime);
+                          resetTimer(newTime); // ensure `remaining` is updated immediately
                           setOpenTime(false);
                         }}
                       >

@@ -13,6 +13,7 @@ import {
 type TimerContextType = {
   time: number;
   setTime: Dispatch<SetStateAction<number>>;
+  setRemaining: Dispatch<SetStateAction<number>>;
   remaining: number;
   isRunning: boolean;
   startTimer: () => void;
@@ -38,8 +39,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   }, [isRunning]);
 
   const startTimer = () => setIsRunning(true);
-  const resetTimer = () => {
-    setRemaining(time);
+
+  const resetTimer = (newTime?: number) => {
+    const updatedTime = newTime ?? time;
+    setRemaining(updatedTime);
     setIsRunning(false);
   };
 
