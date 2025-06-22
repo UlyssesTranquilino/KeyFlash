@@ -117,7 +117,7 @@ export default function TypingTabs() {
 
   const [openTime, setOpenTime] = useState(false);
   return (
-    <div className="mt-3 px-4 sm:px-9 flex items-center max-w-[1000px] mx-auto lg:mt-3">
+    <div className="px-4 sm:px-9 flex items-center max-w-[1000px] mx-auto ">
       <div className="w-full flex flex-wrap justify-between gap-3 sm:gap-6 p-3 h-15 rounded-md px-5 bg-blue-950/30 items-center">
         <div className="flex items-center gap-3 sm:gap-6">
           {/* Tab navigation */}
@@ -269,8 +269,9 @@ export default function TypingTabs() {
                         value={topic.value.toString()}
                         onSelect={(current) => {
                           const parsed = parseInt(current, 10);
-                          const newTime = parsed === time ? 0 : parsed;
+                          const newTime = parsed === time ? -1 : parsed;
 
+                          console.log("Selected time:", newTime);
                           setTime(newTime);
                           resetTimer(newTime); // ensure `remaining` is updated immediately
                           setOpenTime(false);

@@ -23,13 +23,12 @@ type TimerContextType = {
 const TimerContext = createContext<TimerContextType | undefined>(undefined);
 
 export function TimerProvider({ children }: { children: ReactNode }) {
-  const [time, setTime] = useState(30); // default 30 seconds
-  const [remaining, setRemaining] = useState(30);
+  const [time, setTime] = useState(-1); // default 30 seconds
+  const [remaining, setRemaining] = useState(-1);
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    if (!isRunning) return;
-    console.log("Timer started with time:", time);
+    if (!isRunning || time === -1) return;
 
     const interval = setInterval(() => {
       setRemaining((prev) => (prev > 0 ? prev - 1 : 0));

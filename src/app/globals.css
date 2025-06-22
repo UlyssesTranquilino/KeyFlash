@@ -199,3 +199,21 @@
 .input-glow {
   @apply focus-visible:ring-1 focus-visible:ring-blue-400/90 focus-visible:shadow-[0_0_0_4px_rgba(59,130,246,0.2)];
 }
+
+.word {
+  word-wrap: break-word;
+  white-space: normal;
+  line-height: 1.6;
+}
+
+.statCard-bg {
+  background-image: radial-gradient(
+    ellipse at center,
+    #001b64 0%,
+    #001346 30%,
+    #000 80%
+  );
+  background-size: 100% 170%;
+  background-repeat: no-repeat;
+  box-shadow: 0px 0px 20px #001550;
+}
