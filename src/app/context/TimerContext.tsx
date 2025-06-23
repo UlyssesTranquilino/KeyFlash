@@ -31,23 +31,43 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     if (!isRunning || time === -1) return;
 
     const interval = setInterval(() => {
-      setRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+      setRemaining((prev) => {
+        if (prev <= 0) {
+          clearInterval(interval);
+          setIsRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning]);
+  }, [isRunning, time]);
 
-  const startTimer = () => setIsRunning(true);
+  const startTimer = () => {
+    if (time > 0) {
+      setRemaining(time);
+    }
+    setIsRunning(true);
+  };
 
   const resetTimer = (newTime?: number) => {
-    const updatedTime = newTime ?? time;
+    const updatedTime = newTime !== undefined ? newTime : time;
     setRemaining(updatedTime);
     setIsRunning(false);
   };
 
   return (
     <TimerContext.Provider
-      value={{ time, setTime, remaining, isRunning, startTimer, resetTimer }}
+      value={{
+        time,
+        setTime,
+        remaining,
+        setRemaining,
+        isRunning,
+        startTimer,
+        resetTimer,
+      }}
     >
       {children}
     </TimerContext.Provider>

@@ -27,6 +27,7 @@ export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
   // Apply lowercase mode automatically when a new quote is set
   const setQuote = (q: Quote) => {
     setOriginalQuote(q);
+    console.log("Q: ", q);
     if (isLowercase) {
       const cleaned = q.content
         .toLowerCase()

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Check, X, Clock, Type, BarChart2, Award } from "lucide-react";
 import { useTimer } from "@/app/context/TimerContext";
+import { useQuote } from "@/app/context/QuoteContext";
 const Results = ({
   wpm,
   accuracy,
@@ -12,6 +13,8 @@ const Results = ({
   mistakes,
   startTime,
   endTime,
+  handleRefetch,
+  handleRetype,
 }: {
   wpm: number;
   accuracy: number;
@@ -23,20 +26,23 @@ const Results = ({
   mistakes: number;
   startTime: number | null;
   endTime: number;
+  handleRefetch: () => void;
+  handleRetype: (quoteData: any) => void;
 }) => {
   const duration = startTime ? ((endTime - startTime) / 1000).toFixed(2) : 0;
   const netWpm = Math.max(0, wpm - mistakes / 5); // Net WPM with error penalty
   const consistency = 85; // This would need to be calculated based on WPM variance
 
   const { time } = useTimer();
+  const { setQuote, originalQuote } = useQuote();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-4xl mx-auto p-6 -mt-10"
+      className="max-w-4xl mx-auto p-6 -mt-18 "
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-4">
         <h2 className="text-3xl  text-white mb-2">Typing Results</h2>
         {time === -1 && (
           <p className="text-gray-400">
@@ -47,7 +53,7 @@ const Results = ({
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-4">
         {/* WPM Card */}
         <StatCard
           icon={<Award className="text-amber-400" size={24} />}
@@ -80,17 +86,17 @@ const Results = ({
       </div>
 
       {/* Detailed Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
         {/* Character Breakdown */}
-        <div className="bg-gray-800/50 p-5 rounded-lg border border-gray-700">
-          <h3 className="flex items-center text-lg font-semibold mb-4 text-gray-300">
+        <div className="p-5 rounded-lg border ">
+          <h3 className="flex items-center text-lg  mb-4 text-white w-full text-center ">
             <Type className="mr-2" size={20} /> Character Breakdown
           </h3>
           <div className="space-y-3">
             <StatRow
               label="Correct characters"
               value={correctChars}
-              colorClass="text-emerald-400"
+              colorClass="text-blue-400"
             />
             <StatRow
               label="Incorrect characters"
@@ -100,14 +106,20 @@ const Results = ({
             <StatRow
               label="Total characters"
               value={totalChars}
-              colorClass="text-cyan-400"
+              colorClass="text-white"
             />
             <div className="pt-2">
-              <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
+              <div className="flex  items-center h-2 bg-gray-700 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+                  className="h-full bg-gradient-to-r from-blue-700 to-blue-400"
                   style={{
                     width: `${(correctChars / totalChars) * 100}%`,
+                  }}
+                />
+                <div
+                  className="h-full bg-gradient-to-r  from-red-800 to-red-400"
+                  style={{
+                    width: `${(incorrectChars / totalChars) * 100}%`,
                   }}
                 />
               </div>
@@ -116,7 +128,7 @@ const Results = ({
         </div>
 
         {/* Time Metrics */}
-        <div className="bg-gray-800/50 p-5 rounded-lg border border-gray-700">
+        <div className="p-5 rounded-lg border ">
           <h3 className="flex items-center text-lg font-semibold mb-4 text-gray-300">
             <Clock className="mr-2" size={20} /> Time Metrics
           </h3>
@@ -124,17 +136,17 @@ const Results = ({
             <StatRow
               label="Test duration"
               value={`${duration}s`}
-              colorClass="text-amber-400"
+              colorClass="text-gray-100"
             />
             <StatRow
               label="Characters per minute"
               value={Math.round((correctChars / +duration) * 60)}
-              colorClass="text-blue-400"
+              colorClass="text-gray-100"
             />
             <StatRow
               label="Average per character"
               value={`${((+duration * 1000) / totalChars).toFixed(2)}ms`}
-              colorClass="text-purple-400"
+              colorClass="text-gray-100"
             />
           </div>
         </div>
@@ -142,14 +154,19 @@ const Results = ({
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-4">
-        <button className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 rounded-lg font-medium transition-colors">
-          Try Again
-        </button>
-        <button className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors">
+        <button
+          onClick={handleRefetch}
+          className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
+        >
           New Quote
-        </button>
-        <button className="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors">
-          Share Results
+        </button>{" "}
+        <button
+          onClick={() => {
+            handleRetype(originalQuote);
+          }}
+          className="px-6 lg:px-10 py-3 border-1 border-gray-700 hover:bg-gray-800/40 rounded-md  transition-colors"
+        >
+          Try Again
         </button>
       </div>
     </motion.div>
@@ -172,15 +189,15 @@ const StatCard = ({
   description: string;
   colorClass: string;
 }) => (
-  <div className="h-35 flex items-center justify-around relative bg-blue-950/30 statCard-bg  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm ">
-    <div className="mb-3 scale-130">{icon}</div>
+  <div className="h-35 flex items-center justify-center relative bg-blue-950/30 statCard-bg  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm ">
+    <div className="mb-3 scale-130 w-14 ">{icon}</div>
     <div>
       <h3 className="text-lg  mb-1 text-gray-200">{title}</h3>
       <p className={`text-4xl font-bold mb-1 ${colorClass}`}>
         {value}
         <span className="text-xl ml-1">{unit}</span>
       </p>
-      <p className="text-sm text-gray-500">{description}</p>
+      <p className="text-sm text-gray-400">{description}</p>
     </div>
   </div>
 );
