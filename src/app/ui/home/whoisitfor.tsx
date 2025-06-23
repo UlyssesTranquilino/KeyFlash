@@ -15,7 +15,7 @@ export default function WhoIsItFor() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 px-5 w-full ">
         <div className=" flex items-center justify-center  relative group transition-all duration-300 ease-in-out ">
-          <div className="flex flex-col justify-center items-center cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+          <div className="flex flex-col justify-center items-center  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out ">
             <h1 className=" text-center text-xl md:text-xl mb-3 font-medium ">
               Students
             </h1>
@@ -35,7 +35,7 @@ export default function WhoIsItFor() {
         </div>
 
         <div className=" flex items-center justify-center  relative group transition-all duration-300 ease-in-out ">
-          <div className="flex flex-col justify-center items-center cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+          <div className="flex flex-col justify-center items-center  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out ">
             <h1 className=" text-center text-xl md:text-xl mb-3 font-medium ">
               Teachers
             </h1>
@@ -56,7 +56,7 @@ export default function WhoIsItFor() {
         </div>
 
         <div className=" flex items-center justify-center  relative group transition-all duration-300 ease-in-out ">
-          <div className="flex flex-col justify-center items-center cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+          <div className="flex flex-col justify-center items-center  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out ">
             <h1 className=" text-center text-xl md:text-xl mb-3 font-medium ">
               Developers
             </h1>
@@ -78,7 +78,7 @@ export default function WhoIsItFor() {
         </div>
 
         <div className=" flex items-center justify-center  relative group transition-all duration-300 ease-in-out ">
-          <div className="flex flex-col justify-center items-center cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+          <div className="flex flex-col justify-center items-center  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-white/30  transition-all duration-300 ease-in-out ">
             <h1 className=" text-center text-xl md:text-xl mb-3 font-medium ">
               Everyone
             </h1>

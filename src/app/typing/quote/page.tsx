@@ -39,6 +39,7 @@ const QuoteType = () => {
   const [isIdle, setIsIdle] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [completed, setCompleted] = useState(false);
 
   const [mistakes, setMistakes] = useState(0);
 
@@ -100,12 +101,22 @@ const QuoteType = () => {
     setLoading(false);
   };
 
+  const handleReType = (quoteData: any) => {
+    setQuote(quoteData);
+    setAuthor(quoteData.author || "");
+    resetTest();
+  };
+
   const resetTest = () => {
     setUserInput("");
     setCurrentIndex(0);
     setStartTime(null);
     setWpm(0);
     setIsIdle(true);
+    setCompleted(false);
+    setCorrectChars(0);
+    setIncorrectChars(0);
+    setMistakes(0);
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -118,6 +129,7 @@ const QuoteType = () => {
     setAuthor(randomQuote?.author || "");
     setUserInput("");
     setCurrentIndex(0);
+    setCompleted(false);
     setStartTime(Date.now()); // Keep timing the session
   };
 
@@ -137,13 +149,18 @@ const QuoteType = () => {
       let correct = 0;
       let incorrect = 0;
 
-      for (let i = 0; i < value.length; i++) {
+      // Count correct characters from the beginning
+      let correctFromStart = 0;
+      for (let i = 0; i < Math.min(value.length, quote.content.length); i++) {
         if (value[i] === quote.content[i]) {
-          correct++;
+          correctFromStart++;
         } else {
-          incorrect++;
+          break;
         }
       }
+
+      correct = correctFromStart;
+      incorrect = value.length - correctFromStart;
 
       setCorrectChars(correct);
       setIncorrectChars(incorrect);
@@ -160,20 +177,20 @@ const QuoteType = () => {
 
     setCurrentIndex(value.length);
 
+    // Check completion - user must type the exact quote
     if (quote?.content && value === quote.content) {
-      if (time === -1) {
-        setEndTime(Date.now());
-      } else if (remaining > 0) {
+      setEndTime(Date.now());
+      setCompleted(true);
+
+      // Only load next quote if in timed mode with time remaining
+      if (time > 0 && remaining > 0) {
         loadNextQuote();
+        setCompleted(false); // Reset for next quote
       }
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === " " && quote?.content[currentIndex] !== " ") {
-      e.preventDefault();
-    }
-
     // Handle Ctrl+Backspace - delete previous word
     if (e.key === "Backspace" && e.ctrlKey) {
       e.preventDefault();
@@ -196,107 +213,46 @@ const QuoteType = () => {
   const renderQuoteWithHighlighting = () => {
     if (!quote?.content) return null;
 
-    const words = quote.content.split(" ");
-    let charIndex = 0;
+    const quoteChars = quote.content.split("");
+    const userChars = userInput.split("");
+    const elements = [];
+
+    for (let i = 0; i < quoteChars.length; i++) {
+      const char = quoteChars[i];
+      let className = "text-gray-500";
+
+      if (i < userChars.length) {
+        className =
+          userChars[i] === char
+            ? "text-white"
+            : "text-red-600/75 bg-red-900/30";
+      }
+
+      const isCursor = i === currentIndex;
+
+      elements.push(
+        <span key={i} className="inline-block">
+          <span className={className}>{char === " " ? "\u00A0" : char}</span>
+          {isCursor && (
+            <span
+              className={`inline-block w-0.5 h-6 bg-cyan-400 align-middle ml-[-2px] ${
+                isIdle
+                  ? showCursor
+                    ? "opacity-100"
+                    : "opacity-0"
+                  : "opacity-100"
+              }`}
+            />
+          )}
+        </span>
+      );
+    }
 
     return (
-      <div className="word leading-relaxed">
-        {words.map((word, wordIndex) => (
-          <span key={wordIndex} className="inline-block">
-            {word.split("").map((char, charInWordIndex) => {
-              const currentCharIndex = charIndex;
-              charIndex++;
-
-              let className = "";
-              if (currentCharIndex >= userInput.length) {
-                className = "text-gray-500";
-              } else if (char === userInput[currentCharIndex]) {
-                className = "text-white";
-              } else {
-                className = "text-red-600/75";
-              }
-
-              // Render cursor at current position
-              if (currentCharIndex === currentIndex) {
-                return (
-                  <span key={charInWordIndex} className="relative">
-                    <span className={className}>{char}</span>
-                    <span
-                      className={`absolute top-0 left-0 w-0.5 h-7 bg-cyan-400 ${
-                        isIdle
-                          ? showCursor
-                            ? "opacity-100"
-                            : "opacity-0"
-                          : "opacity-100"
-                      }`}
-                      style={{ marginLeft: "-1px" }}
-                    />
-                  </span>
-                );
-              }
-
-              return (
-                <span key={charInWordIndex} className={className}>
-                  {char}
-                </span>
-              );
-            })}
-
-            {/* Add space after word (except last word) */}
-            {wordIndex < words.length - 1 &&
-              (() => {
-                const spaceIndex = charIndex;
-                charIndex++; // Increment for space
-
-                let spaceClassName = "";
-                if (spaceIndex >= userInput.length) {
-                  spaceClassName = "text-gray-500";
-                } else if (userInput[spaceIndex] === " ") {
-                  spaceClassName = "text-blue-300";
-                } else {
-                  spaceClassName = "text-red-600/75";
-                }
-
-                // Render cursor at space position
-                if (spaceIndex === currentIndex) {
-                  return (
-                    <span key="space" className="relative">
-                      <span className={spaceClassName}>&nbsp;</span>
-                      <span
-                        className={`absolute top-0 left-0 w-0.5 h-7 bg-cyan-400 ${
-                          isIdle
-                            ? showCursor
-                              ? "opacity-100"
-                              : "opacity-0"
-                            : "opacity-100"
-                        }`}
-                        style={{ marginLeft: "-1px" }}
-                      />
-                    </span>
-                  );
-                }
-
-                return (
-                  <span key="space" className={spaceClassName}>
-                    &nbsp;
-                  </span>
-                );
-              })()}
-          </span>
-        ))}
-
-        {/* End cursor */}
-        {currentIndex === quote.content.length && currentIndex !== 0 && (
-          <span
-            className={`inline-block w-0.5 h-7 bg-cyan-400 align-middle ${
-              isIdle
-                ? showCursor
-                  ? "opacity-100"
-                  : "opacity-0"
-                : "opacity-100"
-            }`}
-          />
-        )}
+      <div
+        className={`flex flex-wrap justify-center gap-[2px] leading-relaxed text-left`}
+      >
+        {elements}
       </div>
     );
   };
@@ -307,8 +263,8 @@ const QuoteType = () => {
         - Time is infinite (-1) AND not completed OR
         - Time is set AND remaining time > 0
     */}
-      {(time === -1 && userInput !== quote?.content) ||
-      (time !== -1 && remaining > 0) ? (
+      {(!completed && (time === -1 || remaining > 0)) ||
+      (time > 0 && remaining > 0) ? (
         <div>
           <div className="h-70 sm:h-50 lg:h-60 w-full max-w-[900px] mx-auto ">
             {/* Timer */}
@@ -324,20 +280,20 @@ const QuoteType = () => {
 
             {/* Display the quote with color highlighting and cursor */}
             <div
-              className={`text-xl lg:text-[1.7rem] text-center ${spaceMono.className} leading-8 mb-8 min-h-[120px] cursor-default`}
+              className={`relative text-xl lg:text-[1.7rem] text-center ${spaceMono.className} leading-8 mb-8 h-[160px] sm:h-[200px] cursor-text overflow-hidden`}
               onClick={() => inputRef.current?.focus()}
             >
               {renderQuoteWithHighlighting()}
             </div>
 
-            {/* Invisible input field for typing */}
+            {/* Hidden input field for capturing keystrokes */}
             <input
               ref={inputRef}
               type="text"
               value={userInput}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="absolute opacity-0 w-0 h-0"
+              className="absolute opacity-0 w-0 h-0 pointer-events-none"
               autoFocus
               aria-hidden="true"
             />
@@ -375,6 +331,8 @@ const QuoteType = () => {
           quote={quote?.content || ""}
           author={quote?.author || ""}
           mistakes={mistakes}
+          handleRefetch={loadNextQuote}
+          handleRetype={handleReType}
         />
       )}
     </div>

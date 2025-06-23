@@ -17,7 +17,7 @@ export default function Features() {
       <div className=" grid    grid-cols-1  w-full h-45 gap-5 border-white px-5">
         <div className="grid sm:grid-cols-3 gap-3  md:gap-5">
           <div className=" h-50 md:h-60  relative group transition-all duration-300 ease-in-out feature-background">
-            <div className="md:p-5 flex flex-col justify-end cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+            <div className="md:p-5 flex flex-col justify-end  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out  ">
               <Image
                 src={TypingMode}
                 alt="KeyFlash Logo"
@@ -33,7 +33,7 @@ export default function Features() {
           </div>
 
           <div className="sm:col-span-2 relative group transition-all duration-300 ease-in-out feature-background2">
-            <div className=" md:p-8 h-50 md:h-60  cursor-pointer p-5 w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+            <div className=" md:p-8 h-50 md:h-60   p-5 w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out ">
               <Image
                 src={Shine}
                 alt="KeyFlash Logo"
@@ -56,7 +56,7 @@ export default function Features() {
 
         <div className="grid sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-5">
           <div className="sm:col-span-2 md:col-span-3 relative group transition-all duration-300 ease-in-out feature-background3">
-            <div className="md:p-8 flex flex-col justify-end h-50 md:h-60  cursor-pointer p-5 w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+            <div className="md:p-8 flex flex-col justify-end h-50 md:h-60   p-5 w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30">
               <Image
                 src={Shine}
                 alt="KeyFlash Logo"
@@ -77,7 +77,7 @@ export default function Features() {
           </div>
 
           <div className=" md:col-span-2 flex items-center justify-center  relative group transition-all duration-300 ease-in-out feature-background4">
-            <div className="h-50 md:p-8  md:h-60 cursor-pointer p-5  w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+            <div className="h-50 md:p-8  md:h-60  p-5  w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30">
               <h1 className="mt-8 sm:mt-8 text-2xl md:text-3xl lg:text-4xl text-center my-3 font-medium gradient-text">
                 Generate Reviewer
               </h1>

@@ -11,7 +11,7 @@ export default function TypingLayout({
   return (
     <TimerProvider>
       <QuoteProvider>
-        <div className="  text-foreground">
+        <div className=" text-foreground ">
           {/* Top Tabs */}
           <TypingTabs />
 

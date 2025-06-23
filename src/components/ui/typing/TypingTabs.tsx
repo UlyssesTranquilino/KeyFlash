@@ -85,7 +85,7 @@ const allTime = [
     label: "60",
   },
   {
-    value: 0,
+    value: -1,
     label: <Infinity />,
   },
 ];
@@ -267,14 +267,19 @@ export default function TypingTabs() {
                       <CommandItem
                         key={topic.value}
                         value={topic.value.toString()}
+                        // In the time dropdown CommandItem's onSelect handler:
                         onSelect={(current) => {
                           const parsed = parseInt(current, 10);
-                          const newTime = parsed === time ? -1 : parsed;
+                          // Only update if it's a different value
+                          console.log("parsed: ", parsed, " Time: ", time);
+                          if (parsed !== time) {
+                            setTime(parsed);
+                            setRemaining(parsed === 0 ? -1 : parsed); // Handle infinite mode (0 becomes -1)
 
-                          console.log("Selected time:", newTime);
-                          setTime(newTime);
-                          resetTimer(newTime); // ensure `remaining` is updated immediately
-                          setOpenTime(false);
+                            setOpenTime(false);
+                          } else {
+                            setOpenTime(false); // Just close the dropdown if same value clicked
+                          }
                         }}
                       >
                         <div className="flex items-center justify-center w-full">

@@ -9,7 +9,7 @@ export default function HowItWorks() {
 
       <div className="grid grid-cols-1  sm:grid-cols-3 gap-5 px-5 w-full ">
         <div className=" flex items-center justify-center h-55  relative group transition-all duration-300 ease-in-out feature-background-light">
-          <div className="flex flex-col justify-center cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+          <div className="flex flex-col justify-center  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30">
             <h1 className="text-center text-lg md:text-xl lg:text-2xl  lg:mb-5 mb-3 font-medium ">
               Upload or Paste
             </h1>
@@ -21,7 +21,7 @@ export default function HowItWorks() {
         </div>
 
         <div className=" flex items-center justify-center h-55  relative group transition-all duration-300 ease-in-out feature-background-light2">
-          <div className="flex flex-col justify-center cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+          <div className="flex flex-col justify-center  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30">
             <h1 className="text-center text-lg md:text-xl lg:text-2xl  lg:mb-5 mb-3 font-medium ">
               Choose Your Mode
             </h1>
@@ -33,7 +33,7 @@ export default function HowItWorks() {
         </div>
 
         <div className=" flex items-center justify-center h-55  relative group transition-all duration-300 ease-in-out feature-background-light3">
-          <div className="flex flex-col justify-center cursor-pointer p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+          <div className="flex flex-col justify-center  p-5 h-full w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30">
             <h1 className="text-center text-lg md:text-xl lg:text-2xl  lg:mb-5 mb-3 font-medium ">
               Start Mastering
             </h1>
