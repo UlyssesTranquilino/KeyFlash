@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import { getRandomQuotes } from "../../../../utils/typing/getRandomQuotes";
 
 import { Quote } from "@/types/quote";
@@ -9,26 +10,16 @@ import { Quote } from "@/types/quote";
 import { spaceMono } from "@/app/ui/fonts";
 
 // Icons
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, TriangleAlert } from "lucide-react";
 
 // Context
 import { useQuote } from "@/app/context/QuoteContext";
-import { useTimer } from "@/app/context/TimerContext";
 
 import Results from "@/components/ui/typing/Results";
 
 const QuoteType = () => {
   // Contexts
   const { quote, setQuote } = useQuote();
-  const {
-    time,
-    setTime,
-    remaining,
-    setRemaining,
-    isRunning,
-    startTimer,
-    resetTimer,
-  } = useTimer();
 
   const [author, setAuthor] = useState("");
   const [userInput, setUserInput] = useState("");
@@ -41,12 +32,31 @@ const QuoteType = () => {
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [completed, setCompleted] = useState(false);
 
+  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [mistakes, setMistakes] = useState(0);
 
   // Stats
   const [endTime, setEndTime] = useState<number | null>(null);
   const [correctChars, setCorrectChars] = useState(0);
   const [incorrectChars, setIncorrectChars] = useState(0);
+
+  // Check if Caps Lock is on
+  useEffect(() => {
+    const handleKeyEvent = (event: KeyboardEvent) => {
+      if (event.getModifierState) {
+        const isOn = event.getModifierState("CapsLock");
+        setIsCapsLockOn(isOn);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyEvent);
+    window.addEventListener("keyup", handleKeyEvent);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyEvent);
+      window.removeEventListener("keyup", handleKeyEvent);
+    };
+  }, []);
 
   // Handle idle state and cursor blinking
   useEffect(() => {
@@ -85,10 +95,10 @@ const QuoteType = () => {
     const fetchQuotes = async () => {
       const randomQuote = await getRandomQuotes();
       setQuote(randomQuote);
-      resetTest();
+      // Don't call resetTest() here - let the initial state handle it
     };
     fetchQuotes();
-  }, []);
+  }, []); // Empty dependency array for initial load only
 
   const [loading, setLoading] = useState(false);
 
@@ -120,7 +130,6 @@ const QuoteType = () => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-    resetTimer();
   };
 
   const loadNextQuote = async () => {
@@ -141,7 +150,6 @@ const QuoteType = () => {
 
     if (!startTime) {
       setStartTime(Date.now());
-      startTimer();
     }
 
     // Calculate accuracy metrics
@@ -178,15 +186,15 @@ const QuoteType = () => {
     setCurrentIndex(value.length);
 
     // Check completion - user must type the exact quote
-    if (quote?.content && value === quote.content) {
+    if (quote?.content && value.length === quote.content.length) {
       setEndTime(Date.now());
       setCompleted(true);
 
       // Only load next quote if in timed mode with time remaining
-      if (time > 0 && remaining > 0) {
-        loadNextQuote();
-        setCompleted(false); // Reset for next quote
-      }
+      // if (time > 0 && remaining > 0) {
+      //   loadNextQuote();
+      //   setCompleted(false); // Reset for next quote
+      // }
     }
   };
 
@@ -213,45 +221,62 @@ const QuoteType = () => {
   const renderQuoteWithHighlighting = () => {
     if (!quote?.content) return null;
 
-    const quoteChars = quote.content.split("");
+    // Split the quote into words
+    const words = quote.content
+      .split(/(\s+)/)
+      .filter((word) => word.length > 0);
     const userChars = userInput.split("");
+    let currentCharIndex = 0;
     const elements = [];
 
-    for (let i = 0; i < quoteChars.length; i++) {
-      const char = quoteChars[i];
-      let className = "text-gray-500";
+    for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
+      const word = words[wordIndex];
+      const wordChars = word.split("");
+      const wordElements = [];
 
-      if (i < userChars.length) {
-        className =
-          userChars[i] === char
-            ? "text-white"
-            : "text-red-600/75 bg-red-900/30";
+      for (let charIndex = 0; charIndex < wordChars.length; charIndex++) {
+        const char = wordChars[charIndex];
+        let className = "text-gray-500";
+
+        if (currentCharIndex < userChars.length) {
+          className =
+            userChars[currentCharIndex] === char
+              ? "text-white"
+              : "text-red-600/75 bg-red-900/30";
+        }
+
+        const isCursor = currentCharIndex === userInput.length;
+
+        wordElements.push(
+          <span key={`${wordIndex}-${charIndex}`} className="inline">
+            {isCursor && (
+              <span
+                className={`inline-block w-0.5 h-6 bg-cyan-400 align-middle ml-[-2px] ${
+                  isIdle
+                    ? showCursor
+                      ? "opacity-100"
+                      : "opacity-0"
+                    : "opacity-100"
+                }`}
+              />
+            )}
+            <span className={className}>{char === " " ? "\u00A0" : char}</span>
+          </span>
+        );
+
+        currentCharIndex++;
       }
 
-      const isCursor = i === currentIndex;
-
+      // Wrap the entire word in a span that won't break
       elements.push(
-        <span key={i} className="inline-block">
-          <span className={className}>{char === " " ? "\u00A0" : char}</span>
-          {isCursor && (
-            <span
-              className={`inline-block w-0.5 h-6 bg-cyan-400 align-middle ml-[-2px] ${
-                isIdle
-                  ? showCursor
-                    ? "opacity-100"
-                    : "opacity-0"
-                  : "opacity-100"
-              }`}
-            />
-          )}
+        <span key={`word-${wordIndex}`} className="whitespace-nowrap">
+          {wordElements}
         </span>
       );
     }
 
     return (
-      <div
-        className={`flex flex-wrap justify-center gap-[2px] leading-relaxed text-left`}
-      >
+      <div className="flex flex-wrap justify-center gap-x-1 leading-relaxed text-left">
         {elements}
       </div>
     );
@@ -263,28 +288,34 @@ const QuoteType = () => {
         - Time is infinite (-1) AND not completed OR
         - Time is set AND remaining time > 0
     */}
-      {(!completed && (time === -1 || remaining > 0)) ||
-      (time > 0 && remaining > 0) ? (
+      {!completed ? (
         <div>
-          <div className="h-70 sm:h-50 lg:h-60 w-full max-w-[900px] mx-auto ">
-            {/* Timer */}
-            <div className="mb-3 lg:text-lg">
-              {isRunning
-                ? remaining > 0
-                  ? remaining
-                  : ""
-                : time > 0
-                ? time
-                : ""}
-            </div>
+          <div className="relative h-70 sm:h-50 lg:h-60 w-full max-w-[900px] mx-auto ">
+            {isCapsLockOn && (
+              <motion.div
+                initial={{ y: -17, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -17, opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 text-cyan-400 drop-shadow-[0_0_1px_#22d3ee]"
+              >
+                <TriangleAlert className="scale-90" />
+                <h1 className="text-center">Caps Lock On</h1>
+              </motion.div>
+            )}
 
             {/* Display the quote with color highlighting and cursor */}
-            <div
+            <motion.div
+              key={quote?.content} // triggers re-animation when the quote changes
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
               className={`relative text-xl lg:text-[1.7rem] text-center ${spaceMono.className} leading-8 mb-8 h-[160px] sm:h-[200px] cursor-text overflow-hidden`}
               onClick={() => inputRef.current?.focus()}
             >
               {renderQuoteWithHighlighting()}
-            </div>
+            </motion.div>
 
             {/* Hidden input field for capturing keystrokes */}
             <input
@@ -299,7 +330,7 @@ const QuoteType = () => {
             />
 
             {/* Stats and author */}
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center -mt-14">
               {/* WPM: {wpm} */}
               <div className="text-lg font-semibold"></div>
               <p className="text-sm lg:text-base italic text-right text-gray-500">
@@ -311,7 +342,7 @@ const QuoteType = () => {
           <div className="absolute -top-55 -right-4 -z-2 size-100 rounded-full bg-radial-[at_50%_50%] from-blue-500/20  to-black to-90%"></div>
 
           <button
-            className="mx-auto flex items-center justify-center mt-4 p-2 hover:text-cyan-400 text-gray-400 transition-colors"
+            className="mx-auto flex items-center justify-center mt-4 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
             onClick={handleRefetch}
             disabled={loading}
           >

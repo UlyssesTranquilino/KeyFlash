@@ -12,7 +12,13 @@ import {
   AArrowDown,
   Timer,
   Infinity,
+  Dices,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -62,7 +68,7 @@ const topics = [
 
 const tabs = [
   { label: "Story", icon: BookText, path: "/typing/story" },
-  { label: "Words", icon: LetterText, path: "/typing/words" },
+  { label: "Random", icon: Dices, path: "/typing/words" },
   { label: "Quote", icon: Quote, path: "/typing/quote" },
   { label: "Code", icon: Code, path: "/typing/code" },
 ];
@@ -102,6 +108,7 @@ export default function TypingTabs() {
   const router = useRouter();
 
   const isCodeTab = pathname.startsWith("/typing/code");
+  const isRandomTab = pathname.startsWith("/typing/words");
 
   const handleTabClick = (path: string) => {
     router.push(path);
@@ -112,7 +119,7 @@ export default function TypingTabs() {
     setOpenTopic(false);
   }, [pathname]);
 
-  const [isLowerCase, setIsLowerCase] = useState(false);
+  const [isLowerCase, setIsLowerCase] = useState(true);
   const { lowerCaseQuote, startCaseQuote } = useQuote();
 
   const [openTime, setOpenTime] = useState(false);
@@ -246,69 +253,86 @@ export default function TypingTabs() {
         <div className="flex items-center gap-3">
           <div className="w-[0.5] h-6 bg-gray-400" />
 
-          {/* DSA Topic Dropdown */}
-          <Popover open={openTime} onOpenChange={setOpenTime}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                aria-expanded={openTime}
-                className="justify-between flex items-center"
-              >
-                {time > 0 ? time : <Infinity />}
-                <Timer className="text-gray-400" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-18 p-0">
-              <Command>
-                <CommandList>
-                  <CommandEmpty>No topic found.</CommandEmpty>
-                  <CommandGroup>
-                    {allTime.map((topic: any) => (
-                      <CommandItem
-                        key={topic.value}
-                        value={topic.value.toString()}
-                        // In the time dropdown CommandItem's onSelect handler:
-                        onSelect={(current) => {
-                          const parsed = parseInt(current, 10);
-                          // Only update if it's a different value
-                          console.log("parsed: ", parsed, " Time: ", time);
-                          if (parsed !== time) {
-                            setTime(parsed);
-                            setRemaining(parsed === 0 ? -1 : parsed); // Handle infinite mode (0 becomes -1)
-
-                            setOpenTime(false);
-                          } else {
-                            setOpenTime(false); // Just close the dropdown if same value clicked
-                          }
-                        }}
+          {/* Word Mode Time Dropdown */}
+          {isRandomTab && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Popover open={openTime} onOpenChange={setOpenTime}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="justify-between flex items-center"
                       >
-                        <div className="flex items-center justify-center w-full">
-                          {topic.label}
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                        {time > 0 ? time : <Infinity />}
+                        <Timer className="text-gray-400 ml-2" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-18 p-0">
+                      <Command>
+                        <CommandList>
+                          <CommandEmpty>No time found.</CommandEmpty>
+                          <CommandGroup>
+                            {allTime.map((timeOption: any) => (
+                              <CommandItem
+                                key={timeOption.value}
+                                value={timeOption.value.toString()}
+                                onSelect={(current) => {
+                                  const parsed = parseInt(current, 10);
+                                  if (parsed !== time) {
+                                    setTime(parsed);
+                                    setRemaining(parsed === -1 ? -1 : parsed);
+                                    setOpenTime(false);
+                                    // Reset the test immediately when time changes
+                                    resetTimer();
+                                  } else {
+                                    setOpenTime(false);
+                                  }
+                                }}
+                              >
+                                <div className="flex items-center justify-center w-full">
+                                  {timeOption.label}
+                                </div>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Time (sec)</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
 
-          <button
-            onClick={() => {
-              if (isLowerCase) {
-                startCaseQuote();
-              } else {
-                lowerCaseQuote();
-              }
-              setIsLowerCase(!isLowerCase);
-            }}
-            className={cn(
-              "flex items-center gap-2 text-sm transition",
-              isLowerCase ? "text-cyan-400" : "text-gray-400 hover:text-white"
-            )}
-          >
-            <AArrowDown />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => {
+                  if (isLowerCase) {
+                    startCaseQuote();
+                  } else {
+                    lowerCaseQuote();
+                  }
+                  setIsLowerCase(!isLowerCase);
+                }}
+                className={cn(
+                  "flex items-center gap-2 text-sm transition",
+                  isLowerCase
+                    ? "text-cyan-400"
+                    : "text-gray-400 hover:text-white"
+                )}
+              >
+                <AArrowDown />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Simplify Text</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </div>

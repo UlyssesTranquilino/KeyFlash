@@ -53,7 +53,7 @@ const Results = ({
       </div>
 
       {/* Main Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-4">
         {/* WPM Card */}
         <StatCard
           icon={<Award className="text-amber-400" size={24} />}
@@ -86,7 +86,7 @@ const Results = ({
       </div>
 
       {/* Detailed Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
         {/* Character Breakdown */}
         <div className="p-5 rounded-lg border ">
           <h3 className="flex items-center text-lg  mb-4 text-white w-full text-center ">
@@ -109,13 +109,19 @@ const Results = ({
               colorClass="text-white"
             />
             <div className="pt-2">
-              <div className="h-2  bg-gradient-to-r from-red-800 to-red-400 rounded-full overflow-hidden">
+              <div className="flex  items-center h-2 bg-gray-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-blue-700 to-blue-400"
                   style={{
                     width: `${(correctChars / totalChars) * 100}%`,
                   }}
-                ></div>
+                />
+                <div
+                  className="h-full bg-gradient-to-r  from-red-800 to-red-400"
+                  style={{
+                    width: `${(incorrectChars / totalChars) * 100}%`,
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -149,18 +155,18 @@ const Results = ({
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-4">
         <button
+          onClick={handleRefetch}
+          className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
+        >
+          New Quote
+        </button>{" "}
+        <button
           onClick={() => {
             handleRetype(originalQuote);
           }}
-          className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
+          className="px-6 lg:px-10 py-3 border-1 border-gray-700 hover:bg-gray-800/40 rounded-md  transition-colors"
         >
           Try Again
-        </button>
-        <button
-          onClick={handleRefetch}
-          className="px-6 lg:px-10 py-3 border-1 border-gray-700 hover:bg-gray-900/40 rounded-md  transition-colors"
-        >
-          New Quote
         </button>
       </div>
     </motion.div>
