@@ -277,14 +277,14 @@ export default function TypingTabs() {
                               <CommandItem
                                 key={timeOption.value}
                                 value={timeOption.value.toString()}
+                                // In TypingTabs component, modify the time selection handler:
                                 onSelect={(current) => {
                                   const parsed = parseInt(current, 10);
                                   if (parsed !== time) {
                                     setTime(parsed);
                                     setRemaining(parsed === -1 ? -1 : parsed);
                                     setOpenTime(false);
-                                    // Reset the test immediately when time changes
-                                    resetTimer();
+                                    // Removed: resetTimer();
                                   } else {
                                     setOpenTime(false);
                                   }

@@ -29,12 +29,14 @@ const Results = ({
   handleRefetch: () => void;
   handleRetype: (quoteData: any) => void;
 }) => {
-  const duration = startTime ? ((endTime - startTime) / 1000).toFixed(2) : 0;
+  const { time } = useTimer();
+  const { setQuote, originalQuote } = useQuote();
+
+  const duration =
+    time > 0 ? time : startTime ? ((endTime - startTime) / 1000).toFixed(2) : 0;
   const netWpm = Math.max(0, wpm - mistakes / 5); // Net WPM with error penalty
   const consistency = 85; // This would need to be calculated based on WPM variance
 
-  const { time } = useTimer();
-  const { setQuote, originalQuote } = useQuote();
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -158,11 +160,11 @@ const Results = ({
           onClick={handleRefetch}
           className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
         >
-          New Quote
-        </button>{" "}
+          New {author === "" ? "Texts" : "Quote"}
+        </button>
         <button
           onClick={() => {
-            handleRetype(originalQuote);
+            handleRetype(originalQuote ?? quote);
           }}
           className="px-6 lg:px-10 py-3 border-1 border-gray-700 hover:bg-gray-800/40 rounded-md  transition-colors"
         >

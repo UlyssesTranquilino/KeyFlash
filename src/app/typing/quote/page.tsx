@@ -300,7 +300,9 @@ const QuoteType = () => {
                 className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 text-cyan-400 drop-shadow-[0_0_1px_#22d3ee]"
               >
                 <TriangleAlert className="scale-90" />
-                <h1 className="text-center">Caps Lock On</h1>
+                <h1 className="text-center text-sm md:text-base">
+                  Caps Lock On
+                </h1>
               </motion.div>
             )}
 

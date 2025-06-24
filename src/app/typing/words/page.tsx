@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 
 // Icons
@@ -13,6 +13,10 @@ import { spaceMono } from "@/app/ui/fonts";
 import { useQuote } from "@/app/context/QuoteContext";
 import { useTimer } from "@/app/context/TimerContext";
 
+// Components
+import Results from "@/components/ui/typing/Results";
+
+// Utils
 import { getRandomWords } from "../../../../utils/typing/getRandomWords";
 const Words = () => {
   const {
@@ -26,6 +30,8 @@ const Words = () => {
   } = useTimer();
 
   const [userInput, setUserInput] = useState("");
+  const [isFocused, setIsFocused] = useState(true);
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [wpm, setWpm] = useState(0);
@@ -42,6 +48,7 @@ const Words = () => {
   const [endTime, setEndTime] = useState<number | null>(null);
   const [correctChars, setCorrectChars] = useState(0);
   const [incorrectChars, setIncorrectChars] = useState(0);
+  const [testId, setTestId] = useState(Date.now());
 
   // Check if Caps Lock is on
   useEffect(() => {
@@ -63,59 +70,40 @@ const Words = () => {
 
   // Handle idle state and cursor blinking
   useEffect(() => {
-    const handleActivity = () => {
-      setIsIdle(false);
+    if (!isIdle) return;
 
-      if (idleTimeoutRef.current) {
-        clearTimeout(idleTimeoutRef.current);
-      }
-
-      idleTimeoutRef.current = setTimeout(() => {
-        setIsIdle(true);
-      }, 1000);
-    };
-
-    // Cursor blinking effect
     const cursorInterval = setInterval(() => {
-      if (isIdle) {
-        setShowCursor((prev) => !prev);
-      } else {
-        setShowCursor(true);
-      }
+      setShowCursor((prev) => !prev);
     }, 500);
 
-    return () => {
-      clearInterval(cursorInterval);
-      if (idleTimeoutRef.current) {
-        clearTimeout(idleTimeoutRef.current);
-      }
-    };
+    return () => clearInterval(cursorInterval);
   }, [isIdle]);
 
-  // Calculate word count based on time
-  const getWordCountForTime = (selectedTime: number) => {
-    const wordsPerMinute = 100;
+  const generateWords = (count = 25) =>
+    getRandomWords(Math.floor(Math.random() * count) + 10);
 
-    if (selectedTime === -1) {
-      return Math.floor(Math.random() * 25) + 10; // Random count for infinite time
-    }
-
-    const minutes = selectedTime / 60;
-    const wordCount = Math.ceil(wordsPerMinute * minutes * 1.3);
-
-    return Math.max(wordCount, 15);
-  };
-
-  const [randomWords, setRandomWords] = useState<string>(
-    getRandomWords(getWordCountForTime(time))
-  );
+  const memoizedRandomWords = useMemo(() => generateWords(), [testId]);
+  const [randomWords, setRandomWords] = useState<string>(memoizedRandomWords);
 
   useEffect(() => {
-    // Only reset words if the test isn't running (no startTime)
-    if (!startTime) {
-      setRandomWords(getRandomWords(getWordCountForTime(time)));
+    if (!isRunning) {
+      resetTest();
+      setRandomWords(generateWords());
     }
-  }, [time, startTime]);
+  }, [time, isRunning]);
+
+  // Add Random Words when the user input length is near the current quote length
+  useEffect(() => {
+    if (
+      typeof randomWords === "string" &&
+      randomWords.split(" ").length - userInput.trim().split(" ").length <=
+        10 &&
+      !completed &&
+      time > 0
+    ) {
+      setRandomWords((prev) => prev + " " + generateWords(10));
+    }
+  }, [userInput, randomWords, completed, time]);
 
   const resetTest = () => {
     setUserInput("");
@@ -127,6 +115,7 @@ const Words = () => {
     setCorrectChars(0);
     setIncorrectChars(0);
     setMistakes(0);
+    setTestId(Date.now());
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -135,7 +124,7 @@ const Words = () => {
 
   // Load Next Random Words
   const loadNextRandomWords = async () => {
-    setRandomWords(getRandomWords(getWordCountForTime(time)));
+    setRandomWords(generateWords());
     setUserInput("");
     setCurrentIndex(0);
     setCompleted(false);
@@ -283,10 +272,26 @@ const Words = () => {
 
   const handleRestart = () => {
     setLoading(true);
-    setRandomWords(getRandomWords(getWordCountForTime(time)));
+    setRandomWords(generateWords());
     resetTest();
     setLoading(false);
   };
+
+  const handleReType = (prevTexts: string) => {
+    setLoading(true);
+    setRandomWords(prevTexts);
+    resetTest();
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!isFocused && isRunning) {
+      const timeout = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 3000); // auto-refocus after 3s
+      return () => clearTimeout(timeout);
+    }
+  }, [isFocused, isRunning]);
 
   return (
     <div className="mt-22 relative ">
@@ -294,11 +299,22 @@ const Words = () => {
         - Time is infinite (-1) AND not completed OR
         - Time is set AND remaining time > 0
     */}
-      instead of just showing fixed number of words generate whole line of words
-      keep 3 or 4 lines, generate words when it is on line 2
+
       {(!completed && (time === -1 || remaining > 0)) ||
       (time > 0 && remaining > 0) ? (
         <div>
+          {!isFocused && !completed && (time === -1 || remaining > 0) && (
+            <div
+              className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer"
+              onClick={() => inputRef.current?.focus()}
+            >
+              <div className="w-100 mx-auto flex items-center justify-center mt-14 p-2  text-blue-400 font-semibold text-xl">
+                {" "}
+                Click to focus and start typing
+              </div>
+            </div>
+          )}
+
           <div className="relative h-full  w-full max-w-[900px] mx-auto   ">
             {/* Timer */}
             <div className="mb-3 ml-1 lg:text-lg">
@@ -320,17 +336,28 @@ const Words = () => {
                 className="absolute -top-10 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 text-cyan-400 drop-shadow-[0_0_1px_#22d3ee]"
               >
                 <TriangleAlert className="scale-90" />
-                <h1 className="text-center">Caps Lock On</h1>
+                <h1 className="text-center text-sm md:text-base">
+                  Caps Lock On
+                </h1>
               </motion.div>
             )}
 
             {/* Display the quote with color highlighting and cursor */}
-            <div
-              className={`relative text-xl lg:text-[1.7rem] text-center ${spaceMono.className} leading-8 mb-8 max-h-[300px] sm:max-h-[400px] cursor-text overflow-y-auto px-2`}
+            <motion.div
+              key={testId}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className={`relative text-xl lg:text-[1.7rem] text-center ${
+                spaceMono.className
+              } leading-8 mb-8 h-auto cursor-text overflow-y-auto px-2 
+    transition-all duration-100 ease-in-out 
+    ${!isFocused ? "blur-sm opacity-60" : "blur-0 opacity-100"}`}
               onClick={() => inputRef.current?.focus()}
             >
               {renderQuoteWithHighlighting()}
-            </div>
+            </motion.div>
 
             {/* Hidden input field for capturing keystrokes */}
             <input
@@ -339,6 +366,8 @@ const Words = () => {
               value={userInput}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               className="absolute opacity-0 w-0 h-0 pointer-events-none"
               autoFocus
               aria-hidden="true"
@@ -363,21 +392,20 @@ const Words = () => {
           </button>
         </div>
       ) : (
-        // <Results
-        //   wpm={wpm}
-        //   startTime={startTime}
-        //   endTime={endTime || Date.now()}
-        //   accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
-        //   correctChars={correctChars}
-        //   incorrectChars={incorrectChars}
-        //   totalChars={quote?.content?.length || 0}
-        //   quote={quote?.content || ""}
-        //   author={quote?.author || ""}
-        //   mistakes={mistakes}
-        //   handleRefetch={loadNextQuote}
-        //   handleRetype={handleReType}
-        // />
-        <div>results</div>
+        <Results
+          wpm={wpm}
+          startTime={startTime}
+          endTime={endTime || Date.now()}
+          accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
+          correctChars={correctChars}
+          incorrectChars={incorrectChars}
+          totalChars={correctChars + incorrectChars}
+          quote={randomWords || ""}
+          author={""}
+          mistakes={mistakes}
+          handleRefetch={handleRestart}
+          handleRetype={handleReType}
+        />
       )}
     </div>
   );
