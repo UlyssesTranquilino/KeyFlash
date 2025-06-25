@@ -13,6 +13,7 @@ import {
   Timer,
   Infinity,
   Dices,
+  CirclePlus,
 } from "lucide-react";
 import {
   Tooltip,
@@ -41,36 +42,11 @@ import { useTimer } from "@/app/context/TimerContext";
 
 import { start } from "repl";
 
-// Programming languages
-const languages = [
-  { value: "javascript", label: "JavaScript" },
-  { value: "python", label: "Python" },
-  { value: "java", label: "Java" },
-  { value: "c++", label: "C++" },
-  { value: "go", label: "Go" },
-  { value: "typescript", label: "TypeScript" },
-];
-
-// DSA Topics
-const topics = [
-  { value: "arrays", label: "Arrays" },
-  { value: "linked-lists", label: "Linked Lists" },
-  { value: "stacks", label: "Stacks" },
-  { value: "queues", label: "Queues" },
-  { value: "hashmaps", label: "Hash Maps" },
-  { value: "trees", label: "Trees" },
-  { value: "graphs", label: "Graphs" },
-  { value: "recursion", label: "Recursion" },
-  { value: "sorting", label: "Sorting" },
-  { value: "searching", label: "Searching" },
-  { value: "dynamic-programming", label: "Dynamic Programming" },
-];
-
 const tabs = [
-  { label: "Story", icon: BookText, path: "/typing/story" },
   { label: "Random", icon: Dices, path: "/typing/words" },
   { label: "Quote", icon: Quote, path: "/typing/quote" },
   { label: "Code", icon: Code, path: "/typing/code" },
+  { label: "Custom", icon: CirclePlus, path: "/typing/custom" },
 ];
 
 const allTime = [
@@ -99,11 +75,6 @@ const allTime = [
 export default function TypingTabs() {
   const { time, setTime, setRemaining, resetTimer } = useTimer();
 
-  const [openTopic, setOpenTopic] = useState(false);
-  const [openLang, setOpenLang] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState("");
-  const [selectedLang, setSelectedLang] = useState("");
-
   const pathname = usePathname();
   const router = useRouter();
 
@@ -113,11 +84,6 @@ export default function TypingTabs() {
   const handleTabClick = (path: string) => {
     router.push(path);
   };
-
-  useEffect(() => {
-    setOpenLang(false);
-    setOpenTopic(false);
-  }, [pathname]);
 
   const [isLowerCase, setIsLowerCase] = useState(true);
   const { lowerCaseQuote, startCaseQuote } = useQuote();
@@ -136,7 +102,7 @@ export default function TypingTabs() {
                 onClick={() => handleTabClick(tab.path)}
                 className={cn(
                   "flex items-center gap-2 text-sm transition",
-                  active ? "text-cyan-400" : "text-gray-400 hover:text-white"
+                  active ? "text-blue-400" : "text-gray-400 hover:text-white"
                 )}
               >
                 <tab.icon className="scale-90" />
@@ -145,109 +111,6 @@ export default function TypingTabs() {
             );
           })}
         </div>
-
-        {/* Only shown in Code tab */}
-        {isCodeTab && (
-          <>
-            {/* Programming Language Dropdown */}
-            <Popover open={openLang} onOpenChange={setOpenLang}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openLang}
-                  className="ml-auto w-[200px] justify-between"
-                >
-                  {selectedLang
-                    ? languages.find((l) => l.value === selectedLang)?.label
-                    : "Select language..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search language..." />
-                  <CommandList>
-                    <CommandEmpty>No language found.</CommandEmpty>
-                    <CommandGroup>
-                      {languages.map((lang) => (
-                        <CommandItem
-                          key={lang.value}
-                          value={lang.value}
-                          onSelect={(current) => {
-                            setSelectedLang(
-                              current === selectedLang ? "" : current
-                            );
-                            setOpenLang(false);
-                          }}
-                        >
-                          {lang.label}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              selectedLang === lang.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-
-            {/* DSA Topic Dropdown */}
-            <Popover open={openTopic} onOpenChange={setOpenTopic}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={openTopic}
-                  className="w-[220px] justify-between"
-                >
-                  {selectedTopic
-                    ? topics.find((t) => t.value === selectedTopic)?.label
-                    : "Select DSA topic..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[220px] p-0">
-                <Command>
-                  <CommandInput placeholder="Search topic..." />
-                  <CommandList>
-                    <CommandEmpty>No topic found.</CommandEmpty>
-                    <CommandGroup>
-                      {topics.map((topic) => (
-                        <CommandItem
-                          key={topic.value}
-                          value={topic.value}
-                          onSelect={(current) => {
-                            setSelectedTopic(
-                              current === selectedTopic ? "" : current
-                            );
-                            setOpenTopic(false);
-                          }}
-                        >
-                          {topic.label}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              selectedTopic === topic.value
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </>
-        )}
 
         {/* Controls*/}
         <div className="flex items-center gap-3">
@@ -277,14 +140,14 @@ export default function TypingTabs() {
                               <CommandItem
                                 key={timeOption.value}
                                 value={timeOption.value.toString()}
+                                // In TypingTabs component, modify the time selection handler:
                                 onSelect={(current) => {
                                   const parsed = parseInt(current, 10);
                                   if (parsed !== time) {
                                     setTime(parsed);
                                     setRemaining(parsed === -1 ? -1 : parsed);
                                     setOpenTime(false);
-                                    // Reset the test immediately when time changes
-                                    resetTimer();
+                                    // Removed: resetTimer();
                                   } else {
                                     setOpenTime(false);
                                   }
@@ -322,7 +185,7 @@ export default function TypingTabs() {
                 className={cn(
                   "flex items-center gap-2 text-sm transition",
                   isLowerCase
-                    ? "text-cyan-400"
+                    ? "text-blue-400"
                     : "text-gray-400 hover:text-white"
                 )}
               >

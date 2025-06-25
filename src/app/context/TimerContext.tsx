@@ -51,9 +51,13 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     setIsRunning(true);
   };
 
+  // In TimerProvider
   const resetTimer = (newTime?: number) => {
     const updatedTime = newTime !== undefined ? newTime : time;
-    setRemaining(updatedTime);
+    if (newTime !== undefined) {
+      setTime(newTime);
+    }
+    setRemaining(updatedTime === -1 ? -1 : updatedTime);
     setIsRunning(false);
   };
 
