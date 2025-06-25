@@ -217,3 +217,18 @@
   background-repeat: no-repeat;
   box-shadow: 0px 0px 20px #001550;
 }
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
