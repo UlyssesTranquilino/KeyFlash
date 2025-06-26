@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Command,
   CommandEmpty,
@@ -49,12 +49,15 @@ const topics = [
   { value: "queues", label: "Queues" },
   { value: "hashmaps", label: "Hash Maps" },
   { value: "trees", label: "Trees" },
-  { value: "graphs", label: "Graphs" },
   { value: "recursion", label: "Recursion" },
   { value: "sorting", label: "Sorting" },
   { value: "searching", label: "Searching" },
   { value: "dynamic-programming", label: "Dynamic Programming" },
 ];
+
+// Utils
+import { getCodeSnippets } from "../../../../utils/typing/getCodeSnippet";
+import { getRandomQuote } from "@/lib/typing/getQuotes";
 
 const CodeType = () => {
   const [openSettings, setOpenSettings] = useState(false);
@@ -62,6 +65,24 @@ const CodeType = () => {
   const [openLang, setOpenLang] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
   const [selectedLang, setSelectedLang] = useState("");
+
+  // Code
+  const [codeData, setCodeData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Initial Code Snippet Fetch
+  useEffect(() => {
+    const fetchCodeSnippets = async () => {
+      setIsLoading(true);
+
+      const randomCode = await getCodeSnippets("any", "");
+      setCodeData(randomCode[0]);
+      setIsLoading(false);
+
+      console.log("Random Code: ", randomCode);
+    };
+    fetchCodeSnippets();
+  }, []);
 
   return (
     <div>
@@ -164,6 +185,21 @@ const CodeType = () => {
           </PopoverContent>
         </Popover>
       </div>
+
+      {!isLoading ? (
+        <div>
+          <div>
+            CODE
+            <h1>{codeData?.title}</h1>
+          </div>
+
+          <div>
+            <code>{codeData.code}</code>
+          </div>
+        </div>
+      ) : (
+        <div>Loading</div>
+      )}
     </div>
   );
 };

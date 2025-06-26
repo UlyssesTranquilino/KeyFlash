@@ -4,7 +4,7 @@ import { supabase } from "../supabase-client";
 
 export async function getRandomQuotes() {
   try {
-    const { data, error } = await supabase.rpc("get_random_quote"); // Call the function we just created in SQL
+    const { data, error } = await supabase.rpc("get_random_quote");
 
     if (error) {
       console.error("Error fetching random quote via RPC:", error);
