@@ -43,7 +43,7 @@ import { useTimer } from "@/app/context/TimerContext";
 import { start } from "repl";
 
 const tabs = [
-  { label: "Random", icon: Dices, path: "/typing/words" },
+  { label: "Random", icon: Dices, path: "/typing/random" },
   { label: "Quote", icon: Quote, path: "/typing/quote" },
   { label: "Code", icon: Code, path: "/typing/code" },
   { label: "Custom", icon: CirclePlus, path: "/typing/custom" },
