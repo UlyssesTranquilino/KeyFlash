@@ -72,14 +72,46 @@ const allTime = [
   },
 ];
 
+// Programming languages
+const languages = [
+  { value: "any", label: "Any" },
+  { value: "javascript", label: "JavaScript" },
+  { value: "python", label: "Python" },
+  { value: "java", label: "Java" },
+  { value: "c++", label: "C++" },
+  { value: "go", label: "Go" },
+  { value: "typescript", label: "TypeScript" },
+  { value: "pseudocode", label: "Pseudocode" },
+];
+
+// DSA Topics
+const topics = [
+  { value: "any", label: "Any" },
+  { value: "arrays", label: "Arrays" },
+  { value: "linked-lists", label: "Linked Lists" },
+  { value: "stacks", label: "Stacks" },
+  { value: "queues", label: "Queues" },
+  { value: "hashmaps", label: "Hash Maps" },
+  { value: "trees", label: "Trees" },
+  { value: "recursion", label: "Recursion" },
+  { value: "sorting", label: "Sorting" },
+  { value: "searching", label: "Searching" },
+  { value: "dynamic-programming", label: "Dynamic Programming" },
+];
+
 export default function TypingTabs() {
   const { time, setTime, setRemaining, resetTimer } = useTimer();
+  const [openTopic, setOpenTopic] = useState(false);
+  const [openLang, setOpenLang] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState("");
+  const [selectedLang, setSelectedLang] = useState("");
 
   const pathname = usePathname();
   const router = useRouter();
 
   const isCodeTab = pathname.startsWith("/typing/code");
   const isRandomTab = pathname.startsWith("/typing/words");
+  const isQuoteTab = pathname.startsWith("/typing/quote");
 
   const handleTabClick = (path: string) => {
     router.push(path);
@@ -90,31 +122,45 @@ export default function TypingTabs() {
 
   const [openTime, setOpenTime] = useState(false);
   return (
-    <div className="px-4 sm:px-9 flex items-center max-w-[1000px] mx-auto ">
-      <div className="w-full flex flex-wrap justify-between gap-3 sm:gap-6 p-3 h-15 rounded-md px-5 bg-blue-950/30 items-center">
-        <div className="flex items-center gap-3 sm:gap-6">
+    <div className="px-4 sm:px-9 flex justify-end items-center  mx-auto -mt-2 ">
+      <div className="w-full typing-tabs md:w-auto gap-3 sm:gap-5 p-1 sm:p-3 sm:h-13  rounded-md px-5 bg-blue-950/30 items-center">
+        <div className="typing-modes">
           {/* Tab navigation */}
           {tabs.map((tab) => {
             const active = pathname === tab.path;
             return (
-              <button
-                key={tab.label}
-                onClick={() => handleTabClick(tab.path)}
-                className={cn(
-                  "flex items-center gap-2 text-sm transition",
-                  active ? "text-blue-400" : "text-gray-400 hover:text-white"
-                )}
-              >
-                <tab.icon className="scale-90" />
-                <span className="hidden sm:block">{tab.label}</span>
-              </button>
+              <Tooltip key={tab.label}>
+                <TooltipTrigger asChild>
+                  <button
+                    key={tab.label}
+                    onClick={() => handleTabClick(tab.path)}
+                    className={cn(
+                      "flex items-center gap-2 text-sm transition",
+                      active
+                        ? "text-blue-400"
+                        : "text-gray-400 hover:text-white"
+                    )}
+                  >
+                    <tab.icon className="scale-90" />
+                    <span className="hidden tab-label">{tab.label}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{tab.label}</p>
+                </TooltipContent>
+              </Tooltip>
             );
           })}
         </div>
 
         {/* Controls*/}
-        <div className="flex items-center gap-3">
-          <div className="w-[0.5] h-6 bg-gray-400" />
+        <div className="flex items-center  gap-3">
+          <div
+            className={cn(
+              "w-[0.5] h-6 bg-gray-400",
+              isCodeTab && "hidden sm:block"
+            )}
+          />
 
           {/* Word Mode Time Dropdown */}
           {isRandomTab && (
@@ -171,31 +217,132 @@ export default function TypingTabs() {
             </Tooltip>
           )}
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => {
-                  if (isLowerCase) {
-                    startCaseQuote();
-                  } else {
-                    lowerCaseQuote();
-                  }
-                  setIsLowerCase(!isLowerCase);
-                }}
-                className={cn(
-                  "flex items-center gap-2 text-sm transition",
-                  isLowerCase
-                    ? "text-blue-400"
-                    : "text-gray-400 hover:text-white"
-                )}
-              >
-                <AArrowDown />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Simplify Text</p>
-            </TooltipContent>
-          </Tooltip>
+          {isCodeTab && (
+            <>
+              <Popover open={openLang} onOpenChange={setOpenLang}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openLang}
+                    className="ml-auto w-[130px] justify-between border-0"
+                  >
+                    {selectedLang
+                      ? languages.find((l) => l.value === selectedLang)?.label
+                      : "Language"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[130px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search" />
+                    <CommandList>
+                      <CommandEmpty>No language found.</CommandEmpty>
+                      <CommandGroup>
+                        {languages.map((lang) => (
+                          <CommandItem
+                            key={lang.value}
+                            value={lang.value}
+                            onSelect={(current) => {
+                              setSelectedLang(
+                                current === selectedLang ? "" : current
+                              );
+                              setOpenLang(false);
+                            }}
+                          >
+                            {lang.label}
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                selectedLang === lang.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+              <Popover open={openTopic} onOpenChange={setOpenTopic}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openTopic}
+                    className="w-[110px] md:w-[140px] justify-between border-0"
+                  >
+                    {selectedTopic
+                      ? topics.find((t) => t.value === selectedTopic)?.label
+                      : "Topic"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[110px] md:w-[140px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search" />
+                    <CommandList>
+                      <CommandEmpty>No topic found.</CommandEmpty>
+                      <CommandGroup>
+                        {topics.map((topic) => (
+                          <CommandItem
+                            key={topic.value}
+                            value={topic.value}
+                            onSelect={(current) => {
+                              setSelectedTopic(
+                                current === selectedTopic ? "" : current
+                              );
+                              setOpenTopic(false);
+                            }}
+                          >
+                            {topic.label}
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                selectedTopic === topic.value
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </>
+          )}
+
+          {isQuoteTab && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    if (isLowerCase) {
+                      startCaseQuote();
+                    } else {
+                      lowerCaseQuote();
+                    }
+                    setIsLowerCase(!isLowerCase);
+                  }}
+                  className={cn(
+                    "flex items-center gap-2 text-sm transition",
+                    isLowerCase
+                      ? "text-blue-400"
+                      : "text-gray-400 hover:text-white"
+                  )}
+                >
+                  <AArrowDown />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Simplify Text</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
     </div>

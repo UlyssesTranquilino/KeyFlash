@@ -227,10 +227,7 @@ const QuoteType = () => {
           setMistakes(value.length - correct);
 
           // Check completion
-          if (
-            value.length === quote.content.length &&
-            correct === quote.content.length
-          ) {
+          if (value.length === quote.content.length) {
             setEndTime(currentTime);
             setCompleted(true);
           }

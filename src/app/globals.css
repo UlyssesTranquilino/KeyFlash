@@ -232,3 +232,47 @@
     opacity: 0;
   }
 }
+
+@media (width: 812px) {
+  .tab-label {
+    display: block;
+  }
+}
+
+.line-numbers {
+  counter-reset: line;
+  position: relative;
+}
+
+.code-line {
+  display: block;
+  position: relative;
+  padding-left: 0.5em;
+  white-space: pre;
+}
+
+/* Typing Tabs */
+.typing-tabs {
+  display: flex;
+  flex-direction: column;
+}
+
+.typing-modes {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-around;
+  gap: 3px;
+}
+
+@media (min-width: 500px) {
+  .typing-tabs {
+    flex-direction: row;
+  }
+
+  .typing-modes {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
