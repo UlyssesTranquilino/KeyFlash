@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { jakartaSans } from "./ui/fonts";
 import "./globals.css";
 import { ThemeProvider } from "./ui/theme-provider";
+
 import Navbar from "./ui/navbar/navbar";
 
 export const metadata: Metadata = {

@@ -37,8 +37,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+// Context
 import { useQuote } from "@/app/context/QuoteContext";
 import { useTimer } from "@/app/context/TimerContext";
+import { useCode } from "@/app/context/CodeContext";
+import { useWpm } from "@/app/context/WpmContext";
 
 import { start } from "repl";
 
@@ -74,24 +77,24 @@ const allTime = [
 
 // Programming languages
 const languages = [
-  { value: "any", label: "Any" },
+  { value: "any", label: "Language (any)" },
   { value: "javascript", label: "JavaScript" },
   { value: "python", label: "Python" },
   { value: "java", label: "Java" },
   { value: "c++", label: "C++" },
   { value: "go", label: "Go" },
   { value: "typescript", label: "TypeScript" },
-  { value: "pseudocode", label: "Pseudocode" },
+  // { value: "pseudocode", label: "Pseudocode" },
 ];
 
 // DSA Topics
 const topics = [
-  { value: "any", label: "Any" },
+  { value: "any", label: "Topic (any)" },
   { value: "arrays", label: "Arrays" },
   { value: "linked-lists", label: "Linked Lists" },
   { value: "stacks", label: "Stacks" },
   { value: "queues", label: "Queues" },
-  { value: "hashmaps", label: "Hash Maps" },
+  // { value: "hashmaps", label: "Hash Maps" },
   { value: "trees", label: "Trees" },
   { value: "recursion", label: "Recursion" },
   { value: "sorting", label: "Sorting" },
@@ -101,6 +104,9 @@ const topics = [
 
 export default function TypingTabs() {
   const { time, setTime, setRemaining, resetTimer } = useTimer();
+  const { topic, setTopic, language, setLanguage } = useCode();
+  const { showWpm, setShowWpm } = useWpm();
+
   const [openTopic, setOpenTopic] = useState(false);
   const [openLang, setOpenLang] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState("");
@@ -122,8 +128,8 @@ export default function TypingTabs() {
 
   const [openTime, setOpenTime] = useState(false);
   return (
-    <div className="px-4 sm:px-9 flex justify-end items-center  mx-auto -mt-2 ">
-      <div className="w-full typing-tabs md:w-auto gap-3 sm:gap-5 p-1 sm:p-3 sm:h-13  rounded-md px-5 bg-blue-950/30 items-center">
+    <div className="px-4 sm:px-9 flex justify-end items-center  mx-auto -mt-2  ">
+      <div className="w-full typing-tabs md:w-auto gap-3 sm:gap-5 p-1 sm:p-3 sm:h-13  rounded-md px-5 bg-blue-950/30 items-center min-w-70">
         <div className="typing-modes">
           {/* Tab navigation */}
           {tabs.map((tab) => {
@@ -158,7 +164,7 @@ export default function TypingTabs() {
           <div
             className={cn(
               "w-[0.5] h-6 bg-gray-400",
-              isCodeTab && "hidden sm:block"
+              isCodeTab ? "hidden sm:block" : isQuoteTab ? "block" : "hidden"
             )}
           />
 
@@ -227,8 +233,8 @@ export default function TypingTabs() {
                     aria-expanded={openLang}
                     className="ml-auto w-[130px] justify-between border-0"
                   >
-                    {selectedLang
-                      ? languages.find((l) => l.value === selectedLang)?.label
+                    {language
+                      ? languages.find((l) => l.value === language)?.label
                       : "Language"}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -244,7 +250,7 @@ export default function TypingTabs() {
                             key={lang.value}
                             value={lang.value}
                             onSelect={(current) => {
-                              setSelectedLang(
+                              setLanguage(
                                 current === selectedLang ? "" : current
                               );
                               setOpenLang(false);
@@ -274,8 +280,8 @@ export default function TypingTabs() {
                     aria-expanded={openTopic}
                     className="w-[110px] md:w-[140px] justify-between border-0"
                   >
-                    {selectedTopic
-                      ? topics.find((t) => t.value === selectedTopic)?.label
+                    {topic
+                      ? topics.find((t) => t.value === topic)?.label
                       : "Topic"}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -291,7 +297,7 @@ export default function TypingTabs() {
                             key={topic.value}
                             value={topic.value}
                             onSelect={(current) => {
-                              setSelectedTopic(
+                              setTopic(
                                 current === selectedTopic ? "" : current
                               );
                               setOpenTopic(false);
@@ -329,7 +335,7 @@ export default function TypingTabs() {
                     setIsLowerCase(!isLowerCase);
                   }}
                   className={cn(
-                    "flex items-center gap-2 text-sm transition",
+                    "flex items-center gap-2 text-sm transition px-2",
                     isLowerCase
                       ? "text-blue-400"
                       : "text-gray-400 hover:text-white"

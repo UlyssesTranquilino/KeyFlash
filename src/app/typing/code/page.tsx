@@ -8,21 +8,15 @@ import {
   startTransition,
   useMemo,
 } from "react";
+import { useCode } from "@/app/context/CodeContext";
 
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, CirclePlus } from "lucide-react";
+import {
+  getRandomCodeSnippets,
+  getCodeSnippets,
+} from "../../../../utils/typing/getCodeSnippet";
 
-// Mock C++ code data for testing
-const mockCodeData = {
-  title: "Two Sum",
-  description:
-    "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-  difficulty: "easy",
-  label: "Arrays",
-  language: "C++",
-  time_complexity: "O(n)",
-  space_complexity: "O(n)",
-  code: "vector<int> twoSum(vector<int>& nums, int target) {\n    unordered_map<int, int> map;\n    for (int i = 0; i < nums.size(); ++i) {\n        int complement = target - nums[i];\n        if (map.count(complement)) {\n            return { map[complement], i };\n        }\n        map[nums[i]] = i;\n    }\n    return {};\n}",
-};
+import Results from "@/components/ui/typing/Results";
 
 // Debounce utility
 const debounce = (func, wait) => {
@@ -38,6 +32,7 @@ const debounce = (func, wait) => {
 };
 
 const CodeType = () => {
+  const { language, topic } = useCode();
   // Code
   const [codeData, setCodeData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,16 +58,8 @@ const CodeType = () => {
 
   // Initial Code Snippet Fetch
   useEffect(() => {
-    const fetchCodeSnippets = async () => {
-      setIsLoading(true);
-      // Using mock data for testing
-      setTimeout(() => {
-        setCodeData(mockCodeData);
-        setIsLoading(false);
-      }, 500);
-    };
-    fetchCodeSnippets();
-  }, []);
+    handleRefetch();
+  }, [language, topic]);
 
   // Style Difficulty
   const styleDifficulty = (difficulty) => {
@@ -116,16 +103,16 @@ const CodeType = () => {
   const handleRefetch = useCallback(async () => {
     try {
       setIsLoading(true);
-      setTimeout(() => {
-        setCodeData(mockCodeData);
-        resetTest();
-        setIsLoading(false);
-      }, 500);
+      const data = await getCodeSnippets(language, topic);
+      setCodeData(data);
+
+      resetTest();
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching code snippet:", error);
       setIsLoading(false);
     }
-  }, [resetTest]);
+  }, [resetTest, language, topic]);
 
   // Debounced WPM calculation
   const debouncedWpmUpdate = useMemo(
@@ -149,16 +136,12 @@ const CodeType = () => {
     const codeContent = codeData.code;
     const inputLength = userInput.length;
 
-    console.log("Code content:", JSON.stringify(codeContent));
-    console.log("User input:", JSON.stringify(userInput));
-    console.log("Input length:", inputLength);
-
     return (
       <>
         {codeContent.split("\n").map((line, lineIndex) => (
           <div key={lineIndex} className="relative min-h-[1.5rem]">
             {/* Line number */}
-            <span className="absolute left-0 text-gray-600 select-none w-8 text-right pr-2">
+            <span className="absolute left-0 text-gray-700 select-none w-8 text-right pr-2">
               {lineIndex + 1}
             </span>
             {/* Line content */}
@@ -195,7 +178,7 @@ const CodeType = () => {
                     >
                       {isCursor && (
                         <span
-                          className={`absolute left-0 top-0 w-0.5 h-5 bg-blue-400 z-10 ${
+                          className={`absolute left-0 top-[1px] w-0.5 h-4  bg-blue-400 z-10 ${
                             isIdle ? "animate-pulse" : "animate-pulse"
                           }`}
                         />
@@ -282,10 +265,7 @@ const CodeType = () => {
           setMistakes(incorrect);
 
           // Check completion - must match exactly
-          if (
-            value.length === codeData.code.length &&
-            value === codeData.code
-          ) {
+          if (value.length === codeData.code.length) {
             setEndTime(currentTime);
             setCompleted(true);
           }
@@ -320,16 +300,15 @@ const CodeType = () => {
 
       if (e.key === "Tab") {
         e.preventDefault();
-        // Handle tab as 4 spaces or however your code is formatted
         const codeContent = codeData?.code;
         if (!codeContent) return;
 
         const nextCharIndex = userInput.length;
         if (nextCharIndex < codeContent.length) {
-          // Add spaces until we match the expected indentation
           let newInput = userInput;
           let newIndex = nextCharIndex;
 
+          // Add spaces until we match the expected indentation
           while (
             newIndex < codeContent.length &&
             codeContent[newIndex] === " "
@@ -354,18 +333,20 @@ const CodeType = () => {
 
         console.log(
           "Enter pressed, next char should be:",
-          JSON.stringify(codeContent[nextCharIndex])
+          JSON.stringify(codeContent[nextCharIndex] || "END"),
+          "at index:",
+          nextCharIndex
         );
 
         if (
-          nextCharIndex < codeContent.length &&
-          codeContent[nextCharIndex] === "\n"
+          (nextCharIndex < codeContent.length &&
+            codeContent[nextCharIndex] === "\n") ||
+          codeContent[nextCharIndex] === ""
         ) {
-          // We're at a newline position, so add the newline
           let newInput = userInput + "\n";
           let newIndex = nextCharIndex + 1;
 
-          // Now add any spaces that should follow the newline
+          // Automatically add indentation spaces that follow the newline
           while (
             newIndex < codeContent.length &&
             codeContent[newIndex] === " "
@@ -374,14 +355,27 @@ const CodeType = () => {
             newIndex++;
           }
 
-          console.log("New input after Enter:", JSON.stringify(newInput));
+          console.log(
+            "After Enter, new input:",
+            JSON.stringify(newInput),
+            "new index:",
+            newIndex
+          );
+
+          // Update state with the new input and cursor position
           setUserInput(newInput);
           setCurrentIndex(newIndex);
+
+          // Trigger input change handling to ensure correct/incorrect tracking
+          const syntheticEvent = {
+            target: { value: newInput },
+          };
+          handleInputChange(syntheticEvent);
         }
         return;
       }
     },
-    [deletePreviousWord, userInput, codeData]
+    [deletePreviousWord, userInput, codeData, handleInputChange]
   );
 
   // Is Typing
@@ -403,40 +397,13 @@ const CodeType = () => {
   }, []);
 
   return (
-    <div className="lg:pl-20 bg-gray-950 text-white min-h-screen">
+    <div className="lg:pl-20  text-white min-h-screen">
       {!isLoading ? (
         <div>
           {!completed ? (
-            <div className="px-4 py-6">
-              {/* Stats Bar */}
-              <div className="flex items-center justify-between mb-6 text-sm bg-gray-900/50 p-4 rounded-lg">
-                <div className="flex items-center gap-6">
-                  <div>
-                    WPM: <span className="text-blue-400 font-mono">{wpm}</span>
-                  </div>
-                  <div>
-                    Accuracy:{" "}
-                    <span className="text-green-400 font-mono">
-                      {correctChars > 0
-                        ? Math.round(
-                            (correctChars / (correctChars + incorrectChars)) *
-                              100
-                          )
-                        : 100}
-                      %
-                    </span>
-                  </div>
-                  <div>
-                    Errors:{" "}
-                    <span className="text-red-400 font-mono">{mistakes}</span>
-                  </div>
-                </div>
-                <div className="text-gray-400 font-mono">
-                  {userInput.length} / {codeData?.code?.length || 0}
-                </div>
-              </div>
-
+            <div className="px-4 pb-6">
               {/* Code Information */}
+
               <div className="pl-2 flex items-center">
                 <div className="my-3">
                   <h1 className="mb-3 font-medium text-lg md:text-2xl lg:text-[1.7em]">
@@ -460,95 +427,75 @@ const CodeType = () => {
                   </p>
                 </div>
               </div>
-
-              {/* Code Display */}
-              <div className="overflow-auto mt-7 bg-gray-900/80 p-6 rounded-lg border border-gray-700">
+              <div className="relative overflow-auto mt-7 bg-black p-6 rounded-lg border border-gray-700/40">
                 <pre className="line-numbers">
-                  <code className="text-sm md:text-base lg:text-lg font-mono leading-relaxed">
+                  <code className=" md:text-lg lg:text-lg font-mono leading-relaxed">
                     {highlightedCode}
                   </code>
                 </pre>
-              </div>
 
-              {/* Hidden Input */}
-              <div
-                className="w-full h-screen fixed top-0 left-0 opacity-0 cursor-text z-50"
-                onClick={handleTextClick}
-              >
-                <input
+                {/* Hidden input positioned only here */}
+                <textarea
                   ref={inputRef}
-                  type="text"
                   value={userInput}
                   onChange={handleInputChange}
                   onKeyDown={handleKeyDown}
                   onFocus={handleInputFocus}
                   onBlur={handleInputBlur}
-                  className="absolute opacity-0 w-full h-full"
+                  className="absolute inset-0 opacity-0 z-10"
                   autoFocus
                   aria-hidden="true"
                 />
               </div>
-
               {/* Controls */}
-              <div className="flex items-center justify-center gap-4 mt-10">
+              <div className="flex items-center justify-center gap-3 sm:gap-14 md:gap-22 lg:gap-28 my-10">
                 <button
-                  className="flex items-center justify-center p-3 hover:text-blue-400 hover:bg-blue-950/30 rounded-lg text-gray-400 transition-colors border border-gray-600"
+                  className="flex items-center justify-center mt-4 p-2 px-6 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
                   onClick={handleRefetch}
                   disabled={isLoading}
                 >
-                  <RotateCcw className="mr-2 w-4 h-4" />
+                  <CirclePlus className="mr-2 w-4 h-4" />
                   {isLoading ? "Loading..." : "New Code"}
                 </button>
 
                 <button
-                  className="flex items-center justify-center p-3 hover:text-green-400 hover:bg-green-950/30 rounded-lg text-gray-400 transition-colors border border-gray-600"
+                  className="flex items-center justify-center mt-4 p-2 px-6 hover:text-gray-300 hover:bg-gray-900 rounded-sm text-gray-400 transition-colors"
                   onClick={resetTest}
                 >
+                  <RotateCcw className="mr-2 w-4 h-4" />
                   Reset
                 </button>
               </div>
-
               {/* Focus indicator */}
-              {!isFocused && (
-                <div className="fixed top-4 right-4 bg-yellow-600 text-black px-3 py-1 rounded text-sm">
-                  Click to focus and start typing
+              {/* {!isFocused && (
+                <div
+                  className="absolute inset-0 flex items-center justify-center bg-black/60 z-50 rounded-lg cursor-pointer"
+                  onClick={handleTextClick}
+                >
+                  <div className="text-white text-sm md:text-base bg-gray-800 px-4 py-2 rounded shadow-md">
+                    Click here to start typing...
+                  </div>
                 </div>
-              )}
-
-              {/* Debug info */}
-              <div className="mt-4 text-xs text-gray-500 font-mono">
-                <div>
-                  Next expected char: "
-                  {codeData?.code?.[userInput.length] || "END"}" (code:{" "}
-                  {codeData?.code?.charCodeAt(userInput.length) || "N/A"})
-                </div>
-              </div>
+              )} */}
             </div>
           ) : (
-            <div className="flex items-center justify-center min-h-screen">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold mb-4 text-green-400">
-                  Completed!
-                </h2>
-                <div className="text-xl mb-4">
-                  Final WPM: <span className="text-blue-400">{wpm}</span>
-                </div>
-                <div className="text-xl mb-4">
-                  Accuracy:{" "}
-                  <span className="text-green-400">
-                    {Math.round(
-                      (correctChars / (correctChars + incorrectChars)) * 100
-                    )}
-                    %
-                  </span>
-                </div>
-                <button
-                  className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg transition-colors"
-                  onClick={resetTest}
-                >
-                  Try Again
-                </button>
-              </div>
+            <div className="mt-28">
+              <Results
+                wpm={wpm}
+                startTime={startTime}
+                endTime={endTime || Date.now()}
+                accuracy={
+                  (correctChars / (correctChars + incorrectChars)) * 100
+                }
+                correctChars={correctChars}
+                incorrectChars={incorrectChars}
+                totalChars={codeData?.code?.length || 0}
+                quote={codeData?.code || " "}
+                author={"code"}
+                mistakes={mistakes}
+                handleRefetch={handleRefetch}
+                handleRetype={resetTest}
+              />
             </div>
           )}
         </div>

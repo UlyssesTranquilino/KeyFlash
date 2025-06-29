@@ -160,7 +160,7 @@ const Results = ({
           onClick={handleRefetch}
           className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
         >
-          New {author === "" ? "Texts" : "Quote"}
+          New {author === "" ? "Texts" : author == "code" ? "Code" : "Quote"}
         </button>
         <button
           onClick={() => {
