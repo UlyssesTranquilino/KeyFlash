@@ -14,6 +14,7 @@ import { Quote } from "@/types/quote";
 import { spaceMono } from "@/app/ui/fonts";
 import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
 import { useQuote } from "@/app/context/QuoteContext";
+import { useWpm } from "@/app/context/WpmContext";
 import Results from "@/components/ui/typing/Results";
 
 // Debounce utility

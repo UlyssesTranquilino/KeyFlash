@@ -8,16 +8,17 @@ import {
   useMemo,
   startTransition,
 } from "react";
+
 import { motion } from "framer-motion";
+import { useWpm } from "@/app/context/WpmContext";
 
 // Icons
-import { RotateCcw, TriangleAlert, MousePointer } from "lucide-react";
+import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
 
 // Fonts
 import { spaceMono } from "@/app/ui/fonts";
 
 // Context
-import { useQuote } from "@/app/context/QuoteContext";
 import { useTimer } from "@/app/context/TimerContext";
 
 // Components
@@ -49,6 +50,7 @@ const Words = () => {
     startTimer,
     resetTimer,
   } = useTimer();
+  const { showWpm } = useWpm();
 
   const [userInput, setUserInput] = useState("");
   const [isFocused, setIsFocused] = useState(true);
@@ -258,8 +260,8 @@ const Words = () => {
 
           // Check completion
           if (
-            value.length === randomWords.length &&
-            correctFromStart === randomWords.length
+            value.length === randomWords.length
+            // correctFromStart === randomWords.length
           ) {
             setEndTime(currentTime);
             setCompleted(true);
@@ -354,10 +356,14 @@ const Words = () => {
   }, [isFocused, isRunning]);
 
   return (
-    <div className="mt-22 relative">
+    <div className="relative h-[50vh] flex flex-col items-center justify-center ">
       {(!completed && (time === -1 || remaining > 0)) ||
       (time > 0 && remaining > 0) ? (
-        <div>
+        <div className="mt-12 sm:mt-0 flex flex-col">
+          <div className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm">
+            {wpm} WPM
+          </div>
+
           {!isFocused &&
             !completed &&
             (time === -1 || remaining > 0) &&
@@ -366,9 +372,10 @@ const Words = () => {
                 className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer"
                 onClick={handleTextClick}
               >
-                <div className="w-100 mx-auto flex items-center justify-center mt-14 p-2 text-blue-400 font-semibold text-xl">
-                  <MousePointer className="mr-2" /> Click to focus and start
-                  typing
+                <div className="mx-auto flex flex-col sm:flex-row gap-2 items-center justify-center mt-14 p-2 text-blue-400 font-semibold  text-lg md:text-xl text-center">
+                  <Pointer className="block lg:hidden" />{" "}
+                  <MousePointer className=" hidden lg:block" />{" "}
+                  <span>Click to focus and start typing</span>
                 </div>
               </div>
             )}
@@ -443,7 +450,7 @@ const Words = () => {
           <div className="absolute -top-55 -right-4 -z-2 size-100 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-90%"></div>
 
           <button
-            className="mx-auto flex items-center justify-center mt-14 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
+            className="mx-auto flex items-center justify-center mt-20 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
             onClick={handleRestart}
             disabled={loading}
             onMouseEnter={() => setIsHoveringNewTexts(true)}
@@ -454,20 +461,22 @@ const Words = () => {
           </button>
         </div>
       ) : (
-        <Results
-          wpm={wpm}
-          startTime={startTime}
-          endTime={endTime || Date.now()}
-          accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
-          correctChars={correctChars}
-          incorrectChars={incorrectChars}
-          totalChars={correctChars + incorrectChars}
-          quote={randomWords || ""}
-          author={""}
-          mistakes={mistakes}
-          handleRefetch={handleRestart}
-          handleRetype={handleReType}
-        />
+        <div className="mt-240 md:mt-60">
+          <Results
+            wpm={wpm}
+            startTime={startTime}
+            endTime={endTime || Date.now()}
+            accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
+            correctChars={correctChars}
+            incorrectChars={incorrectChars}
+            totalChars={correctChars + incorrectChars}
+            quote={randomWords || ""}
+            author={""}
+            mistakes={mistakes}
+            handleRefetch={handleRestart}
+            handleRetype={handleReType}
+          />
+        </div>
       )}
     </div>
   );
