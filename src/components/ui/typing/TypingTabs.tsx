@@ -116,7 +116,7 @@ export default function TypingTabs() {
   const router = useRouter();
 
   const isCodeTab = pathname.startsWith("/typing/code");
-  const isRandomTab = pathname.startsWith("/typing/words");
+  const isRandomTab = pathname.startsWith("/typing/random");
   const isQuoteTab = pathname.startsWith("/typing/quote");
 
   const handleTabClick = (path: string) => {
@@ -124,13 +124,18 @@ export default function TypingTabs() {
   };
 
   const [isLowerCase, setIsLowerCase] = useState(true);
-  const { lowerCaseQuote, startCaseQuote } = useQuote();
+  const { lowerCaseQuote, startCaseQuote, isLowercase } = useQuote();
 
   const [openTime, setOpenTime] = useState(false);
   return (
-    <div className="px-4 sm:px-9 flex justify-end items-center  mx-auto -mt-2  ">
-      <div className="w-full typing-tabs md:w-auto gap-3 sm:gap-5 p-1 sm:p-3 sm:h-13  rounded-md px-5 bg-blue-950/30 items-center min-w-70">
-        <div className="typing-modes">
+    <div className="px-4 sm:px-9 flex justify-end items-center  mx-auto -mt-2   ">
+      <div
+        className={cn(
+          "py-2 sm:py-0  overflow-hidden gap-3 w-full typing-tabs md:max-w-150  lg:p-3 sm:gap-5 p-1 sm:p-3 sm:h-13 md:pr-6 lg:pr-6 rounded-md px-5 bg-blue-950/30 items-center min-w-75",
+          !isCodeTab ? "md:max-w-100" : ""
+        )}
+      >
+        <div className="typing-modes ">
           {/* Tab navigation */}
           {tabs.map((tab) => {
             const active = pathname === tab.path;
@@ -160,13 +165,25 @@ export default function TypingTabs() {
         </div>
 
         {/* Controls*/}
-        <div className="flex items-center  gap-3">
-          <div
-            className={cn(
-              "w-[0.5] h-6 bg-gray-400",
-              isCodeTab ? "hidden sm:block" : isQuoteTab ? "block" : "hidden"
-            )}
-          />
+        <div className="flex justify-center items-center  gap-3">
+          <div className={`w-[0.5] h-6 bg-gray-400 bar sm:block`} />
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setShowWpm(!showWpm)}
+                className={cn(
+                  "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                  showWpm ? "text-blue-400" : "text-gray-400 hover:text-white"
+                )}
+              >
+                WPM
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Words per minute</p>
+            </TooltipContent>
+          </Tooltip>
 
           {/* Word Mode Time Dropdown */}
           {isRandomTab && (
@@ -224,14 +241,14 @@ export default function TypingTabs() {
           )}
 
           {isCodeTab && (
-            <>
+            <div className="flex items-center gap-3 md:w-100">
               <Popover open={openLang} onOpenChange={setOpenLang}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     role="combobox"
                     aria-expanded={openLang}
-                    className="ml-auto w-[130px] justify-between border-0"
+                    className="w-[95px] md:w-full max-w-[150px] sm:w-[110px] justify-between border-0 truncate"
                   >
                     {language
                       ? languages.find((l) => l.value === language)?.label
@@ -239,7 +256,7 @@ export default function TypingTabs() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[130px] p-0">
+                <PopoverContent className="w-[130px]  p-0">
                   <Command>
                     <CommandInput placeholder="Search" />
                     <CommandList>
@@ -278,7 +295,7 @@ export default function TypingTabs() {
                     variant="outline"
                     role="combobox"
                     aria-expanded={openTopic}
-                    className="w-[110px] md:w-[140px] justify-between border-0"
+                    className="w-[95px]  md:w-full max-w-[150px] sm:w-[110px] justify-between border-0 truncate"
                   >
                     {topic
                       ? topics.find((t) => t.value === topic)?.label
@@ -286,7 +303,7 @@ export default function TypingTabs() {
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[110px] md:w-[140px] p-0">
+                <PopoverContent className="w-[110px] md:w-[140px] pr-0 pl-0">
                   <Command>
                     <CommandInput placeholder="Search" />
                     <CommandList>
@@ -319,7 +336,7 @@ export default function TypingTabs() {
                   </Command>
                 </PopoverContent>
               </Popover>
-            </>
+            </div>
           )}
 
           {isQuoteTab && (
@@ -327,16 +344,15 @@ export default function TypingTabs() {
               <TooltipTrigger asChild>
                 <button
                   onClick={() => {
-                    if (isLowerCase) {
+                    if (isLowercase) {
                       startCaseQuote();
                     } else {
                       lowerCaseQuote();
                     }
-                    setIsLowerCase(!isLowerCase);
                   }}
                   className={cn(
                     "flex items-center gap-2 text-sm transition px-2",
-                    isLowerCase
+                    isLowercase
                       ? "text-blue-400"
                       : "text-gray-400 hover:text-white"
                   )}
@@ -345,7 +361,7 @@ export default function TypingTabs() {
                 </button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Simplify Text</p>
+                <p>{isLowercase ? "Original case" : "Simplify text"}</p>
               </TooltipContent>
             </Tooltip>
           )}

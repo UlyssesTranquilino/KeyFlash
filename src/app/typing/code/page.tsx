@@ -9,12 +9,14 @@ import {
   useMemo,
 } from "react";
 import { useCode } from "@/app/context/CodeContext";
+import { useWpm } from "@/app/context/WpmContext";
 
 import { RotateCcw, CirclePlus } from "lucide-react";
 import {
   getRandomCodeSnippets,
   getCodeSnippets,
 } from "../../../../utils/typing/getCodeSnippet";
+import { motion } from "framer-motion";
 
 import Results from "@/components/ui/typing/Results";
 
@@ -32,6 +34,7 @@ const debounce = (func, wait) => {
 };
 
 const CodeType = () => {
+  const { showWpm, setShowWpm } = useWpm();
   const { language, topic } = useCode();
   // Code
   const [codeData, setCodeData] = useState(null);
@@ -397,13 +400,24 @@ const CodeType = () => {
   }, []);
 
   return (
-    <div className="lg:pl-20  text-white min-h-screen">
+    <div className="lg:pl-20  text-white min-h-screen relative">
       {!isLoading ? (
         <div>
           {!completed ? (
             <div className="px-4 pb-6">
-              {/* Code Information */}
+              {showWpm && (
+                <motion.div
+                  initial={{ y: -17, opacity: 0, scale: 0.95 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  exit={{ y: -17, opacity: 0, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="absolute right-0 self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
+                >
+                  {userInput.length == 0 ? 0 : wpm} WPM
+                </motion.div>
+              )}
 
+              {/* Code Information */}
               <div className="pl-2 flex items-center">
                 <div className="my-3">
                   <h1 className="mb-3 font-medium text-lg md:text-2xl lg:text-[1.7em]">
@@ -450,19 +464,19 @@ const CodeType = () => {
               {/* Controls */}
               <div className="flex items-center justify-center gap-3 sm:gap-14 md:gap-22 lg:gap-28 my-10">
                 <button
-                  className="flex items-center justify-center mt-4 p-2 px-6 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
+                  className="flex items-center justify-center lg:text-lg mt-4 p-2 px-6 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
                   onClick={handleRefetch}
                   disabled={isLoading}
                 >
-                  <CirclePlus className="mr-2 w-4 h-4" />
+                  <CirclePlus className="mr-2 lg:mr-3 w-4 h-4 lg:scale-130" />
                   {isLoading ? "Loading..." : "New Code"}
                 </button>
 
                 <button
-                  className="flex items-center justify-center mt-4 p-2 px-6 hover:text-gray-300 hover:bg-gray-900 rounded-sm text-gray-400 transition-colors"
+                  className="flex items-center justify-center lg:text-lg mt-4 p-2 px-6 hover:text-gray-300 hover:bg-gray-900 rounded-sm text-gray-400 transition-colors"
                   onClick={resetTest}
                 >
-                  <RotateCcw className="mr-2 w-4 h-4" />
+                  <RotateCcw className="mr-2 lg:mr-3 w-4 h-4 lg:scale-130" />
                   Reset
                 </button>
               </div>
@@ -500,7 +514,7 @@ const CodeType = () => {
           )}
         </div>
       ) : (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex items-start justify-center py-60">
           <div className="text-xl text-gray-400">Loading...</div>
         </div>
       )}

@@ -41,15 +41,14 @@ const debounce = (func: any, wait: any) => {
 };
 
 const Words = () => {
-  const {
-    time,
-    setTime,
-    remaining,
-    setRemaining,
-    isRunning,
-    startTimer,
-    resetTimer,
-  } = useTimer();
+  const timerContext = useTimer();
+  const time = timerContext?.time;
+  const setTime = timerContext?.setTime;
+  const remaining = timerContext?.remaining;
+  const setRemaining = timerContext?.setRemaining;
+  const isRunning = timerContext?.isRunning;
+  const startTimer = timerContext?.startTimer;
+  const resetTimer = timerContext?.resetTimer;
   const { showWpm } = useWpm();
 
   const [userInput, setUserInput] = useState("");
@@ -188,7 +187,7 @@ const Words = () => {
       randomWords.split(" ").length - userInput.trim().split(" ").length <=
         10 &&
       !completed &&
-      time > 0
+      (time ?? 0) > 0
     ) {
       setRandomWords((prev) => prev + " " + generateWords(10));
     }
@@ -208,7 +207,9 @@ const Words = () => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-    resetTimer();
+    if (resetTimer) {
+      resetTimer();
+    }
   }, [resetTimer]);
 
   // Load Next Random Words
@@ -232,7 +233,9 @@ const Words = () => {
       // Start timer on first input
       if (!startTime) {
         setStartTime(currentTime);
-        startTimer();
+        if (startTimer) {
+          startTimer();
+        }
       }
 
       // Update input immediately (high priority)
@@ -267,7 +270,7 @@ const Words = () => {
             setCompleted(true);
 
             // Load next words if in timed mode with time remaining
-            if (time > 0 && remaining > 0) {
+            if ((time ?? 0) > 0 && (remaining ?? 0) > 0) {
               loadNextRandomWords();
               setCompleted(false);
             }
@@ -357,16 +360,24 @@ const Words = () => {
 
   return (
     <div className="relative h-[50vh] flex flex-col items-center justify-center ">
-      {(!completed && (time === -1 || remaining > 0)) ||
-      (time > 0 && remaining > 0) ? (
+      {(!completed && (time === -1 || (remaining ?? 0) > 0)) ||
+      ((time ?? 0) > 0 && (remaining ?? 0) > 0) ? (
         <div className="mt-12 sm:mt-0 flex flex-col">
-          <div className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm">
-            {wpm} WPM
-          </div>
+          {showWpm && (
+            <motion.div
+              initial={{ y: -17, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -17, opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
+            >
+              {wpm} WPM
+            </motion.div>
+          )}
 
           {!isFocused &&
             !completed &&
-            (time === -1 || remaining > 0) &&
+            (time === -1 || (remaining ?? 0) > 0) &&
             !isHoveringNewTexts && (
               <div
                 className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer"
@@ -384,10 +395,10 @@ const Words = () => {
             {/* Timer */}
             <div className=" px-5 md:px-9 lg:px-0  mb-3 ml-1 lg:text-lg">
               {isRunning
-                ? remaining > 0
+                ? (remaining ?? 0) > 0
                   ? remaining
                   : ""
-                : time > 0
+                : (time ?? 0) > 0
                 ? time
                 : ""}
             </div>
