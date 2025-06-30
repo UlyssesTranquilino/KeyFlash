@@ -32,7 +32,10 @@ const debounce = (func: any, wait: any) => {
 
 const QuoteType = () => {
   // Contexts
-  const { quote, setQuote } = useQuote();
+  const { quote, setQuote, lowerCaseQuote, startCaseQuote, isLowercase } =
+    useQuote();
+
+  const { showWpm } = useWpm();
 
   // States
   const [author, setAuthor] = useState("");
@@ -116,6 +119,25 @@ const QuoteType = () => {
     []
   );
 
+  console.log("WPM: ", wpm);
+  const resetTest = useCallback(() => {
+    // Clear any pending debounce
+    if (debouncedWpmUpdate.cancel) debouncedWpmUpdate.cancel();
+
+    setUserInput("");
+    setCurrentIndex(0);
+    setStartTime(null);
+    setWpm(0);
+    setIsIdle(true);
+    setCompleted(false);
+    setCorrectChars(0);
+    setIncorrectChars(0);
+    setMistakes(0);
+    setEndTime(null); // Add this
+    setTestId(Date.now());
+    inputRef.current?.focus();
+  }, [debouncedWpmUpdate]);
+
   // Optimized quote highlighting with memoization
   const highlightedQuote = useMemo(() => {
     if (!quote?.content) return null;
@@ -154,41 +176,36 @@ const QuoteType = () => {
   const handleRefetch = useCallback(async () => {
     setLoading(true);
     const randomQuote = await getRandomQuotes();
-    setQuote(randomQuote);
+    setQuote(randomQuote); // Use context's setQuote
     setAuthor(randomQuote?.author || "");
     resetTest();
     setLoading(false);
-  }, []);
 
-  const handleReType = useCallback((quoteData: Quote) => {
-    setQuote(quoteData);
-    setAuthor(quoteData.author || "");
-    resetTest();
-  }, []);
-
-  const resetTest = useCallback(() => {
-    setUserInput("");
-    setCurrentIndex(0);
-    setStartTime(null);
     setWpm(0);
-    setIsIdle(true);
-    setCompleted(false);
-    setCorrectChars(0);
-    setIncorrectChars(0);
-    setMistakes(0);
-    setTestId(Date.now());
-    inputRef.current?.focus();
-  }, []);
+    console.log("Refetch WPM: ", wpm);
+  }, [setQuote, resetTest]);
+
+  const handleReType = useCallback(
+    (quoteData: Quote) => {
+      setQuote(quoteData); // Use context's setQuote
+      setAuthor(quoteData.author || "");
+      resetTest();
+
+      setWpm(0);
+      console.log("Refetch WPM: ", wpm);
+    },
+    [setQuote, resetTest]
+  );
 
   const loadNextQuote = useCallback(async () => {
     const randomQuote = await getRandomQuotes();
-    setQuote(randomQuote);
+    setQuote(randomQuote); // Use context's setQuote
     setAuthor(randomQuote?.author || "");
     setUserInput("");
     setCurrentIndex(0);
     setCompleted(false);
     setStartTime(Date.now());
-  }, []);
+  }, [setQuote]);
 
   // Optimized input change handler
   const handleInputChange = useCallback(
@@ -283,7 +300,19 @@ const QuoteType = () => {
   return (
     <div className="mt-22 relative">
       {!completed ? (
-        <div>
+        <div className="mt-12 sm:mt-0 flex flex-col">
+          {showWpm && (
+            <motion.div
+              initial={{ y: -17, opacity: 0, scale: 0.95 }}
+              animate={{ y: 0, opacity: 1, scale: 1 }}
+              exit={{ y: -17, opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
+            >
+              {userInput.length == 0 ? 0 : wpm} WPM
+            </motion.div>
+          )}
+
           {/* Overlay */}
           {!isFocused && !completed && !isHoveringNewQuote && (
             <div

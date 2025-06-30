@@ -10,6 +10,8 @@ type QuoteContextType = {
   lowerCaseQuote: () => void;
   startCaseQuote: () => void;
   isLowercase: boolean;
+  cleanPunctuation: boolean;
+  setCleanPunctuation: (clean: boolean) => void;
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
@@ -23,34 +25,37 @@ export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
     }
     return false;
   });
+  const [cleanPunctuation, setCleanPunctuation] = useState<boolean>(false);
 
-  // Apply lowercase mode automatically when a new quote is set
-  const setQuote = (q: Quote) => {
-    setOriginalQuote(q);
-    console.log("Q: ", q);
+  // Apply case transformation consistently
+  const transformQuoteContent = (content: string): string => {
+    let transformed = content;
     if (isLowercase) {
-      const cleaned = q.content
-        .toLowerCase()
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
-        .replace(/\s{2,}/g, " ");
-      setQuoteState({
-        ...q,
-        content: cleaned.trim(),
-      });
-    } else {
-      setQuoteState(q);
+      transformed = transformed.toLowerCase();
     }
-  };
-
-  const lowerCaseQuote = () => {
-    if (quote) {
-      const cleaned = quote.content
-        .toLowerCase()
+    if (cleanPunctuation) {
+      transformed = transformed
         .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "")
         .replace(/\s{2,}/g, " ")
         .trim();
+    }
+    return transformed;
+  };
 
-      setQuoteState({ ...quote, content: cleaned });
+  const setQuote = (q: Quote) => {
+    setOriginalQuote(q);
+    setQuoteState({
+      ...q,
+      content: transformQuoteContent(q.content),
+    });
+  };
+
+  const lowerCaseQuote = () => {
+    if (quote && originalQuote) {
+      setQuoteState({
+        ...quote,
+        content: transformQuoteContent(originalQuote.content),
+      });
       setIsLowercase(true);
       localStorage.setItem("isLowercase", "true");
     }
@@ -64,6 +69,13 @@ export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Ensure case is applied when isLowercase changes
+  useEffect(() => {
+    if (originalQuote) {
+      setQuote(originalQuote);
+    }
+  }, [isLowercase, cleanPunctuation]);
+
   return (
     <QuoteContext.Provider
       value={{
@@ -73,6 +85,8 @@ export const QuoteProvider = ({ children }: { children: React.ReactNode }) => {
         lowerCaseQuote,
         startCaseQuote,
         isLowercase,
+        cleanPunctuation,
+        setCleanPunctuation,
       }}
     >
       {children}
