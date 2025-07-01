@@ -290,3 +290,14 @@
     gap: 20px;
   }
 }
+
+.word-container {
+  display: inline-block;
+  margin-right: 0.25rem; /* Small space between words */
+  word-break: keep-all; /* Prevent word breaks */
+}
+
+.text-content {
+  white-space: pre-wrap; /* Preserve spaces and wrap naturally */
+  word-wrap: break-word; /* Break long words properly */
+}

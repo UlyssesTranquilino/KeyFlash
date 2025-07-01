@@ -1,21 +1,19 @@
 "use client";
 
 import {
-  useEffect,
   useState,
+  useEffect,
   useRef,
   useCallback,
-  useMemo,
   startTransition,
+  useMemo,
 } from "react";
+import Results from "./Results";
 import { motion } from "framer-motion";
-import { getRandomQuotes } from "../../../../utils/typing/getRandomQuotes";
-import { Quote } from "@/types/quote";
 import { spaceMono } from "@/app/ui/fonts";
 import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
-import { useQuote } from "@/app/context/QuoteContext";
+// Context
 import { useWpm } from "@/app/context/WpmContext";
-import Results from "@/components/ui/typing/Results";
 
 // Debounce utility
 const debounce = (func: any, wait: any) => {
@@ -29,33 +27,29 @@ const debounce = (func: any, wait: any) => {
     timeout = setTimeout(later, wait);
   };
 };
-
-const QuoteType = () => {
-  // Contexts
-  const { quote, setQuote, lowerCaseQuote, startCaseQuote, isLowercase } =
-    useQuote();
-
+const StandardTyping = ({ text }) => {
   const { showWpm } = useWpm();
 
-  // States
-  const [author, setAuthor] = useState("");
   const [userInput, setUserInput] = useState("");
+  const [isFocused, setIsFocused] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [wpm, setWpm] = useState(0);
   const [isIdle, setIsIdle] = useState(true);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [completed, setCompleted] = useState(false);
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [mistakes, setMistakes] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [textData, setTextData] = useState(text);
+
+  // Stats
   const [endTime, setEndTime] = useState<number | null>(null);
   const [correctChars, setCorrectChars] = useState(0);
   const [incorrectChars, setIncorrectChars] = useState(0);
-  const [isFocused, setIsFocused] = useState(true);
   const [testId, setTestId] = useState(Date.now());
-  const [loading, setLoading] = useState(false);
-  const [isHoveringNewQuote, setIsHoveringNewQuote] = useState(false);
+  const [isHoveringNewTexts, setIsHoveringNewTexts] = useState(false);
   const [isClickingOnText, setIsClickingOnText] = useState(false);
 
   // Auto-focus when not focused
@@ -97,15 +91,6 @@ const QuoteType = () => {
     };
   }, []);
 
-  // Initial quote fetch
-  useEffect(() => {
-    const fetchQuotes = async () => {
-      const randomQuote = await getRandomQuotes();
-      setQuote(randomQuote);
-    };
-    fetchQuotes();
-  }, []);
-
   // Debounced WPM calculation
   const debouncedWpmUpdate = useMemo(
     () =>
@@ -119,6 +104,7 @@ const QuoteType = () => {
     []
   );
 
+  // Reset Test
   const resetTest = useCallback(() => {
     // Clear any pending debounce
     if (debouncedWpmUpdate.cancel) debouncedWpmUpdate.cancel();
@@ -137,13 +123,13 @@ const QuoteType = () => {
     inputRef.current?.focus();
   }, [debouncedWpmUpdate]);
 
-  // Optimized quote highlighting with word-level rendering
-  const highlightedQuote = useMemo(() => {
-    if (!quote?.content) return null;
+  // Highlighting Text
+  const highlightedText = useMemo(() => {
+    if (!textData) return null;
 
-    const words = quote.content.split(" ");
-    const userInputChars = userInput.split("");
-    let charIndex = 0;
+    const words = textData.split(" ");
+    const userInputWords = userInput.split(" ");
+    let charIndex = 0; // Tracks absolute position in the full text
 
     return words.map((word, wordIndex) => {
       const wordChars = word.split("");
@@ -153,7 +139,7 @@ const QuoteType = () => {
         <span key={wordIndex} className="inline-block mr-1.5">
           {wordChars.map((char) => {
             const currentCharIndex = charIndex;
-            charIndex++;
+            charIndex++; // Increment for the character (but don't render this)
 
             let className = "text-gray-500";
             if (currentCharIndex < userInput.length) {
@@ -180,72 +166,59 @@ const QuoteType = () => {
             );
           })}
 
-          {/* Add trailing space after word (except last) */}
+          {/* Handle space after each word except last */}
           {!isLastWord &&
             (() => {
               const spaceIndex = charIndex;
-              charIndex++;
-
-              const isCursor = spaceIndex === userInput.length;
-              const isCorrect = userInput[spaceIndex] === " ";
-
-              let spaceClass = "text-gray-500";
-              if (spaceIndex < userInput.length) {
-                spaceClass = isCorrect
-                  ? "text-white"
-                  : "text-red-600/75 bg-red-900/30";
-              }
+              charIndex++; // ✅ Increment here without rendering
 
               return (
                 <span className="relative" key={`space-${spaceIndex}`}>
-                  {isCursor && (
+                  {spaceIndex === userInput.length && (
                     <span
                       className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
                         isIdle ? "animate-pulse" : ""
                       }`}
                     />
                   )}
-                  <span className={spaceClass}>&nbsp;</span>
+                  <span
+                    className={
+                      spaceIndex < userInput.length
+                        ? userInput[spaceIndex] === " "
+                          ? "text-white"
+                          : "text-red-600/75 bg-red-900/30"
+                        : "text-gray-500"
+                    }
+                  >
+                    &nbsp;
+                  </span>
                 </span>
               );
             })()}
         </span>
       );
     });
-  }, [quote?.content, userInput, isIdle]);
+  }, [textData, userInput, isIdle]);
 
   const handleRefetch = useCallback(async () => {
     setLoading(true);
-    const randomQuote = await getRandomQuotes();
-    setQuote(randomQuote); // Use context's setQuote
-    setAuthor(randomQuote?.author || "");
+    setTextData("Upload again"); // Use context's setQuote
     resetTest();
     setLoading(false);
 
     setWpm(0);
     console.log("Refetch WPM: ", wpm);
-  }, [setQuote, resetTest]);
+  }, [setTextData, resetTest]);
 
   const handleReType = useCallback(
-    (quoteData: Quote) => {
-      setQuote(quoteData); // Use context's setQuote
-      setAuthor(quoteData.author || "");
+    (text: string) => {
+      setTextData(text);
       resetTest();
 
       setWpm(0);
     },
-    [setQuote, resetTest]
+    [setTextData, resetTest]
   );
-
-  const loadNextQuote = useCallback(async () => {
-    const randomQuote = await getRandomQuotes();
-    setQuote(randomQuote); // Use context's setQuote
-    setAuthor(randomQuote?.author || "");
-    setUserInput("");
-    setCurrentIndex(0);
-    setCompleted(false);
-    setStartTime(Date.now());
-  }, [setQuote]);
 
   // Optimized input change handler
   const handleInputChange = useCallback(
@@ -267,13 +240,13 @@ const QuoteType = () => {
 
       // Batch non-critical updates
       startTransition(() => {
-        if (quote?.content) {
+        if (textData) {
           // Optimized character counting
           let correct = 0;
-          const minLength = Math.min(value.length, quote.content.length);
+          const minLength = Math.min(value.length, textData.length);
 
           for (let i = 0; i < minLength; i++) {
-            if (value[i] === quote.content[i]) {
+            if (value[i] === textData[i]) {
               correct++;
             } else {
               break;
@@ -285,7 +258,7 @@ const QuoteType = () => {
           setMistakes(value.length - correct);
 
           // Check completion
-          if (value.length === quote.content.length) {
+          if (value.length === textData.length) {
             setEndTime(currentTime);
             setCompleted(true);
           }
@@ -297,7 +270,7 @@ const QuoteType = () => {
         }
       });
     },
-    [quote, startTime, debouncedWpmUpdate]
+    [textData, startTime, debouncedWpmUpdate]
   );
 
   const deletePreviousWord = useCallback(() => {
@@ -338,9 +311,9 @@ const QuoteType = () => {
   }, []);
 
   return (
-    <div className="mt-22 relative">
+    <div className="mt-10 relative flex flex-col items-center justify-center ">
       {!completed ? (
-        <div className="mt-10 sm:-mt-3 flex flex-col">
+        <div className="mt-12 sm:mt-0 flex flex-col relative w-full ">
           {showWpm && (
             <motion.div
               initial={{ y: -17, opacity: 0, scale: 0.95 }}
@@ -354,7 +327,7 @@ const QuoteType = () => {
           )}
 
           {/* Overlay */}
-          {!isFocused && !completed && !isHoveringNewQuote && (
+          {!isFocused && !completed && !isHoveringNewTexts && (
             <div
               className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer mt-5"
               onClick={handleTextClick}
@@ -367,7 +340,7 @@ const QuoteType = () => {
             </div>
           )}
 
-          <div className="relative h-70 sm:h-50 lg:h-60 w-full max-w-[900px] mx-auto">
+          <div className="relative  w-full max-w-[900px] mx-auto">
             {isCapsLockOn && (
               <motion.div
                 initial={{ y: -17, opacity: 0, scale: 0.95 }}
@@ -390,18 +363,18 @@ const QuoteType = () => {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.7rem] text-center transition-opacity duration-100 ${
                 spaceMono.className
-              } leading-8 mb-8 h-[160px] sm:h-[200px] cursor-text overflow-hidden ${
+              } leading-8 mb-8 max-h-[250px] sm:max-h-[300px] overflow-auto ${
                 !isFocused ? "blur-sm opacity-60" : "blur-0 opacity-100"
               }`}
               onClick={handleTextClick}
               onMouseDown={(e) => e.preventDefault()} // Prevent text selection interfering with focus
             >
-              <div className="flex flex-wrap justify-center leading-relaxed">
-                {highlightedQuote}
+              <div className="flex flex-wrap  leading-relaxed ">
+                {highlightedText}
               </div>
             </motion.div>
 
-            <input
+            <textarea
               ref={inputRef}
               type="text"
               value={userInput}
@@ -413,48 +386,39 @@ const QuoteType = () => {
               autoFocus
               aria-hidden="true"
             />
-
-            <div className="flex justify-between items-center mt-0 md:-mt-8">
-              <div className="text-lg font-semibold"></div>
-              <p className="text-sm lg:text-base italic text-right text-gray-500">
-                — {quote?.author}
-              </p>
-            </div>
           </div>
 
           <div className="absolute -top-55 -right-4 -z-2 size-100 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-90%"></div>
 
           <button
             className="mx-auto flex items-center justify-center mt-4 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
-            onClick={handleRefetch}
+            onClick={() => handleReType(textData)}
             disabled={loading}
-            onMouseEnter={() => setIsHoveringNewQuote(true)}
-            onMouseLeave={() => setIsHoveringNewQuote(false)}
+            onMouseEnter={() => setIsHoveringNewTexts(true)}
+            onMouseLeave={() => setIsHoveringNewTexts(false)}
           >
             <RotateCcw className="mr-2 scale-90" />
-            {loading ? "Loading..." : "New Quote"}
+            {loading ? "Loading..." : "Reset"}
           </button>
         </div>
       ) : (
-        <div className="">
-          <Results
-            wpm={wpm}
-            startTime={startTime}
-            endTime={endTime || Date.now()}
-            accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
-            correctChars={correctChars}
-            incorrectChars={incorrectChars}
-            totalChars={quote?.content?.length || 0}
-            quote={quote?.content || ""}
-            author={quote?.author || ""}
-            mistakes={mistakes}
-            handleRefetch={loadNextQuote}
-            handleRetype={handleReType}
-          />
-        </div>
+        <Results
+          wpm={wpm}
+          startTime={startTime}
+          endTime={endTime || Date.now()}
+          accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
+          correctChars={correctChars}
+          incorrectChars={incorrectChars}
+          totalChars={textData.length || 0}
+          quote={textData || ""}
+          author={""}
+          mistakes={mistakes}
+          handleRefetch={() => console.log("none")}
+          handleRetype={handleReType}
+        />
       )}
     </div>
   );
 };
 
-export default QuoteType;
+export default StandardTyping;
