@@ -14,6 +14,7 @@ import {
   Infinity,
   Dices,
   CirclePlus,
+  Pencil,
 } from "lucide-react";
 import {
   Tooltip,
@@ -42,6 +43,7 @@ import { useQuote } from "@/app/context/QuoteContext";
 import { useTimer } from "@/app/context/TimerContext";
 import { useCode } from "@/app/context/CodeContext";
 import { useWpm } from "@/app/context/WpmContext";
+import { useEditText } from "@/app/context/AddTextContext";
 
 import { start } from "repl";
 
@@ -103,6 +105,7 @@ const topics = [
 ];
 
 export default function TypingTabs() {
+  const { openAddText, setOpenAddText } = useEditText();
   const { time, setTime, setRemaining, resetTimer } = useTimer();
   const { topic, setTopic, language, setLanguage } = useCode();
   const { showWpm, setShowWpm } = useWpm();
@@ -118,6 +121,7 @@ export default function TypingTabs() {
   const isCodeTab = pathname.startsWith("/typing/code");
   const isRandomTab = pathname.startsWith("/typing/random");
   const isQuoteTab = pathname.startsWith("/typing/quote");
+  const isCustomTab = pathname.startsWith("/typing/custom");
 
   const handleTabClick = (path: string) => {
     router.push(path);
@@ -362,6 +366,27 @@ export default function TypingTabs() {
               </TooltipTrigger>
               <TooltipContent>
                 <p>{isLowercase ? "Original case" : "Simplify text"}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {isCustomTab && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setOpenAddText(!openAddText)}
+                  className={cn(
+                    "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                    openAddText
+                      ? "text-blue-400"
+                      : "text-gray-400 hover:text-white"
+                  )}
+                >
+                  <Pencil className="scale-78" /> Edit
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Edit Custom Text</p>
               </TooltipContent>
             </Tooltip>
           )}

@@ -141,32 +141,79 @@ const Words = () => {
   // Optimized words highlighting with memoization
   const highlightedWords = useMemo(() => {
     if (!randomWords) return null;
+    const randomContent = typeof randomWords === "string" ? randomWords : "";
 
-    const inputLength = userInput.length;
+    const words = randomContent.split(" ");
+    const typedChars = userInput;
+    let charIndex = 0; // Tracks global character index
 
-    return randomWords.split("").map((char, index) => {
-      let className = "text-gray-500"; // default
-
-      if (index < inputLength) {
-        className =
-          userInput[index] === char
-            ? "text-white"
-            : "text-red-600/75 bg-red-900/30";
-      }
-
-      const isCursor = index === inputLength;
-      const displayChar = char === " " ? "\u00A0" : char;
+    return words.map((word, wordIdx) => {
+      const wordChars = word.split("");
+      const isLastWord = wordIdx === words.length - 1;
 
       return (
-        <span key={index} className="relative">
-          {isCursor && (
-            <span
-              className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                isIdle ? "animate-pulse" : ""
-              }`}
-            />
-          )}
-          <span className={className}>{displayChar}</span>
+        <span key={wordIdx} className="inline-block mr-1.5">
+          {wordChars.map((char) => {
+            const currentCharIndex = charIndex;
+            charIndex++;
+
+            const userChar = typedChars[currentCharIndex];
+            const isTyped = currentCharIndex < typedChars.length;
+            const isCorrect = userChar === char;
+            const isCursor = currentCharIndex === typedChars.length;
+
+            const className = isTyped
+              ? isCorrect
+                ? "text-white"
+                : "text-red-600/75 bg-red-900/30"
+              : "text-gray-500";
+
+            const displayChar = char === " " ? "\u00A0" : char;
+
+            return (
+              <span key={currentCharIndex} className="relative">
+                {isCursor && (
+                  <span
+                    className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                      isIdle ? "animate-pulse" : ""
+                    }`}
+                  />
+                )}
+                <span className={className}>{displayChar}</span>
+              </span>
+            );
+          })}
+
+          {/* Handle space between words */}
+          {!isLastWord &&
+            (() => {
+              const spaceIndex = charIndex;
+              charIndex++; // Count the space
+
+              const isCursor = spaceIndex === typedChars.length;
+              const userChar = typedChars[spaceIndex];
+              const isCorrectSpace = userChar === " ";
+              const isTyped = spaceIndex < typedChars.length;
+
+              const spaceClassName = isTyped
+                ? isCorrectSpace
+                  ? "text-white"
+                  : "text-red-600/75 bg-red-900/30"
+                : "text-gray-500";
+
+              return (
+                <span className="relative" key={`space-${spaceIndex}`}>
+                  {isCursor && (
+                    <span
+                      className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                        isIdle ? "animate-pulse" : ""
+                      }`}
+                    />
+                  )}
+                  <span className={spaceClassName}>&nbsp;</span>
+                </span>
+              );
+            })()}
         </span>
       );
     });
@@ -359,7 +406,7 @@ const Words = () => {
   }, [isFocused, isRunning]);
 
   return (
-    <div className="relative h-[50vh] flex flex-col items-center justify-center ">
+    <div className="relative min-h-[50vh] flex flex-col items-center -mt-5 sm:mt-17">
       {(!completed && (time === -1 || (remaining ?? 0) > 0)) ||
       ((time ?? 0) > 0 && (remaining ?? 0) > 0) ? (
         <div className="mt-12 sm:mt-0 flex flex-col">
@@ -380,10 +427,10 @@ const Words = () => {
             (time === -1 || (remaining ?? 0) > 0) &&
             !isHoveringNewTexts && (
               <div
-                className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer"
+                className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer mt-5"
                 onClick={handleTextClick}
               >
-                <div className="mx-auto flex flex-col sm:flex-row gap-2 items-center justify-center mt-14 p-2 text-blue-400 font-semibold  text-lg md:text-xl text-center">
+                <div className="lg:mr-15 mx-auto flex flex-col sm:flex-row gap-2 items-center justify-center mt-14 p-2 text-blue-400 font-semibold  text-lg md:text-xl text-center">
                   <Pointer className="block lg:hidden" />{" "}
                   <MousePointer className=" hidden lg:block" />{" "}
                   <span>Click to focus and start typing</span>
@@ -472,7 +519,7 @@ const Words = () => {
           </button>
         </div>
       ) : (
-        <div className="mt-240 md:mt-60">
+        <div className="mt-30 sm:mt-5">
           <Results
             wpm={wpm}
             startTime={startTime}
