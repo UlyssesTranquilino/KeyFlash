@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +15,7 @@ import {
   EyeClosed,
   Type,
   FileUp,
+  Trash,
 } from "lucide-react";
 import {
   Carousel,
@@ -51,22 +53,27 @@ const TypingFlashcards = () => {
 
   const [sampleTerms, setSampleTerms] = useState([
     {
+      id: 1,
       question: "What is the capital of France?",
       answer: "Paris",
     },
     {
+      id: 2,
       question: "What is the largest planet in our solar system?",
       answer: "Jupiter",
     },
     {
+      id: 3,
       question: "What language is primarily spoken in Brazil?",
       answer: "Portuguese",
     },
     {
+      id: 4,
       question: "What is 9 x 6?",
       answer: "54",
     },
     {
+      id: 5,
       question: "Who wrote 'Romeo and Juliet'?",
       answer: "William Shakespeare",
     },
@@ -89,6 +96,7 @@ const TypingFlashcards = () => {
   const [cardCompleted, setCardCompleted] = useState(false);
   const [wpm, setWpm] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [copyFlashcardData, setCopyFlashcardData] = useState<any>();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -137,6 +145,11 @@ const TypingFlashcards = () => {
       if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
     };
   }, []);
+
+  // Check if edit dialog is open
+  useEffect(() => {
+    setCopyFlashcardData(sampleTerms);
+  }, [openEditFlashcard]);
 
   const resetCurrentCard = useCallback(() => {
     setUserInput("");
@@ -306,6 +319,30 @@ const TypingFlashcards = () => {
 
   const [isFlipped, setIsFlipped] = useState(false);
 
+  const handleSubmit = () => {
+    const hasEmptyFields = copyFlashcardData.some(
+      (card: any) => !card.question?.trim() || !card.answer?.trim()
+    );
+
+    if (hasEmptyFields) {
+      alert(
+        "Please make sure all flashcards have both a question and an answer."
+      );
+      return;
+    }
+
+    setSampleTerms(copyFlashcardData);
+    setOpenEditFlashcard(false);
+  };
+
+  const handleDelete = (id: string) => {
+    if (!copyFlashcardData || copyFlashcardData.length <= 0) return;
+
+    setCopyFlashcardData((prev: any) =>
+      prev ? prev.filter((card: any) => card.id !== id) : []
+    );
+  };
+
   return (
     <div className="max-w-4xl mx-auto sm:p-4">
       {/* Custom Settings */}
@@ -347,6 +384,7 @@ const TypingFlashcards = () => {
                     "flex items-center gap-2",
                     activeTab === "upload" && "text-blue-400"
                   )}
+                  disabled
                 >
                   <FileUp className="h-4 w-4" /> Upload (Coming Soon)
                 </TabsTrigger>
@@ -356,61 +394,84 @@ const TypingFlashcards = () => {
                 value="write"
                 className="mt-4 flex flex-col gap-5 overflow-scroll max-h-100"
               >
-                <div className="flex items-center justify-around gap-9">
+                <div className="flex items-center justify-around gap-9 ">
                   <h1>Question</h1>
                   <h1>Answer</h1>
                 </div>
-                {sampleTerms.map((card: any, index) => (
+                {copyFlashcardData?.map((card: any, index: number) => (
                   <div
-                    key={card.question + index.toString()}
-                    className="flex items-center justify-around gap-5 "
+                    key={card.id}
+                    className="flex flex-col relative bg-gray-900/30"
                   >
-                    <div className="bg-gray-900 rounded-sm w-full h-full p-4 min-h-30 md:min-h-40">
-                      {" "}
-                      <textarea
-                        value={card.question}
-                        onInput={(e) => {
-                          e.currentTarget.style.height = "auto";
-                          e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
-                        }}
-                        onChange={(e) => {
-                          setSampleTerms((prev: any) => {
-                            return prev.map((item: object, idx: number) => {
-                              if (idx === index) {
-                                return { ...item, question: e.target.value };
-                              } else {
-                                return item;
-                              }
+                    <button
+                      onClick={() => handleDelete(card.id)}
+                      className="absolute  hover:text-red-400 text-gray-500 self-end p-1"
+                    >
+                      <Trash className="scale-70" />
+                    </button>
+                    <div className="flex items-center justify-around gap-5 ">
+                      <div className="bg-gray-900 rounded-sm w-full h-full p-4 min-h-30 md:min-h-40">
+                        <textarea
+                          value={card.question}
+                          onInput={(e) => {
+                            e.currentTarget.style.height = "auto";
+                            e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+                          }}
+                          onChange={(e) => {
+                            setCopyFlashcardData((prev: any) => {
+                              return prev.map((item: object, idx: number) => {
+                                if (idx === index) {
+                                  return { ...item, question: e.target.value };
+                                } else {
+                                  return item;
+                                }
+                              });
                             });
-                          });
-                        }}
-                        className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
-                      />
-                    </div>
+                          }}
+                          className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
+                        />
+                      </div>
 
-                    <div className="bg-gray-900 rounded-sm w-full h-full p-4 min-h-30 md:min-h-40">
-                      <textarea
-                        value={card.answer}
-                        onInput={(e) => {
-                          e.currentTarget.style.height = "auto";
-                          e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
-                        }}
-                        onChange={(e) => {
-                          setSampleTerms((prev: any) => {
-                            return prev.map((item: object, idx: number) => {
-                              if (idx === index) {
-                                return { ...item, answer: e.target.value };
-                              } else {
-                                return item;
-                              }
+                      <div className="bg-gray-900 rounded-sm w-full h-full p-4 min-h-30 md:min-h-40">
+                        <textarea
+                          value={card.answer}
+                          onInput={(e) => {
+                            e.currentTarget.style.height = "auto";
+                            e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
+                          }}
+                          onChange={(e) => {
+                            setCopyFlashcardData((prev: any) => {
+                              return prev.map((item: object, idx: number) => {
+                                if (idx === index) {
+                                  return { ...item, answer: e.target.value };
+                                } else {
+                                  return item;
+                                }
+                              });
                             });
-                          });
-                        }}
-                        className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
-                      />
+                          }}
+                          className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}
+
+                <Button
+                  onClick={() => {
+                    setCopyFlashcardData((prev: any) => [
+                      ...prev,
+                      {
+                        id: Date.now(),
+                        question: "",
+                        answer: "",
+                      },
+                    ]);
+                  }}
+                  className="h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/3 mx-auto p-3 mt-2"
+                >
+                  Add Card
+                </Button>
               </TabsContent>
 
               <TabsContent value="upload" className="mt-4">
@@ -423,6 +484,23 @@ const TypingFlashcards = () => {
                 </div>
               </TabsContent>
             </Tabs>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <Button
+                onClick={() => {
+                  setOpenEditFlashcard(false);
+                }}
+                className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
+              >
+                Save
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -566,7 +644,7 @@ const TypingFlashcards = () => {
         </div>
 
         <button
-          className="flex mt-20 items-center gap-2 px-4 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
+          className="flex my-14 items-center gap-2 px-4 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
           onClick={handleRestart}
         >
           <RotateCcw className="w-4 h-4" />

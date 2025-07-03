@@ -65,7 +65,7 @@ const tabs = [
         height="29"
         fill="none"
         stroke="currentColor"
-        stroke-width="9"
+        strokeWidth="9"
         className="-ml-1 lg:-ml-2"
       >
         <rect
@@ -480,7 +480,7 @@ export default function TypingTabs() {
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Edit Custom Flashcard</p>
+                  <p>Edit Flashcard</p>
                 </TooltipContent>
               </Tooltip>
             </>
