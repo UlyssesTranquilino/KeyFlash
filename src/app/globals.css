@@ -282,6 +282,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-top: -4px;
   }
 }
 
@@ -300,4 +301,35 @@
 .text-content {
   white-space: pre-wrap; /* Preserve spaces and wrap naturally */
   word-wrap: break-word; /* Break long words properly */
+}
+
+/* For Webkit browsers (Chrome, Safari) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(75, 85, 99, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(75, 85, 99, 0.5);
+}
+
+/* Remove focus outlines for dialog elements */
+[data-radix-dialog-content] :focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Custom focus for textareas */
+textarea:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5) !important;
 }

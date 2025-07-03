@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Quote,
@@ -15,6 +15,8 @@ import {
   Dices,
   CirclePlus,
   Pencil,
+  Eye,
+  EyeClosed,
 } from "lucide-react";
 import {
   Tooltip,
@@ -44,6 +46,7 @@ import { useTimer } from "@/app/context/TimerContext";
 import { useCode } from "@/app/context/CodeContext";
 import { useWpm } from "@/app/context/WpmContext";
 import { useEditText } from "@/app/context/AddTextContext";
+import { useFlashcard } from "@/app/context/FlashcardContext";
 
 import { start } from "repl";
 
@@ -52,6 +55,42 @@ const tabs = [
   { label: "Quote", icon: Quote, path: "/typing/quote" },
   { label: "Code", icon: Code, path: "/typing/code" },
   { label: "Custom", icon: CirclePlus, path: "/typing/custom" },
+  {
+    label: "Flashcard",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 4 150 150"
+        width="29"
+        height="29"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="9"
+        className="-ml-1 lg:-ml-2"
+      >
+        <rect
+          x="30"
+          y="40"
+          width="60"
+          height="80"
+          rx="10"
+          transform="rotate(16 120 220)"
+          stroke="currentColor"
+        />
+
+        <rect
+          x="45"
+          y="25"
+          width="60"
+          height="80"
+          rx="10"
+          stroke="currentColor"
+          fill="#08132D"
+        />
+      </svg>
+    ),
+    path: "/typing/flashcard",
+  },
 ];
 
 const allTime = [
@@ -105,6 +144,8 @@ const topics = [
 ];
 
 export default function TypingTabs() {
+  const { openEditFlashcard, blurAnswer, setOpenEditFlashcard, setBlurAnswer } =
+    useFlashcard();
   const { openAddText, setOpenAddText } = useEditText();
   const { time, setTime, setRemaining, resetTimer } = useTimer();
   const { topic, setTopic, language, setLanguage } = useCode();
@@ -122,6 +163,7 @@ export default function TypingTabs() {
   const isRandomTab = pathname.startsWith("/typing/random");
   const isQuoteTab = pathname.startsWith("/typing/quote");
   const isCustomTab = pathname.startsWith("/typing/custom");
+  const isFlashcardTab = pathname.startsWith("/typing/flashcard");
 
   const handleTabClick = (path: string) => {
     router.push(path);
@@ -135,7 +177,7 @@ export default function TypingTabs() {
     <div className="px-4 sm:px-9 flex justify-end items-center  mx-auto -mt-2   ">
       <div
         className={cn(
-          "py-2 sm:py-0  overflow-hidden gap-3 w-full typing-tabs md:max-w-150  lg:p-3 sm:gap-5 p-1 sm:p-3 sm:h-13 md:pr-6 lg:pr-6 rounded-md px-5 bg-blue-950/30 items-center min-w-75",
+          "py-2 sm:py-0  overflow-hidden gap-3 w-full typing-tabs md:max-w-180  lg:p-3 sm:gap-5 p-1 sm:p-3 sm:h-13 md:pr-6 lg:pr-6 rounded-md px-5 bg-blue-950/30 flex items-center min-w-75",
           !isCodeTab ? "md:max-w-100" : ""
         )}
       >
@@ -156,7 +198,14 @@ export default function TypingTabs() {
                         : "text-gray-400 hover:text-white"
                     )}
                   >
-                    <tab.icon className="scale-90" />
+                    <span className="w-5 h-5">
+                      {React.isValidElement(tab.icon) ? (
+                        tab.icon
+                      ) : (
+                        <tab.icon className="scale-90" />
+                      )}
+                    </span>
+
                     <span className="hidden tab-label">{tab.label}</span>
                   </button>
                 </TooltipTrigger>
@@ -169,8 +218,8 @@ export default function TypingTabs() {
         </div>
 
         {/* Controls*/}
-        <div className="flex justify-center items-center  gap-3">
-          <div className={`w-[0.5] h-6 bg-gray-400 bar sm:block`} />
+        <div className="flex justify-center items-center  gap-3 md:gap-0 ">
+          <div className={`w-[0.5] h-6 bg-gray-400 bar sm:block mr-2`} />
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -389,6 +438,52 @@ export default function TypingTabs() {
                 <p>Edit Custom Text</p>
               </TooltipContent>
             </Tooltip>
+          )}
+
+          {isFlashcardTab && (
+            <>
+              {/* <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setBlurAnswer(!blurAnswer)}
+                    className={cn(
+                      "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                      blurAnswer
+                        ? "text-blue-400"
+                        : "text-gray-400 hover:text-white"
+                    )}
+                  >
+                    {!blurAnswer ? (
+                      <Eye className="scale-78" />
+                    ) : (
+                      <EyeClosed className="scale-78" />
+                    )}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{blurAnswer ? "Hide Answer" : "Show Answer"}</p>
+                </TooltipContent>
+              </Tooltip> */}
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setOpenEditFlashcard(!openEditFlashcard)}
+                    className={cn(
+                      "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                      openEditFlashcard
+                        ? "text-blue-400"
+                        : "text-gray-400 hover:text-white"
+                    )}
+                  >
+                    <Pencil className="scale-78" /> Edit
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit Custom Flashcard</p>
+                </TooltipContent>
+              </Tooltip>
+            </>
           )}
         </div>
       </div>

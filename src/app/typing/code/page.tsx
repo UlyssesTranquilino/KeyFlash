@@ -21,9 +21,9 @@ import { motion } from "framer-motion";
 import Results from "@/components/ui/typing/Results";
 
 // Debounce utility
-const debounce = (func, wait) => {
-  let timeout;
-  return function executedFunction(...args) {
+const debounce = (func: any, wait: any) => {
+  let timeout: any;
+  return function executedFunction(...args: any) {
     const later = () => {
       clearTimeout(timeout);
       func(...args);
@@ -37,11 +37,11 @@ const CodeType = () => {
   const { showWpm, setShowWpm } = useWpm();
   const { language, topic } = useCode();
   // Code
-  const [codeData, setCodeData] = useState(null);
+  const [codeData, setCodeData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   // Typing
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [userInput, setUserInput] = useState("");
   const [isIdle, setIsIdle] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,8 +49,8 @@ const CodeType = () => {
   const [isFocused, setIsFocused] = useState(true);
 
   // Time
-  const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [endTime, setEndTime] = useState<number | null>(null);
   const [completed, setCompleted] = useState(false);
 
   // Stats
@@ -65,7 +65,7 @@ const CodeType = () => {
   }, [language, topic]);
 
   // Style Difficulty
-  const styleDifficulty = (difficulty) => {
+  const styleDifficulty = (difficulty: any) => {
     difficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 
     if (difficulty == "Easy") {
@@ -120,7 +120,7 @@ const CodeType = () => {
   // Debounced WPM calculation
   const debouncedWpmUpdate = useMemo(
     () =>
-      debounce((inputLength, start) => {
+      debounce((inputLength: any, start: any) => {
         const timeElapsed = (Date.now() - start) / 60000;
         const words = inputLength > 0 ? Math.max(1, inputLength / 5) : 0;
         startTransition(() => {
@@ -141,7 +141,7 @@ const CodeType = () => {
 
     return (
       <>
-        {codeContent.split("\n").map((line, lineIndex) => (
+        {codeContent.split("\n").map((line: any, lineIndex: any) => (
           <div key={lineIndex} className="relative min-h-[1.5rem]">
             {/* Line number */}
             <span className="absolute left-0 text-gray-700 select-none w-8 text-right pr-2">
@@ -153,7 +153,7 @@ const CodeType = () => {
                 // Handle empty lines
                 <span className="text-gray-500">&nbsp;</span>
               ) : (
-                line.split("").map((char, charIndex) => {
+                line.split("").map((char: any, charIndex: any) => {
                   // Calculate absolute position in the entire code string
                   let absoluteIndex = 0;
                   for (let i = 0; i < lineIndex; i++) {
@@ -222,7 +222,7 @@ const CodeType = () => {
 
   // Input Change with better character tracking
   const handleInputChange = useCallback(
-    (e) => {
+    (e: any) => {
       const value = e.target.value;
       const currentTime = Date.now();
 
@@ -294,7 +294,7 @@ const CodeType = () => {
 
   // Improved Enter key handling
   const handleKeyDown = useCallback(
-    (e) => {
+    (e: any) => {
       if (e.key === "Backspace" && e.ctrlKey) {
         e.preventDefault();
         deletePreviousWord();

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Navbar from "./ui/navbar/navbar";
-import { Folder, ClipboardList, Keyboard } from "lucide-react";
+import { Folder, ClipboardList, Keyboard, CodeXml, FileUp } from "lucide-react";
 import Intro from "./ui/home/intro";
 import Features from "./ui/home/features";
 import WhyItWorks from "./ui/home/whyitworks";
@@ -29,46 +29,11 @@ export default function Home() {
         </div>
 
         <div className=" grid  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full h-45 gap-5 border-white px-5">
-          <div className="relative group transition-all duration-300 ease-in-out">
-            <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
-              <Folder
-                size={55}
-                strokeWidth={1.3}
-                className="text-[#007CFF] -ml-1 scale-90 md:scale-100"
-              />
-              <h1 className="text-md md:text-lg my-3 font-medium">
-                Upload File
-              </h1>
-              <p className="text-xs md:text-sm w-60">
-                Turn any PDF, DOCX, or PPT into a typing challenge
-              </p>
-            </div>
-
-            <div className=" absolute -top-10 -left-10 -z-1 size-70 rounded-full bg-radial-[at_50%_50%] from-blue-500/70 to-black to-80%"></div>
-          </div>
-
-          <div className="relative group transition-all duration-300 ease-in-out">
-            <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
-              <ClipboardList
-                size={55}
-                strokeWidth={1.3}
-                className="text-[#007CFF] -ml-2 scale-90 md:scale-100"
-              />
-              <h1 className="text-md md:text-lg my-3 font-medium">
-                Paste Text
-              </h1>
-              <p className="text-xs md:text-sm w-60">
-                Drop in any notes or content to start learning instantly.
-              </p>
-            </div>
-            <div className="absolute -top-3 sm:-top-10 -right-4 -z-1 size-60 rounded-full bg-radial-[at_50%_50%] from-blue-500/70  to-black to-80%"></div>
-          </div>
-
           <Link
-            href="/typing/random"
-            className="relative group transition-all duration-300 ease-in-out sm:col-span-2 sm:mx-auto sm:w-1/2 lg:col-span-1 lg:w-full lg:mx-0"
+            href="/typing/custom"
+            className="relative group transition-all duration-300 ease-in-out"
           >
-            <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30  transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+            <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30 transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
               <Keyboard
                 size={55}
                 strokeWidth={1.3}
@@ -78,10 +43,51 @@ export default function Home() {
                 Practice Typing
               </h1>
               <p className="text-xs md:text-sm w-60">
-                Warm up with stories, quotes, random words, or code snippets.
+                Build speed and accuracy with random words or quotes.
               </p>
             </div>
-            <div className="absolute -top-5 -right-3 -z-1 size-65 rounded-full bg-radial-[at_50%_50%] from-blue-500/70  to-black to-70%"></div>
+            <div className="absolute -top-5 -right-3 -z-1 size-65 rounded-full bg-radial-[at_50%_50%] from-blue-500/70 to-black to-70%"></div>
+          </Link>
+
+          <Link
+            href="/typing/code"
+            className="relative group transition-all duration-300 ease-in-out"
+          >
+            <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30 transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+              <CodeXml
+                size={55}
+                strokeWidth={1.3}
+                className="text-[#007CFF] -ml-2 scale-90 md:scale-100"
+              />
+              <h1 className="text-md md:text-lg my-3 font-medium">
+                Type and Learn Code
+              </h1>
+              <p className="text-xs md:text-sm w-60">
+                Practice typing real code snippets by language and topic.
+              </p>
+            </div>
+            <div className="absolute -top-3 sm:-top-10 -right-4 -z-1 size-60 rounded-full bg-radial-[at_50%_50%] from-blue-500/70 to-black to-80%"></div>
+          </Link>
+
+          <Link
+            href="/typing/random"
+            className="relative group transition-all duration-300 ease-in-out sm:col-span-2 sm:mx-auto sm:w-1/2 lg:col-span-1 lg:w-full lg:mx-0"
+          >
+            <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30 transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+              <FileUp
+                size={55}
+                strokeWidth={1.3}
+                className="text-[#007CFF] -ml-1 scale-90 md:scale-100"
+              />
+              <h1 className="text-md md:text-lg my-3 font-medium">
+                Paste or Upload Text
+              </h1>
+              <p className="text-xs md:text-sm w-60">
+                Convert your PDF, DOCX, or PPT files into interactive typing
+                content.
+              </p>
+            </div>
+            <div className="absolute -top-10 -left-10 -z-1 size-70 rounded-full bg-radial-[at_50%_50%] from-blue-500/70 to-black to-80%"></div>
           </Link>
         </div>
 
