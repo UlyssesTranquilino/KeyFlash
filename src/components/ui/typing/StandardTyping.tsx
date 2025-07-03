@@ -14,6 +14,7 @@ import { spaceMono } from "@/app/ui/fonts";
 import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
 // Context
 import { useWpm } from "@/app/context/WpmContext";
+import { useEditText } from "@/app/context/AddTextContext";
 
 // Debounce utility
 const debounce = (func: any, wait: any) => {
@@ -27,8 +28,10 @@ const debounce = (func: any, wait: any) => {
     timeout = setTimeout(later, wait);
   };
 };
+
 const StandardTyping = ({ text }) => {
   const { showWpm } = useWpm();
+  const { setOpenAddText } = useEditText();
 
   const [userInput, setUserInput] = useState("");
   const [isFocused, setIsFocused] = useState(true);
@@ -37,6 +40,8 @@ const StandardTyping = ({ text }) => {
   const [wpm, setWpm] = useState(0);
   const [isIdle, setIsIdle] = useState(true);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const textDisplayRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLSpanElement>(null);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [completed, setCompleted] = useState(false);
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
@@ -51,6 +56,36 @@ const StandardTyping = ({ text }) => {
   const [testId, setTestId] = useState(Date.now());
   const [isHoveringNewTexts, setIsHoveringNewTexts] = useState(false);
   const [isClickingOnText, setIsClickingOnText] = useState(false);
+
+  // Auto-scroll to cursor
+  const scrollToCursor = useCallback(() => {
+    if (cursorRef.current && textDisplayRef.current) {
+      const cursor = cursorRef.current;
+      const container = textDisplayRef.current;
+
+      // Get cursor position relative to container
+      const cursorRect = cursor.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      // Calculate if cursor is out of view
+      const cursorTop =
+        cursorRect.top - containerRect.top + container.scrollTop;
+      const cursorBottom = cursorTop + cursorRect.height;
+
+      const containerHeight = container.clientHeight;
+      const scrollTop = container.scrollTop;
+      const scrollBottom = scrollTop + containerHeight;
+
+      // Scroll if cursor is above or below visible area
+      if (cursorTop < scrollTop + 100) {
+        // Cursor is above visible area
+        container.scrollTop = Math.max(0, cursorTop - 100);
+      } else if (cursorBottom > scrollBottom - 100) {
+        // Cursor is below visible area
+        container.scrollTop = cursorBottom - containerHeight + 100;
+      }
+    }
+  }, []);
 
   // Auto-focus when not focused
   useEffect(() => {
@@ -91,6 +126,16 @@ const StandardTyping = ({ text }) => {
     };
   }, []);
 
+  // Scroll to cursor when user input changes
+  useEffect(() => {
+    if (userInput.length > 0) {
+      // Use requestAnimationFrame to ensure DOM updates are complete
+      requestAnimationFrame(() => {
+        scrollToCursor();
+      });
+    }
+  }, [userInput, scrollToCursor]);
+
   // Debounced WPM calculation
   const debouncedWpmUpdate = useMemo(
     () =>
@@ -118,8 +163,14 @@ const StandardTyping = ({ text }) => {
     setCorrectChars(0);
     setIncorrectChars(0);
     setMistakes(0);
-    setEndTime(null); // Add this
+    setEndTime(null);
     setTestId(Date.now());
+
+    // Reset scroll position
+    if (textDisplayRef.current) {
+      textDisplayRef.current.scrollTop = 0;
+    }
+
     inputRef.current?.focus();
   }, [debouncedWpmUpdate]);
 
@@ -127,75 +178,93 @@ const StandardTyping = ({ text }) => {
   const highlightedText = useMemo(() => {
     if (!textData) return null;
 
-    const words = textData.split(" ");
-    const userInputWords = userInput.split(" ");
-    let charIndex = 0; // Tracks absolute position in the full text
+    const lines = textData.split("\n");
+    const userInputChars = userInput.split("");
+    let charIndex = 0;
 
-    return words.map((word, wordIndex) => {
-      const wordChars = word.split("");
-      const isLastWord = wordIndex === words.length - 1;
+    return lines.map((line, lineIndex) => {
+      // Add a space at the end of the line (except last line)
+      if (lineIndex < lines.length - 1) {
+        line += "\n";
+      }
+
+      const words = line.split(" ");
+      const lineElements = [];
+
+      words.forEach((word, wordIndex) => {
+        const wordChars = word.split("");
+
+        // Word characters
+        const wordSpans = wordChars.map((char) => {
+          const currentCharIndex = charIndex++;
+          const isCursor = currentCharIndex === userInput.length;
+          const displayChar = char === " " ? "\u00A0" : char;
+
+          let className = "text-gray-500";
+          if (currentCharIndex < userInput.length) {
+            className =
+              userInput[currentCharIndex] === char
+                ? "text-white"
+                : "text-red-600/75 bg-red-900/30";
+          }
+
+          return (
+            <span key={currentCharIndex} className="relative">
+              {isCursor && (
+                <span
+                  ref={cursorRef}
+                  className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                    isIdle ? "animate-pulse" : ""
+                  }`}
+                />
+              )}
+              <span className={className}>{displayChar}</span>
+            </span>
+          );
+        });
+
+        // Space after word (if not last)
+        if (wordIndex < words.length - 1) {
+          const spaceIndex = charIndex++;
+          wordSpans.push(
+            <span className="relative" key={`space-${spaceIndex}`}>
+              {spaceIndex === userInput.length && (
+                <span
+                  ref={cursorRef}
+                  className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                    isIdle ? "animate-pulse" : ""
+                  }`}
+                />
+              )}
+              <span
+                className={
+                  spaceIndex < userInput.length
+                    ? userInput[spaceIndex] === " "
+                      ? "text-white"
+                      : "text-red-600/75 bg-red-900/30"
+                    : "text-gray-500"
+                }
+              >
+                &nbsp;
+              </span>
+            </span>
+          );
+        }
+
+        lineElements.push(
+          <span
+            key={`${lineIndex}-${wordIndex}`}
+            className="inline-block mr-1.5"
+          >
+            {wordSpans}
+          </span>
+        );
+      });
 
       return (
-        <span key={wordIndex} className="inline-block mr-1.5">
-          {wordChars.map((char) => {
-            const currentCharIndex = charIndex;
-            charIndex++; // Increment for the character (but don't render this)
-
-            let className = "text-gray-500";
-            if (currentCharIndex < userInput.length) {
-              className =
-                userInput[currentCharIndex] === char
-                  ? "text-white"
-                  : "text-red-600/75 bg-red-900/30";
-            }
-
-            const isCursor = currentCharIndex === userInput.length;
-            const displayChar = char === " " ? "\u00A0" : char;
-
-            return (
-              <span key={currentCharIndex} className="relative">
-                {isCursor && (
-                  <span
-                    className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                      isIdle ? "animate-pulse" : ""
-                    }`}
-                  />
-                )}
-                <span className={className}>{displayChar}</span>
-              </span>
-            );
-          })}
-
-          {/* Handle space after each word except last */}
-          {!isLastWord &&
-            (() => {
-              const spaceIndex = charIndex;
-              charIndex++; // ✅ Increment here without rendering
-
-              return (
-                <span className="relative" key={`space-${spaceIndex}`}>
-                  {spaceIndex === userInput.length && (
-                    <span
-                      className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                        isIdle ? "animate-pulse" : ""
-                      }`}
-                    />
-                  )}
-                  <span
-                    className={
-                      spaceIndex < userInput.length
-                        ? userInput[spaceIndex] === " "
-                          ? "text-white"
-                          : "text-red-600/75 bg-red-900/30"
-                        : "text-gray-500"
-                    }
-                  >
-                    &nbsp;
-                  </span>
-                </span>
-              );
-            })()}
-        </span>
+        <div key={lineIndex} className="w-full">
+          {lineElements}
+        </div>
       );
     });
   }, [textData, userInput, isIdle]);
@@ -313,14 +382,14 @@ const StandardTyping = ({ text }) => {
   return (
     <div className="mt-10 relative flex flex-col items-center justify-center ">
       {!completed ? (
-        <div className="mt-12 sm:mt-0 flex flex-col relative w-full ">
+        <div className="mt-0 sm:mt-10 flex flex-col relative w-full ">
           {showWpm && (
             <motion.div
               initial={{ y: -17, opacity: 0, scale: 0.95 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -17, opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
+              className="self-end -top-15 absolute p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
             >
               {userInput.length == 0 ? 0 : wpm} WPM
             </motion.div>
@@ -361,15 +430,15 @@ const StandardTyping = ({ text }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.7rem] text-center transition-opacity duration-100 ${
+              ref={textDisplayRef}
+              className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.6rem] text-center transition-opacity duration-100 ${
                 spaceMono.className
-              } leading-8 mb-8 max-h-[250px] sm:max-h-[300px] overflow-auto ${
-                !isFocused ? "blur-sm opacity-60" : "blur-0 opacity-100"
-              }`}
+              } leading-10 mb-8 max-h-[50vh] overflow-y-auto overflow-x-hidden scroll-smooth
+ ${!isFocused ? "blur-sm opacity-60" : "blur-0 opacty-100"}`}
               onClick={handleTextClick}
               onMouseDown={(e) => e.preventDefault()} // Prevent text selection interfering with focus
             >
-              <div className="flex flex-wrap  leading-relaxed ">
+              <div className="whitespace-pre-wrap break-words font-mono text-left">
                 {highlightedText}
               </div>
             </motion.div>
@@ -413,7 +482,7 @@ const StandardTyping = ({ text }) => {
           quote={textData || ""}
           author={""}
           mistakes={mistakes}
-          handleRefetch={() => console.log("none")}
+          handleRefetch={() => setOpenAddText(true)}
           handleRetype={handleReType}
         />
       )}

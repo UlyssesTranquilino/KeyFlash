@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Check, X, Clock, Type, BarChart2, Award } from "lucide-react";
 import { useTimer } from "@/app/context/TimerContext";
 import { useQuote } from "@/app/context/QuoteContext";
+
 const Results = ({
   wpm,
   accuracy,

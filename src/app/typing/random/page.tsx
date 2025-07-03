@@ -519,7 +519,7 @@ const Words = () => {
           </button>
         </div>
       ) : (
-        <div className="mt-30 sm:mt-5">
+        <div className="mt-30 sm:mt-4">
           <Results
             wpm={wpm}
             startTime={startTime}

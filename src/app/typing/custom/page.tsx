@@ -4,7 +4,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileUp, Type, Link, X, Pencil, MessageSquareText } from "lucide-react";
+import {
+  FileUp,
+  Type,
+  Link,
+  X,
+  Pencil,
+  MessageSquareText,
+  CodeXml,
+} from "lucide-react";
 
 import {
   Dialog,
@@ -14,9 +22,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
 import { cn } from "@/lib/utils";
 import StandardTyping from "@/components/ui/typing/StandardTyping";
 import { useEditText } from "@/app/context/AddTextContext";
+import CodeTyping from "@/components/ui/typing/CodeTyping";
 
 const Story = () => {
   const { openAddText, setOpenAddText } = useEditText();
@@ -110,21 +127,52 @@ const Story = () => {
                   // maxLength={600}
                 />
 
-                <div className="mt-2 text-xs text-gray-500">
-                  {text.length} characters -{" "}
-                  <span
-                    className={cn(
-                      "text-gray-500",
-                      text.length > 500 && "text-red-400"
-                    )}
-                  >
-                    Max 500 characters
-                  </span>
+                <div className="mt-2 text-xs  flex items-center justify-between">
+                  <div className="text-gray-500">
+                    {text.length} characters -
+                    <span
+                      className={cn(
+                        "text-gray-500",
+                        text.length > 500 && "text-red-400"
+                      )}
+                    >
+                      Max 500 characters
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-blue-300">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2 cursor-pointer">
+                          <Switch
+                            id="code-toggle"
+                            checked={isCode}
+                            onCheckedChange={setIsCode}
+                            className={cn(
+                              "scale-80",
+                              "data-[state=checked]:bg-blue-300",
+                              "data-[state=checked]:border-blue-300",
+                              "data-[state=checked]:ring-blue-300"
+                            )}
+                          />
+                          <Label
+                            htmlFor="code-toggle"
+                            className="text-sm flex items-center gap-2"
+                          >
+                            Code
+                            <CodeXml />
+                          </Label>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" align="center">
+                        <p>Display text as code format</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
               </TabsContent>
 
               <TabsContent value="upload" className="mt-4">
-                <div className="border-2 border-dashed border-blue-300/60 rounded-lg p-6 text-center">
+                <div className="border-2 border-dashed border-blue-300/60 rounded-lg p-3 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <FileUp className="h-8 w-8 text-gray-400" />
                     <p className="text-sm font-medium">Upload a text file</p>
@@ -133,14 +181,64 @@ const Story = () => {
                       type="file"
                       accept=".txt,text/plain"
                       onChange={handleFileUpload}
-                      className="mt-4 w-full max-w-xs"
+                      className="mt-4 w-full max-w-54"
                     />
                     {file && (
-                      <div className="mt-4 flex items-center gap-2 bg-gray-100 p-2 rounded">
-                        <span className="text-sm">{file.name}</span>
-                        <button onClick={() => setFile(null)}>
+                      <div className="flex flex-col items-center gap-2 p-2 rounded w-full">
+                        {/* <span className="text-sm">{file.name}</span> */}
+                        {/* <button onClick={() => setFile(null)}>
                           <X className="h-4 w-4 text-gray-500" />
-                        </button>
+                        </button> */}
+                        <Textarea
+                          value={text}
+                          onChange={(e) => setText(e.target.value)}
+                          placeholder="Type or paste your text here..."
+                          className="min-h-[100px] max-h-[170px] !bg-gray-950/30 md:text-[15px] w-full"
+                          // maxLength={600}
+                        />
+
+                        <div className="mt-2 text-xs  flex items-center justify-between w-full">
+                          <div className="text-gray-500">
+                            {text.length} characters -
+                            <span
+                              className={cn(
+                                "text-gray-500",
+                                text.length > 500 && "text-red-400"
+                              )}
+                            >
+                              Max 500 characters
+                            </span>
+                          </div>
+                          <div className="flex items-center space-x-2 text-blue-300">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-2 cursor-pointer">
+                                  <Switch
+                                    id="code-toggle"
+                                    checked={isCode}
+                                    onCheckedChange={setIsCode}
+                                    className={cn(
+                                      "scale-80",
+                                      "data-[state=checked]:bg-blue-300",
+                                      "data-[state=checked]:border-blue-300",
+                                      "data-[state=checked]:ring-blue-300"
+                                    )}
+                                  />
+                                  <Label
+                                    htmlFor="code-toggle"
+                                    className="text-sm flex items-center gap-2"
+                                  >
+                                    Code
+                                    <CodeXml />
+                                  </Label>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" align="center">
+                                <p>Display text as code format</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -150,7 +248,7 @@ const Story = () => {
 
             <div className="mt-6 flex justify-end gap-3">
               <Button
-                disabled={!file && (text.length === 0 || text.length > 500)}
+                // disabled={text.length === 0 || text.length > 500}
                 onClick={() => setOpenAddText(false)}
                 className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
               >
@@ -158,7 +256,7 @@ const Story = () => {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={!file && (text.length === 0 || text.length > 500)}
+                disabled={text.length === 0 || text.length > 500}
                 className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
               >
                 Add Text
@@ -169,7 +267,13 @@ const Story = () => {
       </div>
       {!openAddText && text.length > 0 ? (
         <div>
-          <StandardTyping text={text} />
+          {isCode ? (
+            <div>
+              <CodeTyping text={text} />
+            </div>
+          ) : (
+            <StandardTyping text={text} />
+          )}
         </div>
       ) : (
         <div className="mt-15 flex flex-col items-center justify-center gap-4 p-8 rounded-xl border border-dashed border-blue-300/40 bg-blue-950/10 text-center shadow-inner">
