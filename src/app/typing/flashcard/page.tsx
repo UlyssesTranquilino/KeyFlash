@@ -5,6 +5,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
+import Link from "next/link";
 import {
   RotateCcw,
   TriangleAlert,
@@ -16,7 +19,9 @@ import {
   Type,
   FileUp,
   Trash,
+  Ban,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import {
   Carousel,
   CarouselContent,
@@ -24,7 +29,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +55,7 @@ const TypingFlashcards = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [isTestMode, setIsTestMode] = useState(false);
 
   const [sampleTerms, setSampleTerms] = useState([
     {
@@ -67,20 +73,10 @@ const TypingFlashcards = () => {
       question: "What language is primarily spoken in Brazil?",
       answer: "Portuguese",
     },
-    {
-      id: 4,
-      question: "What is 9 x 6?",
-      answer: "54",
-    },
-    {
-      id: 5,
-      question: "Who wrote 'Romeo and Juliet'?",
-      answer: "William Shakespeare",
-    },
   ]);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState("text");
+  const [activeTab, setActiveTab] = useState("write");
 
   // Typing states
   const [userInput, setUserInput] = useState("");
@@ -96,15 +92,24 @@ const TypingFlashcards = () => {
   const [cardCompleted, setCardCompleted] = useState(false);
   const [wpm, setWpm] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [copyFlashcardData, setCopyFlashcardData] = useState<any>();
+  const [copyFlashcardData, setCopyFlashcardData] = useState<any>(sampleTerms);
+  const [showAnswer, setShowAnswer] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const answerInputRef = useRef<HTMLInputElement>(null);
   const idleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
 
+  // Stat
+  const [correct, setCorrect] = useState(false);
+  const [userAnswer, setUserAnswer] = useState("");
   const currentTerm = sampleTerms[current];
   const currentText =
     currentPhase === "question" ? currentTerm?.question : currentTerm?.answer;
+
+  useEffect(() => {
+    setOpenEditFlashcard(true);
+  }, []);
 
   // Auto-focus when not focused
   useEffect(() => {
@@ -159,7 +164,8 @@ const TypingFlashcards = () => {
     setCardCompleted(false);
     setStartTime(null);
     setWpm(0);
-    setBlurAnswer(true); // <-- Add this to hide answer again
+    setShowAnswer(false);
+    setBlurAnswer(true);
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -255,12 +261,12 @@ const TypingFlashcards = () => {
             setCurrentIndex(0);
           }, 500);
         } else {
+          setCorrect(true);
           setCardCompleted(true);
           setTimeout(() => {
             if (current < sampleTerms.length - 1) {
               api?.scrollNext();
             } else {
-              // Last card completed
               console.log("All cards completed!");
             }
           }, 1000);
@@ -269,6 +275,26 @@ const TypingFlashcards = () => {
     },
     [currentText, currentPhase, startTime, updateWpm, current, api]
   );
+
+  // Handle answer submission in blur mode
+  const handleAnswerSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setCardCompleted(true);
+
+      if (userAnswer === currentTerm.answer) {
+        setCorrect(true);
+      } else {
+        setCorrect(false);
+      }
+
+      // Focus back to the hidden input to continue typing
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    }
+
+    console.log(answerInputRef);
+  };
 
   const deletePreviousWord = useCallback(() => {
     let deleteTo = currentIndex - 1;
@@ -311,12 +337,6 @@ const TypingFlashcards = () => {
     resetCurrentCard();
   }, [resetCurrentCard]);
 
-  useEffect(() => {
-    if (currentPhase === "answer" && userInput === currentText) {
-      setBlurAnswer(false); // Unblur when answer is correctly typed
-    }
-  }, [userInput, currentText, currentPhase]);
-
   const [isFlipped, setIsFlipped] = useState(false);
 
   const handleSubmit = () => {
@@ -325,7 +345,7 @@ const TypingFlashcards = () => {
     );
 
     if (hasEmptyFields) {
-      alert(
+      toast.warning(
         "Please make sure all flashcards have both a question and an answer."
       );
       return;
@@ -345,28 +365,36 @@ const TypingFlashcards = () => {
 
   return (
     <div className="max-w-4xl mx-auto sm:p-4">
+      <Toaster position="top-center" />
       {/* Custom Settings */}
       <div>
         <Dialog open={openEditFlashcard} onOpenChange={setOpenEditFlashcard}>
-          {/* <DialogTrigger> */}
           <DialogContent
             onOpenAutoFocus={(e) => e.preventDefault()}
             className="!max-w-[750px] w-full "
           >
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">
+              <DialogTitle className="text-xl font-semibold text-center">
                 Edit Flashcard
               </DialogTitle>
-              <DialogDescription className="text-sm text-gray-500">
-                Choose how you want to add text - write directly or upload a
-                file
+              <DialogDescription className="text-sm text-gray-400">
+                <div className="px-4 py-2 mb-4">
+                  You're not logged in. You can add up to 10 cards.{" "}
+                  <Link
+                    href="/signin"
+                    className="font-semibold text-blue-400 hover:underline"
+                  >
+                    Sign in
+                  </Link>{" "}
+                  to save and add more.
+                </div>
               </DialogDescription>
             </DialogHeader>
 
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="mt-4 "
+              className="mt-2 "
             >
               <TabsList className="grid w-full grid-cols-2 bg-blue-950/30">
                 <TabsTrigger
@@ -403,12 +431,14 @@ const TypingFlashcards = () => {
                     key={card.id}
                     className="flex flex-col relative bg-gray-900/30"
                   >
-                    <button
-                      onClick={() => handleDelete(card.id)}
-                      className="absolute  hover:text-red-400 text-gray-500 self-end p-1"
-                    >
-                      <Trash className="scale-70" />
-                    </button>
+                    {copyFlashcardData.length > 1 && (
+                      <button
+                        onClick={() => handleDelete(card.id)}
+                        className="absolute  hover:text-red-400 text-gray-500 self-end p-1"
+                      >
+                        <Trash className="scale-70" />
+                      </button>
+                    )}
                     <div className="flex items-center justify-around gap-5 ">
                       <div className="bg-gray-900 rounded-sm w-full h-full p-4 min-h-30 md:min-h-40">
                         <textarea
@@ -459,6 +489,18 @@ const TypingFlashcards = () => {
 
                 <Button
                   onClick={() => {
+                    const MAX_CARDS_GUEST = 10;
+                    const isLoggedIn = false;
+                    const isGuest = !isLoggedIn;
+
+                    if (
+                      isGuest &&
+                      copyFlashcardData.length >= MAX_CARDS_GUEST
+                    ) {
+                      toast.warning("Sign in to add more than 20 cards.");
+                      return;
+                    }
+
                     setCopyFlashcardData((prev: any) => [
                       ...prev,
                       {
@@ -468,9 +510,12 @@ const TypingFlashcards = () => {
                       },
                     ]);
                   }}
-                  className="h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/3 mx-auto p-3 mt-2"
+                  className="h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2"
                 >
                   Add Card
+                  <span className="text-gray-300">
+                    ({10 - copyFlashcardData.length} remaining)
+                  </span>
                 </Button>
               </TabsContent>
 
@@ -505,16 +550,18 @@ const TypingFlashcards = () => {
         </Dialog>
       </div>
       <div className="mb-6  flex items-center justify-between max-w-[800px] mx-auto">
-        {/* <p className="text-sm sm:text-base text-gray-400 ">
-          Type the question, then type the answer to proceed
-        </p> */}
-
-        {/* Caps Lock warning */}
-
-        {showWpm && (
-          <div className="mt-2 text-blue-400 font-mono w-full text-right">
+        {showWpm ? (
+          <motion.div
+            initial={{ y: 20, opacity: 0, scale: 0.95 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 20, opacity: 0, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="mt-2 text-blue-400 font-mono w-full text-right"
+          >
             {wpm} WPM
-          </div>
+          </motion.div>
+        ) : (
+          <div className="h-8" />
         )}
       </div>
 
@@ -545,7 +592,7 @@ const TypingFlashcards = () => {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>{blurAnswer ? "Hide Answer" : "Show Answer"}</p>
+                    <p>{!blurAnswer ? "Hide Answer" : "Show Answer"}</p>
                   </TooltipContent>
                 </Tooltip>
 
@@ -588,6 +635,8 @@ const TypingFlashcards = () => {
                 <h2 className="text-sm md:text-base text-gray-400 mb-4 mt-10 ">
                   {currentPhase === "question"
                     ? "Type the question:"
+                    : blurAnswer
+                    ? "Type your answer and press Enter:"
                     : "Type the answer:"}
                 </h2>
 
@@ -596,36 +645,68 @@ const TypingFlashcards = () => {
                   ref={textContainerRef}
                   className=" text-center  flex items-center justify-center w-full max-w-[600px]"
                 >
-                  <motion.div
-                    key={`${index}-${currentPhase}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre transition-all duration-300 ${
-                      currentPhase === "answer" &&
-                      blurAnswer &&
-                      userInput !== currentText
-                        ? "filter blur-md"
-                        : ""
-                    }`}
-                    onClick={handleTextClick}
-                    onMouseDown={(e) => e.preventDefault()}
-                  >
-                    <div className="flex flex-wrap justify-center text-center mx-auto">
-                      {highlightedText}
+                  {currentPhase === "answer" && blurAnswer && !showAnswer ? (
+                    // Show input field for answer when blurAnswer is on
+                    <div className="w-full">
+                      <input
+                        value={userAnswer}
+                        ref={answerInputRef}
+                        type="text"
+                        className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Type your answer here..."
+                        onKeyDown={handleAnswerSubmit}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        autoFocus
+                      />
                     </div>
-                  </motion.div>
+                  ) : (
+                    // Show normal typing interface for other cases
+                    <motion.div
+                      key={`${index}-${currentPhase}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre transition-all duration-300`}
+                      onClick={handleTextClick}
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <div className="flex flex-wrap justify-center text-center mx-auto">
+                        {highlightedText}
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
+                {/* Show correct answer if blurAnswer is on and user pressed Enter */}
+                {currentPhase === "answer" && blurAnswer && showAnswer && (
+                  <div className="mt-4 p-4 bg-gray-800 rounded-md w-full">
+                    <p className="text-gray-400 mb-2">Correct answer:</p>
+                    <p className="text-white text-xl">{currentTerm?.answer}</p>
+                  </div>
+                )}
+
                 {/* Card completion indicator */}
-                {cardCompleted && (
+                {cardCompleted && correct && (
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-green-400 text-center"
                   >
                     <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-                    <span className="text-sm">Card completed!</span>
+                    <span className="text-sm">
+                      {blurAnswer ? "Correct Answer!" : "Card completed!"}
+                    </span>
+                  </motion.div>
+                )}
+
+                {cardCompleted && !correct && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="text-green-400 text-center"
+                  >
+                    <CheckCircle className="w-8 h-8 mx-auto mb-2" />
+                    <span className="text-sm">Wrong Answer!</span>
                   </motion.div>
                 )}
               </div>
@@ -633,24 +714,56 @@ const TypingFlashcards = () => {
           ))}
         </CarouselContent>
 
-        <CarouselPrevious className="hidden md:flex absolute -left-12 top-1/2 -translate-y-1/2 z-10" />
-        <CarouselNext className="hidden md:flex absolute -right-12 top-1/2 -translate-y-1/2 z-10" />
-      </Carousel>
+        <div className=" w-full absolute right-1/2  -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
+          <div className="flex gap-1 items-center  ">
+            <Switch
+              id="code-toggle"
+              checked={isTestMode}
+              onCheckedChange={setIsTestMode}
+              className={cn(
+                "scale-80",
+                "data-[state=checked]:bg-blue-300",
+                "data-[state=checked]:border-blue-300",
+                "data-[state=checked]:ring-blue-300"
+              )}
+            />
+            <Label
+              htmlFor="code-toggle"
+              className="text-sm flex items-center gap-2"
+            >
+              Test
+            </Label>
+          </div>
 
-      {/* Progress and controls */}
-      <div className="flex flex-col items-center justify-between mt-6">
-        <div className="text-gray-400">
-          {current + 1} / {count}
+          <div className="w-full  col-span-3">
+            <div className="text-center w-30 sm:w-34 mx-auto  relative ">
+              <CarouselPrevious className="flex  absolute left-0  top-1/2 -translate-y-1/2 z-10" />
+              <div className="text-gray-400">
+                {current + 1} / {count}
+              </div>
+
+              <CarouselNext className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10" />
+            </div>
+          </div>
+
+          {/* Progress and controls */}
+          <div className="flex flex-col items-end justify-between  ">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="flex my-14 items-center gap-2 px-4 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
+                  onClick={handleRestart}
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Restart Card</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
-
-        <button
-          className="flex my-14 items-center gap-2 px-4 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
-          onClick={handleRestart}
-        >
-          <RotateCcw className="w-4 h-4" />
-          Restart Card
-        </button>
-      </div>
+      </Carousel>
 
       {/* Hidden input */}
       <input
