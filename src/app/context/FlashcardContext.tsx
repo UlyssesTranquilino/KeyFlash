@@ -25,7 +25,7 @@ export const FlashcardContextProvider = ({
   children: React.ReactNode;
 }) => {
   const [openEditFlashcard, setOpenEditFlashcard] = useState<boolean>(false);
-  const [blurAnswer, setBlurAnswer] = useState<boolean>(false);
+  const [blurAnswer, setBlurAnswer] = useState<boolean>(true);
   return (
     <FlashcardContext.Provider
       value={{
