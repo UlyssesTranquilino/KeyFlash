@@ -2,66 +2,71 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
 import { createClient } from "../../utils/supabase/server";
 
 export async function login(formData: FormData) {
   const supabase = createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  if (!email || !password) {
+    return redirect("/auth/login?error=Missing credentials");
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (error) {
-    redirect("/error");
+    return redirect(`/auth/login?error=${encodeURIComponent(error.message)}`);
   }
 
   revalidatePath("/", "layout");
-  redirect("/home");
+  return redirect("/home");
 }
 
 export async function signup(formData: FormData) {
   const supabase = createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const firstName = formData.get("first-name") as string;
   const lastName = formData.get("last-name") as string;
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password || !firstName || !lastName) {
+    return redirect("/auth/signup?error=Missing required fields");
+  }
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
     options: {
       data: {
-        full_name: `${firstName + " " + lastName}`,
-        email: formData.get("email") as string,
+        full_name: `${firstName} ${lastName}`,
       },
     },
-  };
-
-  const { error } = await supabase.auth.signUp(data);
+  });
 
   if (error) {
-    redirect("/error");
+    return redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
   }
 
   revalidatePath("/", "layout");
-  redirect("/home");
+  return redirect("/home?message=Check your email to confirm your account");
 }
 
 export async function signout() {
   const supabase = createClient();
   const { error } = await supabase.auth.signOut();
+
   if (error) {
-    console.log(error);
-    redirect("/error");
+    console.error("Sign out error:", error);
+    return redirect("/error?message=Failed to sign out");
   }
 
-  redirect("/logout");
+  return redirect("/login?message=You have been signed out");
 }
 
 export async function signInWithGoogle() {
@@ -69,6 +74,7 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
       queryParams: {
         access_type: "offline",
         prompt: "consent",
@@ -77,9 +83,9 @@ export async function signInWithGoogle() {
   });
 
   if (error) {
-    console.log(error);
-    redirect("/error");
+    console.error("Google sign-in error:", error);
+    return redirect("/auth/login?error=Google sign-in failed");
   }
 
-  redirect(data.url);
+  return redirect(data.url);
 }

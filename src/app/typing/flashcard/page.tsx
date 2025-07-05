@@ -20,6 +20,11 @@ import {
   FileUp,
   Trash,
   Ban,
+  CircleX,
+  Check,
+  X,
+  Rewind,
+  Pencil,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -56,6 +61,8 @@ const TypingFlashcards = () => {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [isTestMode, setIsTestMode] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [allComplete, setAllComplete] = useState(false);
 
   const [sampleTerms, setSampleTerms] = useState([
     {
@@ -102,6 +109,8 @@ const TypingFlashcards = () => {
 
   // Stat
   const [correct, setCorrect] = useState(false);
+  const [correctCount, setCorrectCount] = useState<number>(0);
+  const [wrongCount, setWrongCount] = useState<number>(0);
   const [userAnswer, setUserAnswer] = useState("");
   const currentTerm = sampleTerms[current];
   const currentText =
@@ -158,6 +167,7 @@ const TypingFlashcards = () => {
 
   const resetCurrentCard = useCallback(() => {
     setUserInput("");
+    setUserAnswer("");
     setCurrentIndex(0);
     setCurrentPhase("question");
     setQuestionCompleted(false);
@@ -165,27 +175,39 @@ const TypingFlashcards = () => {
     setStartTime(null);
     setWpm(0);
     setShowAnswer(false);
+    setCorrect(false); // Add this to reset the correct state
     setBlurAnswer(true);
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, [setBlurAnswer]);
 
-  // Carousel setup
   useEffect(() => {
-    if (!api) {
-      return;
-    }
+    if (!api) return;
 
     setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap());
 
     api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-      resetCurrentCard();
-      setBlurAnswer(blurAnswer);
+      const newIndex = api.selectedScrollSnap();
+
+      // Always reset input when moving to a new card
+      if (newIndex !== current) {
+        resetCurrentCard();
+        setBlurAnswer(true);
+        setCurrent(newIndex);
+      }
+
+      // In test mode, prevent navigation unless card is completed
+      if (isTestMode && newIndex !== current && !cardCompleted) {
+        api.scrollTo(current);
+        toast.info("Complete this card before moving on", {
+          position: "top-center",
+          duration: 1000,
+        });
+      }
     });
-  }, [api, resetCurrentCard]);
+  }, [api, resetCurrentCard, isTestMode, current, cardCompleted]);
 
   // WPM calculation
   const updateWpm = useCallback((inputLength: number, start: number) => {
@@ -252,17 +274,29 @@ const TypingFlashcards = () => {
       }
 
       // Check completion
-      if (currentText && value === currentText) {
+      if (
+        (currentText && value === currentText) ||
+        value.length >= currentText.length
+      ) {
         if (currentPhase === "question") {
           setQuestionCompleted(true);
           setTimeout(() => {
             setCurrentPhase("answer");
+            // Only reset input and related states, not the phase
             setUserInput("");
             setCurrentIndex(0);
+            setStartTime(null);
+            setWpm(0);
+            if (inputRef.current) {
+              inputRef.current.focus();
+            }
           }, 500);
         } else {
           setCorrect(true);
           setCardCompleted(true);
+          setCorrectCount((prev) => prev + 1);
+
+          // Only allow navigation in test mode if card is completed
           setTimeout(() => {
             if (current < sampleTerms.length - 1) {
               api?.scrollNext();
@@ -273,7 +307,15 @@ const TypingFlashcards = () => {
         }
       }
     },
-    [currentText, currentPhase, startTime, updateWpm, current, api]
+    [
+      currentText,
+      currentPhase,
+      startTime,
+      updateWpm,
+      current,
+      api,
+      sampleTerms.length,
+    ]
   );
 
   // Handle answer submission in blur mode
@@ -283,14 +325,25 @@ const TypingFlashcards = () => {
 
       if (userAnswer === currentTerm.answer) {
         setCorrect(true);
+        setCorrectCount((prev) => prev + 1);
       } else {
         setCorrect(false);
+        setWrongCount((prev) => prev + 1);
       }
 
       // Focus back to the hidden input to continue typing
       setTimeout(() => {
         inputRef.current?.focus();
       }, 0);
+
+      setTimeout(() => {
+        if (current < sampleTerms.length - 1) {
+          api?.scrollNext();
+          setUserInput("");
+        } else {
+          setAllComplete(true);
+        }
+      }, 1500);
     }
 
     console.log(answerInputRef);
@@ -337,6 +390,34 @@ const TypingFlashcards = () => {
     resetCurrentCard();
   }, [resetCurrentCard]);
 
+  const handleReset = useCallback(() => {
+    // Reset all cards state
+    setUserInput("");
+    setUserAnswer("");
+    setCurrentIndex(0);
+    setCurrentPhase("question");
+    setQuestionCompleted(false);
+    setCardCompleted(false);
+    setStartTime(null);
+    setWpm(0);
+    setShowAnswer(false);
+    setCorrect(false);
+    setBlurAnswer(true);
+
+    // Reset statistics
+    setCorrectCount(0);
+    setWrongCount(0);
+
+    // Go back to the first card
+    api?.scrollTo(0);
+    setCurrent(0);
+
+    // Focus the input
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+  }, [api, setBlurAnswer]);
+
   const [isFlipped, setIsFlipped] = useState(false);
 
   const handleSubmit = () => {
@@ -367,6 +448,148 @@ const TypingFlashcards = () => {
     <div className="max-w-4xl mx-auto sm:p-4">
       <Toaster position="top-center" />
       {/* Custom Settings */}
+
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg">Confirm Reset</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to reset all progress and start from the
+              beginning?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowResetConfirm(false)}
+              className="text-gray-200 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                // Reset all cards state
+                setUserInput("");
+                setUserAnswer("");
+                setCurrentIndex(0);
+                setCurrentPhase("question");
+                setQuestionCompleted(false);
+                setCardCompleted(false);
+                setStartTime(null);
+                setWpm(0);
+                setShowAnswer(false);
+                setCorrect(false);
+                setBlurAnswer(true);
+
+                // Reset statistics
+                setCorrectCount(0);
+                setWrongCount(0);
+
+                // Go back to the first card
+                api?.scrollTo(0);
+                setCurrent(0);
+
+                // Focus the input
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 0);
+
+                setShowResetConfirm(false);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Reset
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={allComplete} onOpenChange={setAllComplete}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center">
+              <CheckCircle className="w-12 h-12 text-green-500 mb-4" />
+              <DialogTitle className="text-2xl text-center">
+                All Flashcards Completed!
+              </DialogTitle>
+              <DialogDescription className="text-center mt-2">
+                Great job! You've finished all {sampleTerms.length} flashcards.
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            {/* Stats Section */}
+            <div className="bg-gray-900/50 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-center mb-4">
+                Your Results
+              </h3>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-green-500 text-3xl font-bold">
+                    {correctCount}
+                  </div>
+                  <div className="text-gray-400 text-sm">Correct Answers</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-red-500 text-3xl font-bold">
+                    {wrongCount}
+                  </div>
+                  <div className="text-gray-400 text-sm">Wrong Answers</div>
+                </div>
+              </div>
+
+              {/* <div className="mt-4">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Accuracy</span>
+                  <span className="font-medium">
+                    {Math.round(
+                      (correctCount / (correctCount + wrongCount)) * 100
+                    )}
+                    %
+                  </span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-green-500 h-2 rounded-full"
+                    style={{
+                      width: `${Math.round(
+                        (correctCount / (correctCount + wrongCount)) * 100
+                      )}%`,
+                    }}
+                  />
+                </div>
+              </div> */}
+            </div>
+
+            {/* Actions Section */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => {
+                  api?.scrollTo(0);
+                  resetCurrentCard();
+                  setAllComplete(false);
+                }}
+                className="flex-1 bg-blue-950/30 hover:bg-blue-950 text-white border-0"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Practice Again
+              </Button>
+
+              <Button
+                onClick={() => setOpenEditFlashcard(true)}
+                variant="ghost"
+                className="flex-1 text-gray-400 hover:text-white"
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit Cards
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div>
         <Dialog open={openEditFlashcard} onOpenChange={setOpenEditFlashcard}>
           <DialogContent
@@ -561,11 +784,19 @@ const TypingFlashcards = () => {
             {wpm} WPM
           </motion.div>
         ) : (
-          <div className="h-8" />
+          <div className="h-0" />
         )}
       </div>
 
-      <Carousel setApi={setApi} className="max-w-[800px] mx-auto relative">
+      <Carousel
+        setApi={setApi}
+        className="max-w-[800px] mx-auto relative"
+        opts={{
+          watchDrag: !isTestMode, // Disable swipe in test mode
+          dragFree: isTestMode, // Makes it harder to accidentally swipe
+          skipSnaps: isTestMode, // Prevents partial swipes from changing cards
+        }}
+      >
         <CarouselContent className="max-w-[900px] w-full mx-auto gap-x-6">
           {sampleTerms.map((item, index) => (
             <CarouselItem
@@ -652,7 +883,7 @@ const TypingFlashcards = () => {
                         value={userAnswer}
                         ref={answerInputRef}
                         type="text"
-                        className="w-full bg-gray-800 border border-gray-700 rounded-md p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-gray-900 border border-gray-700 rounded-md p-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-400"
                         placeholder="Type your answer here..."
                         onKeyDown={handleAnswerSubmit}
                         onChange={(e) => setUserAnswer(e.target.value)}
@@ -670,7 +901,7 @@ const TypingFlashcards = () => {
                       onClick={handleTextClick}
                       onMouseDown={(e) => e.preventDefault()}
                     >
-                      <div className="flex flex-wrap justify-center text-center mx-auto">
+                      <div className="flex flex-wrap justify-center text-center mx-auto  ">
                         {highlightedText}
                       </div>
                     </motion.div>
@@ -690,7 +921,7 @@ const TypingFlashcards = () => {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-green-400 text-center"
+                    className="text-green-400 text-center mt-6"
                   >
                     <CheckCircle className="w-8 h-8 mx-auto mb-2" />
                     <span className="text-sm">
@@ -703,10 +934,13 @@ const TypingFlashcards = () => {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-green-400 text-center"
+                    className=" text-center mt-6"
                   >
-                    <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-                    <span className="text-sm">Wrong Answer!</span>
+                    <CircleX className=" text-red-400 w-8 h-8 mx-auto mb-2" />
+                    <span className=" text-red-400 text-sm">Wrong Answer!</span>
+                    <div className="mt-1">
+                      Correct Answer: {currentTerm.answer}
+                    </div>
                   </motion.div>
                 )}
               </div>
@@ -715,43 +949,80 @@ const TypingFlashcards = () => {
         </CarouselContent>
 
         <div className=" w-full absolute right-1/2  -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
-          <div className="flex gap-1 items-center  ">
-            <Switch
-              id="code-toggle"
-              checked={isTestMode}
-              onCheckedChange={setIsTestMode}
-              className={cn(
-                "scale-80",
-                "data-[state=checked]:bg-blue-300",
-                "data-[state=checked]:border-blue-300",
-                "data-[state=checked]:ring-blue-300"
-              )}
-            />
-            <Label
-              htmlFor="code-toggle"
-              className="text-sm flex items-center gap-2"
-            >
-              Test
-            </Label>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 ">
+            <div className="flex gap-1 items-center  ">
+              {/* <Switch
+                id="code-toggle"
+                checked={isTestMode}
+                onCheckedChange={setIsTestMode}
+                className={cn(
+                  "scale-80",
+                  "data-[state=checked]:bg-blue-400",
+                  "data-[state=checked]:border-blue-400",
+                  "data-[state=checked]:ring-blue-400"
+                )}
+              />
+              <Label
+                htmlFor="code-toggle"
+                className="text-sm flex items-center gap-2"
+              >
+                Test
+              </Label> */}
+            </div>
           </div>
 
-          <div className="w-full  col-span-3">
+          <div className="w-full  col-span-3 relative">
             <div className="text-center w-30 sm:w-34 mx-auto  relative ">
-              <CarouselPrevious className="flex  absolute left-0  top-1/2 -translate-y-1/2 z-10" />
+              <CarouselPrevious
+                disabled={isTestMode}
+                className="flex  absolute left-0  top-1/2 -translate-y-1/2 z-10"
+              />
               <div className="text-gray-400">
                 {current + 1} / {count}
               </div>
 
-              <CarouselNext className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10" />
+              <CarouselNext
+                disabled={isTestMode}
+                className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10"
+              />
             </div>
+            {isTestMode && (
+              <div className="flex items-center justify-center text-sm gap-3 absolute -translate-x-1/67  p-4 w-full">
+                <div className="flex gap-1  ">
+                  <Check className="h-5 w-5 text-green-400 " />
+
+                  <span className="text-gray-300"> {correctCount}</span>
+                </div>
+                <div className="flex gap-1">
+                  <X className="h-5 w-5 text-red-400" />
+
+                  <span className="text-gray-300"> {wrongCount}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Progress and controls */}
-          <div className="flex flex-col items-end justify-between  ">
+          <div className="flex justify-end gap-5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  className="flex my-14 items-center gap-2 px-4 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
+                  disabled={isTestMode}
+                  className="flex my-14 items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
+                  onClick={() => setShowResetConfirm(true)}
+                >
+                  <Rewind className="w-5 h-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Reset Cards</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  disabled={isTestMode}
+                  className="flex my-14 items-center gap-2  py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
                   onClick={handleRestart}
                 >
                   <RotateCcw className="w-5 h-5" />
@@ -764,7 +1035,6 @@ const TypingFlashcards = () => {
           </div>
         </div>
       </Carousel>
-
       {/* Hidden input */}
       <input
         ref={inputRef}

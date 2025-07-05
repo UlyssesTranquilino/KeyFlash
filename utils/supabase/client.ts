@@ -1,5 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr";
 
+// use in client side
 export function createClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
