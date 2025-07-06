@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { createClient } from "../../../utils/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { redirect } from "next/navigation";
 
 interface AuthContextType {
   user: User | null;
@@ -46,9 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
+
     if (error) {
       console.error("Sign out error:", error);
     }
+    redirect("/signin");
   };
 
   return (

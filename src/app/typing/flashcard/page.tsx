@@ -52,8 +52,10 @@ import { cn } from "@/lib/utils";
 import { type CarouselApi } from "@/components/ui/carousel";
 import { useWpm } from "@/app/context/WpmContext";
 import { useFlashcard } from "@/app/context/FlashcardContext";
+import { useAuth } from "@/app/context/AuthContext";
 
 const TypingFlashcards = () => {
+  const { user } = useAuth();
   const { showWpm } = useWpm();
   const { blurAnswer, setBlurAnswer, openEditFlashcard, setOpenEditFlashcard } =
     useFlashcard();
@@ -619,15 +621,16 @@ const TypingFlashcards = () => {
               onValueChange={setActiveTab}
               className="mt-2 "
             >
-              <TabsList className="grid w-full grid-cols-2 bg-blue-950/30">
+              <TabsList className="grid w-full grid-cols-3 bg-blue-950/30">
                 <TabsTrigger
                   value="write"
                   className={cn(
-                    "flex items-center gap-2 bg-blue-950/30 ",
-                    activeTab === "write" && "text-blue-400"
+                    "flex items-center gap-2 ",
+                    activeTab === "write" && "text-blue-400 "
                   )}
                 >
-                  <Type className="h-4 w-4" /> Write
+                  <Type className="h-4 w-4" />{" "}
+                  <span className="hidden sm:block"> Write</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="upload"
@@ -635,9 +638,49 @@ const TypingFlashcards = () => {
                     "flex items-center gap-2",
                     activeTab === "upload" && "text-blue-400"
                   )}
-                  disabled
                 >
-                  <FileUp className="h-4 w-4" /> Upload (Coming Soon)
+                  <FileUp className="h-4 w-4" />{" "}
+                  <span className="hidden sm:block"> Upload</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="flashcards"
+                  className={cn(
+                    "flex items-center gap-2",
+                    activeTab === "flashcards" && "text-blue-400"
+                  )}
+                  disabled={!user}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="20 4 150 150"
+                    width="45"
+                    height="45"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    className=""
+                  >
+                    <rect
+                      x="30"
+                      y="40"
+                      width="85"
+                      height="105"
+                      rx="10"
+                      transform="rotate(16 120 220)"
+                      stroke="currentColor"
+                    />
+
+                    <rect
+                      x="45"
+                      y="25"
+                      width="85"
+                      height="105"
+                      rx="10"
+                      stroke="currentColor"
+                      fill="#08132D"
+                    />
+                  </svg>
+                  <span className="hidden sm:block"> Flashcards</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -748,6 +791,69 @@ const TypingFlashcards = () => {
                     <FileUp className="h-8 w-8 text-gray-400" />
                     <p className="text-sm font-medium">Upload a text file</p>
                     <p className="text-xs text-gray-500">Supports .txt files</p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="flashcards" className="mt-4">
+                <h1>Flashcards</h1>
+
+                <div className="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Flashcard Item */}
+                  <div className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg">
+                    {/* Content */}
+                    <div className="relative z-10 p-5 h-full flex flex-col">
+                      <div className="mb-2">
+                        <h2 className="font-semibold text-xl text-white group-hover:text-blue-400 transition-colors">
+                          Trees
+                        </h2>
+                      </div>
+                      <div className="mt-auto flex justify-between items-center">
+                        <span className="text-sm text-gray-400">12 terms</span>
+                        <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 p-3 rounded-md"></button>
+                      </div>
+                    </div>
+
+                    {/* Decorative Graphic - Animated on Hover */}
+                    <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 200 200"
+                        width="160"
+                        height="160"
+                        className="transition-transform duration-500 ease-in-out group-hover:rotate-0 group-hover:translate-x-2 group-hover:translate-y-2 transform translate-x-8 translate-y-5 rotate-12"
+                      >
+                        {/* Main Card */}
+                        <rect
+                          x="40"
+                          y="30"
+                          width="80"
+                          height="110"
+                          rx="12"
+                          fill="#1E3A8A"
+                          fillOpacity="0.3"
+                          stroke="#3B82F6"
+                          strokeWidth="1.5"
+                        />
+
+                        {/* Secondary Card */}
+                        <rect
+                          x="25"
+                          y="50"
+                          width="80"
+                          height="110"
+                          rx="12"
+                          fill="#1E3A8A"
+                          fillOpacity="0.2"
+                          stroke="#3B82F6"
+                          strokeWidth="1.2"
+                          strokeDasharray="4 2"
+                        />
+                      </svg>
+                    </div>
+
+                    {/* Hover Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </div>
                 </div>
               </TabsContent>

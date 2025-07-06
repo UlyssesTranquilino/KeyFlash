@@ -16,22 +16,20 @@ export async function GET(request: NextRequest) {
       if (error) {
         console.error("OAuth callback error:", error);
         return NextResponse.redirect(
-          `${origin}/auth/login?error=Authentication failed`
+          `${origin}/login?error=Authentication failed`
         );
       }
 
-      // Successful authentication - redirect to home or dashboard
       return NextResponse.redirect(`${origin}/home`);
     } catch (error) {
       console.error("Unexpected error during OAuth callback:", error);
       return NextResponse.redirect(
-        `${origin}/auth/login?error=Authentication failed`
+        `${origin}/login?error=Authentication failed`
       );
     }
   }
 
-  // If no code, redirect to login
   return NextResponse.redirect(
-    `${origin}/auth/login?error=No authorization code received`
+    `${origin}/login?error=No authorization code received`
   );
 }

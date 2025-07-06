@@ -2,7 +2,14 @@
 
 import { useAuth } from "../context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { CirclePlus, Dices, Quote, Code } from "lucide-react";
+import { CirclePlus, Dices, Quote, Code, CircleUserRound } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import Link from "next/link";
 
 export default function HomePage() {
   const { user, loading } = useAuth();
@@ -17,8 +24,27 @@ export default function HomePage() {
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Please log in to access this page.</div>
+      <div className="flex flex-col items-center justify-center mt-30 rounded-lg outline-1 border-blue-400 border-dashed mx-5 h-70 p-3 max-w-[500px] sm:mx-auto shadow-sm shadow-blue-700/50">
+        <CircleUserRound
+          strokeWidth={0.8}
+          className="mb-10 scale-300 text-blue-400 md:scale-350"
+        />
+        <div className="text-lg mb-3 text-center font-semibold">
+          Account Not Found
+        </div>
+        <div className="text-sm text-center text-gray-400 mb-3">
+          Use your account credentials to sign in and access this page.
+        </div>
+        <Link
+          href="/signin"
+          className=" flex items-center justify-center w-full  max-w-50"
+        >
+          <Button className="mt-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-600/20">
+            Log in
+          </Button>
+        </Link>
+        <div className="absolute bottom-40  -left-4 lg:left-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+        <div className="absolute top-10  -right-4 lg:right-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
       </div>
     );
   }
@@ -37,42 +63,69 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
-        <div className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700 /90relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm ">
+        <Link
+          href="/typing/random"
+          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700 /90relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm "
+        >
           <div className="absolute -top-55 -right-4 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
           <div className="flex flex-col items-center gap-2">
             <Dices />
             <p className={`text-base  mb-1 text-blue-400`}>Random Typing</p>
           </div>
-        </div>
+        </Link>
 
-        <div className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm ">
+        <Link
+          href="/typing/quote"
+          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm "
+        >
           <div className="absolute -top-15 -left-5 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
           <div className="flex flex-col items-center gap-2">
             <Quote />
             <p className={`text-base  mb-1 text-blue-400`}>Quote Typing</p>
           </div>
-        </div>
+        </Link>
 
-        <div className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm ">
+        <Link
+          href="/typing/code"
+          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm "
+        >
           <div className="absolute -top-15 -left-15 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
           <div className="flex flex-col items-center gap-2">
             <Code />
             <p className={`text-base  mb-1 text-blue-400`}>Code Typing</p>
           </div>
-        </div>
+        </Link>
 
-        <div className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm ">
-          <div className="absolute -z-2 size-80 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-          {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
-          <div className="flex flex-col items-center gap-2">
-            <CirclePlus className="" />
-
-            <p className={`text-base  mb-1 text-blue-400`}>Create</p>
-          </div>
-        </div>
+        {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
+        <Popover>
+          <PopoverTrigger
+            asChild
+            className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden  flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm "
+          >
+            <div className="flex flex-col items-center   w-full h-23">
+              <CirclePlus className="scale-150" />
+              <p className={`text-base mt-2  mb-1 text-blue-400`}>Create</p>
+              <div className="absolute -z-2 size-80 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+            </div>
+          </PopoverTrigger>
+          <PopoverContent className=" bg-gray-950 w-36 md:w-45 ">
+            <div className="flex flex-col items-center gap-3">
+              <Link href="/typing/flashcard" className="w-full">
+                <Button className="max-w-50 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20">
+                  Flashcard
+                </Button>
+              </Link>
+              <Link href="/typing/custom" className="w-full">
+                <Button className="max-w-50 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20">
+                  Text
+                </Button>
+              </Link>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="mt-12">
@@ -161,7 +214,7 @@ export default function HomePage() {
                 Get started by creating your first flashcard set
               </p>
               <div className="mt-6">
-                <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium text-white transition-colors flex items-center gap-2 mx-auto">
+                <button className="flex  items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -176,9 +229,6 @@ export default function HomePage() {
                   </svg>
                   Create Flashcard Set
                 </button>
-              </div>
-              <div className="mt-4">
-                <p className="text-sm text-gray-500">or browse templates</p>
               </div>
             </div>
           </div>
