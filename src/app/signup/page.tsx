@@ -29,28 +29,16 @@ export default function Signup() {
             </p>
           </div>
           <div className="grid gap-6">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-3">
-                <Label htmlFor="firstname">First name</Label>
-                <Input
-                  id="firstname"
-                  type="text"
-                  placeholder="John"
-                  required
-                  className="input-glow"
-                />
-              </div>
-
-              <div className="grid gap-3">
-                <Label htmlFor="lastname">Last name</Label>
-                <Input
-                  id="lastname"
-                  type="text"
-                  placeholder="Doe"
-                  required
-                  className="input-glow"
-                />
-              </div>
+            <div className="grid gap-3">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="name"
+                name="name"
+                placeholder="John Doe"
+                required
+                className="input-glow"
+              />
             </div>
 
             <div className="grid gap-3">
@@ -58,6 +46,7 @@ export default function Signup() {
               <Input
                 id="email"
                 type="email"
+                name="email"
                 placeholder="johndoe@example.com"
                 required
                 className="input-glow"
@@ -70,6 +59,7 @@ export default function Signup() {
               <Input
                 id="password"
                 type="password"
+                name="password"
                 required
                 className="input-glow"
               />

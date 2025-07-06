@@ -27,34 +27,37 @@ export async function login(formData: FormData) {
   return redirect("/home");
 }
 
+// app/signup/actions.ts
 export async function signup(formData: FormData) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
-  const firstName = formData.get("first-name") as string;
-  const lastName = formData.get("last-name") as string;
+  const name = formData.get("name") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  if (!email || !password || !firstName || !lastName) {
-    return redirect("/auth/signup?error=Missing required fields");
+  if (!email || !password || !name) {
+    return redirect("/signup?error=Missing required fields");
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: {
-        full_name: `${firstName} ${lastName}`,
-      },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+      data: { name },
     },
   });
 
   if (error) {
-    return redirect(`/auth/signup?error=${encodeURIComponent(error.message)}`);
+    return redirect(`/signup?error=${encodeURIComponent(error.message)}`);
   }
 
-  revalidatePath("/", "layout");
-  return redirect("/home?message=Check your email to confirm your account");
+  if (data.user?.identities?.length === 0) {
+    return redirect("/signup?error=User already registered");
+  }
+
+  // Redirect to check-email page with the email address
+  return redirect(`/signup/check-email?email=${encodeURIComponent(email)}`);
 }
 
 export async function signout() {
@@ -88,4 +91,32 @@ export async function signInWithGoogle() {
   }
 
   return redirect(data.url);
+}
+
+// app/signup/actions.ts
+export async function resendConfirmation(formData: FormData) {
+  const supabase = await createClient();
+  const email = formData.get("email") as string;
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`,
+    },
+  });
+
+  if (error) {
+    return redirect(
+      `/signup/check-email?email=${encodeURIComponent(
+        email
+      )}&error=${encodeURIComponent(error.message)}`
+    );
+  }
+
+  return redirect(
+    `/signup/check-email?email=${encodeURIComponent(
+      email
+    )}&message=Email resent successfully`
+  );
 }

@@ -1,33 +1,42 @@
-import { type EmailOtpType } from "@supabase/supabase-js";
-import { type NextRequest, NextResponse } from "next/server";
-
+// app/auth/confirm/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../../../utils/supabase/server";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const token_hash = searchParams.get("token_hash");
-  const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  const requestUrl = new URL(request.url);
+  const token_hash = requestUrl.searchParams.get("token_hash");
+  const type = requestUrl.searchParams.get("type");
+  const origin = requestUrl.origin;
 
-  const redirectTo = request.nextUrl.clone();
-  redirectTo.pathname = next;
-  redirectTo.searchParams.delete("token_hash");
-  redirectTo.searchParams.delete("type");
-
-  if (token_hash && type) {
+  if (token_hash && type === "signup") {
     const supabase = createClient();
 
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
-    });
-    if (!error) {
-      redirectTo.searchParams.delete("next");
-      return NextResponse.redirect(redirectTo);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        type: "signup",
+        token_hash,
+      });
+
+      if (error) {
+        console.error("Email confirmation error:", error);
+        return NextResponse.redirect(
+          `${origin}/signup?error=Email confirmation failed`
+        );
+      }
+
+      // Successful confirmation - redirect to home with success message
+      return NextResponse.redirect(
+        `${origin}/home?message=Email confirmed successfully`
+      );
+    } catch (error) {
+      console.error("Unexpected error during email confirmation:", error);
+      return NextResponse.redirect(
+        `${origin}/signup?error=Confirmation failed`
+      );
     }
   }
 
-  // return the user to an error page with some instructions
-  redirectTo.pathname = "/error";
-  return NextResponse.redirect(redirectTo);
+  return NextResponse.redirect(
+    `${origin}/signup?error=Invalid confirmation link`
+  );
 }
