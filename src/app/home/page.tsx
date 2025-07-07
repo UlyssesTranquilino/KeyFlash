@@ -214,7 +214,10 @@ export default function HomePage() {
                 Get started by creating your first flashcard set
               </p>
               <div className="mt-6">
-                <button className="flex  items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20">
+                <Link
+                  href="/create/flashcard"
+                  className="flex max-w-60 mx-auto items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -228,7 +231,7 @@ export default function HomePage() {
                     />
                   </svg>
                   Create Flashcard Set
-                </button>
+                </Link>
               </div>
             </div>
           </div>
