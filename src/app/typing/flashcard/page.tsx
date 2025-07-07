@@ -447,7 +447,7 @@ const TypingFlashcards = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto sm:p-4">
+    <div className="max-w-4xl mx-auto  sm:p-4">
       <Toaster position="top-center" />
       {/* Custom Settings */}
 
@@ -695,7 +695,7 @@ const TypingFlashcards = () => {
                 {copyFlashcardData?.map((card: any, index: number) => (
                   <div
                     key={card.id}
-                    className="flex flex-col relative bg-gray-900/30"
+                    className="flex flex-col  relative bg-gray-900/30"
                   >
                     {copyFlashcardData.length > 1 && (
                       <button
@@ -705,8 +705,8 @@ const TypingFlashcards = () => {
                         <Trash className="scale-70" />
                       </button>
                     )}
-                    <div className="flex items-center justify-around gap-5 ">
-                      <div className="bg-gray-900 rounded-sm w-full h-full p-4 min-h-30 md:min-h-40">
+                    <div className="flex items-center justify-around gap-3 sm:gap-5 ">
+                      <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
                         <textarea
                           value={card.question}
                           onInput={(e) => {
@@ -728,7 +728,7 @@ const TypingFlashcards = () => {
                         />
                       </div>
 
-                      <div className="bg-gray-900 rounded-sm w-full h-full p-4 min-h-30 md:min-h-40">
+                      <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
                         <textarea
                           value={card.answer}
                           onInput={(e) => {
