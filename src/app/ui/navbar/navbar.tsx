@@ -7,7 +7,13 @@ import { useTheme } from "next-themes";
 import Logo from "../../../../public/KeyFlashLogo.png";
 
 import Link from "next/link";
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { useAuth } from "@/app/context/AuthContext";
@@ -67,6 +73,10 @@ export default function Navbar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="right">
+            <SheetTitle>Sidebar Menu</SheetTitle>
+            <SheetDescription>
+              Explore navigation links, login options, and theme settings.
+            </SheetDescription>
             <Link href="#" className="mr-6 hidden lg:flex" prefetch={false}>
               <div className="flex items-center  gap-2 sm:gap-3">
                 <Image src={Logo} alt="KeyFlash Logo" className="w-8 sm:w-9 " />

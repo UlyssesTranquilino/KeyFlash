@@ -11,6 +11,7 @@ export function createClient() {
       auth: {
         flowType: "pkce",
         detectSessionInUrl: true,
+        persistSession: true,
       },
       cookies: {
         async get(name: string) {

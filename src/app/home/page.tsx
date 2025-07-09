@@ -8,11 +8,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useEffect } from "react";
 
 import Link from "next/link";
 
 export default function HomePage() {
-  const { user, loading } = useAuth();
+  const { user, session, loading } = useAuth();
 
   if (loading) {
     return (
@@ -48,6 +49,11 @@ export default function HomePage() {
       </div>
     );
   }
+
+  useEffect(() => {
+    console.log("Persist: ", user);
+    console.log("Session: ", session);
+  }, []);
 
   return (
     <div className="container max-w-[900px]  mx-auto px-4 py-4">
@@ -215,7 +221,7 @@ export default function HomePage() {
               </p>
               <div className="mt-6">
                 <Link
-                  href="/create/flashcard"
+                  href="/flashcard/create"
                   className="flex max-w-60 mx-auto items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20"
                 >
                   <svg

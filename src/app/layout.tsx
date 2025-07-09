@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { jakartaSans } from "./ui/fonts";
 import "./globals.css";
 import { ThemeProvider } from "./ui/theme-provider";
-import { AuthProvider } from "./context/AuthContext";
+import AuthProviderWrapper from "@/components/ui/AuthProviderWrapper";
 
 import Navbar from "./ui/navbar/navbar";
 
@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${jakartaSans.className}  antialiased bg-black `}>
-        <AuthProvider>
+        <AuthProviderWrapper>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -29,7 +29,7 @@ export default function RootLayout({
             <Navbar />
             {children}
           </ThemeProvider>
-        </AuthProvider>
+        </AuthProviderWrapper>
       </body>
     </html>
   );
