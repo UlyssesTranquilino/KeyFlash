@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
+import { supabase } from "../supabase-client";
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -53,6 +53,15 @@ export async function updateSession(request: NextRequest) {
       },
     }
   );
+
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    NextResponse.redirect(new URL("/signin", request.url));
+  }
 
   await supabase.auth.getUser();
 
