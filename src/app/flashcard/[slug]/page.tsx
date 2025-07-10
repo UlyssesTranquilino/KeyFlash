@@ -1,8 +1,5 @@
-import { createClient } from "../../../../utils/supabase/server";
+import FlashcardPageClient from "@/components/ui/flashcard/FlashcardPageClient";
 
-const FlashcardPage = ({ params }: { params: { slug: string } }) => {
-  const id = params.slug.split("-")[0];
-  return <div>page</div>;
-};
-
-export default FlashcardPage;
+export default function Page({ params }: { params: { slug: string } }) {
+  return <FlashcardPageClient slug={params.slug} />;
+}

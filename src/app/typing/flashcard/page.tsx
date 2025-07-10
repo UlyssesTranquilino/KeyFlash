@@ -604,14 +604,24 @@ const TypingFlashcards = () => {
               </DialogTitle>
               <DialogDescription className="text-sm text-gray-400">
                 <div className="px-4 py-2 mb-4">
-                  You're not logged in. You can add up to 10 cards.{" "}
-                  <Link
-                    href="/signin"
-                    className="font-semibold text-blue-400 hover:underline"
-                  >
-                    Sign in
-                  </Link>{" "}
-                  to save and add more.
+                  {user ? (
+                    <>
+                      You're logged in — you can create, edit, or choose from
+                      your existing flashcards.
+                    </>
+                  ) : (
+                    <>
+                      {" "}
+                      You're not logged in. You can add up to 10 cards.{" "}
+                      <Link
+                        href="/signin"
+                        className="font-semibold text-blue-400 hover:underline"
+                      >
+                        Sign in
+                      </Link>{" "}
+                      to save and add more.
+                    </>
+                  )}
                 </div>
               </DialogDescription>
             </DialogHeader>

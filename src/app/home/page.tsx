@@ -8,12 +8,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getAllFlashcards } from "../../../utils/flashcard/flashcard";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const router = useRouter();
   const { user, session, loading } = useAuth();
+  const [flashcards, setFlashcards] = useState<any[]>([]);
 
   if (loading) {
     return (
@@ -50,10 +54,26 @@ export default function HomePage() {
     );
   }
 
+  // Initial quote fetch
   useEffect(() => {
-    console.log("Persist: ", user);
-    console.log("Session: ", session);
+    const fetchFlashcards = async () => {
+      const data = await getAllFlashcards(user?.id);
+      if (Array.isArray(data)) {
+        setFlashcards(data);
+      } else {
+        setFlashcards([]);
+      }
+      console.log("Data: data", data);
+    };
+    fetchFlashcards();
   }, []);
+
+  function slugify(str: string) {
+    return str
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  }
 
   return (
     <div className="container max-w-[900px]  mx-auto px-4 py-4">
@@ -138,64 +158,77 @@ export default function HomePage() {
         <h1 className="font-medium text-lg mb-3">
           Flashcards <span className="ml-1 text-sm text-gray-300">(30)</span>
         </h1>
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Flashcard Item */}
-          <div className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg">
-            {/* Content */}
-            <div className="relative z-10 p-5 h-full flex flex-col">
-              <div className="mb-2">
-                <h2 className="font-semibold text-xl text-white group-hover:text-blue-400 transition-colors">
-                  Trees
-                </h2>
+          {flashcards?.map((card: any) => (
+            <div
+              key={card.id}
+              onClick={() => {
+                const slug = `${card.id}-${slugify(card.title)}`;
+                router.push(`/flashcard/${slug}`);
+              }}
+              className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg"
+            >
+              {/* Content */}
+              <div className="relative z-10 p-5 h-full flex flex-col">
+                <div className="mb-2">
+                  <h2 className="font-semibold text-xl text-white group-hover:text-blue-400 transition-colors">
+                    {card.title}
+                  </h2>
+                </div>
+                <div className="mt-auto flex justify-between items-center">
+                  <span className="text-sm text-gray-400">
+                    {card.terms.length} terms
+                  </span>
+                  <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 p-3 rounded-md"></button>
+                </div>
               </div>
-              <div className="mt-auto flex justify-between items-center">
-                <span className="text-sm text-gray-400">12 terms</span>
-                <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 p-3 rounded-md"></button>
+
+              {/* Decorative Graphic - Animated on Hover */}
+              <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 200 200"
+                  width="160"
+                  height="160"
+                  className="transition-transform duration-500 ease-in-out group-hover:rotate-0 group-hover:translate-x-2 group-hover:translate-y-2 transform translate-x-8 translate-y-5 rotate-12"
+                >
+                  {/* Main Card */}
+                  <rect
+                    x="40"
+                    y="30"
+                    width="80"
+                    height="110"
+                    rx="12"
+                    fill="#1E3A8A"
+                    fillOpacity="0.3"
+                    stroke="#3B82F6"
+                    strokeWidth="1.5"
+                  />
+
+                  {/* Secondary Card */}
+                  <rect
+                    x="25"
+                    y="50"
+                    width="80"
+                    height="110"
+                    rx="12"
+                    fill="#1E3A8A"
+                    fillOpacity="0.2"
+                    stroke="#3B82F6"
+                    strokeWidth="1.2"
+                    strokeDasharray="4 2"
+                  />
+                </svg>
               </div>
+
+              {/* Hover Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
-
-            {/* Decorative Graphic - Animated on Hover */}
-            <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 200 200"
-                width="160"
-                height="160"
-                className="transition-transform duration-500 ease-in-out group-hover:rotate-0 group-hover:translate-x-2 group-hover:translate-y-2 transform translate-x-8 translate-y-5 rotate-12"
-              >
-                {/* Main Card */}
-                <rect
-                  x="40"
-                  y="30"
-                  width="80"
-                  height="110"
-                  rx="12"
-                  fill="#1E3A8A"
-                  fillOpacity="0.3"
-                  stroke="#3B82F6"
-                  strokeWidth="1.5"
-                />
-
-                {/* Secondary Card */}
-                <rect
-                  x="25"
-                  y="50"
-                  width="80"
-                  height="110"
-                  rx="12"
-                  fill="#1E3A8A"
-                  fillOpacity="0.2"
-                  stroke="#3B82F6"
-                  strokeWidth="1.2"
-                  strokeDasharray="4 2"
-                />
-              </svg>
-            </div>
-
-            {/* Hover Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          </div>
+          ))}
         </div>
+
         <div className="mt-12">
           <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center">
             <div className="mx-auto max-w-md">
