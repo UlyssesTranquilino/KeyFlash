@@ -87,7 +87,7 @@ export default function page() {
       toast.success("Flashcard created successfully!");
 
       const slug = `${newCard.id}-${slugify(newCard.title)}`;
-      router.push(`/flashcards/${slug}`);
+      router.push(`/flashcard/${slug}`);
     } catch (error) {
       toast.error("Failed to create flashcard");
       console.error(error);
