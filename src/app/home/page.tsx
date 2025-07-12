@@ -156,124 +156,131 @@ export default function HomePage() {
 
       <div className="mt-12">
         <h1 className="font-medium text-lg mb-3">
-          Flashcards <span className="ml-1 text-sm text-gray-300">(30)</span>
+          Flashcards{" "}
+          <span className="ml-1 text-sm text-gray-300">
+            ({flashcards.length})
+          </span>
         </h1>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Flashcard Item */}
-          {flashcards?.map((card: any) => (
-            <div
-              key={card.id}
-              onClick={() => {
-                const slug = `${card.id}-${slugify(card.title)}`;
-                router.push(`/flashcard/${slug}`);
-              }}
-              className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg"
-            >
-              {/* Content */}
-              <div className="relative z-10 p-5 h-full flex flex-col">
-                <div className="mb-2">
-                  <h2 className="font-semibold text-xl text-white group-hover:text-blue-400 transition-colors">
-                    {card.title}
-                  </h2>
-                </div>
-                <div className="mt-auto flex justify-between items-center">
-                  <span className="text-sm text-gray-400">
-                    {card.terms.length} terms
-                  </span>
-                  <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 p-3 rounded-md"></button>
-                </div>
-              </div>
-
-              {/* Decorative Graphic - Animated on Hover */}
-              <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 200 200"
-                  width="160"
-                  height="160"
-                  className="transition-transform duration-500 ease-in-out group-hover:rotate-0 group-hover:translate-x-2 group-hover:translate-y-2 transform translate-x-8 translate-y-5 rotate-12"
+        <div>
+          {flashcards.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {/* Flashcard Item */}
+              {flashcards?.map((card: any) => (
+                <div
+                  key={card.id}
+                  onClick={() => {
+                    const slug = `${card.id}-${slugify(card.title)}`;
+                    router.push(`/flashcard/${slug}`);
+                  }}
+                  className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg"
                 >
-                  {/* Main Card */}
-                  <rect
-                    x="40"
-                    y="30"
-                    width="80"
-                    height="110"
-                    rx="12"
-                    fill="#1E3A8A"
-                    fillOpacity="0.3"
-                    stroke="#3B82F6"
-                    strokeWidth="1.5"
-                  />
+                  {/* Content */}
+                  <div className="relative z-10 p-5 h-full flex flex-col">
+                    <div className="mb-2">
+                      <h2 className="font-semibold text-lg text-white group-hover:text-blue-400 transition-colors">
+                        {card.title}
+                      </h2>
+                    </div>
+                    <div className="mt-auto flex justify-between items-center">
+                      <span className="text-sm text-gray-400">
+                        {card.terms.length} terms
+                      </span>
+                      <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 p-3 rounded-md"></button>
+                    </div>
+                  </div>
 
-                  {/* Secondary Card */}
-                  <rect
-                    x="25"
-                    y="50"
-                    width="80"
-                    height="110"
-                    rx="12"
-                    fill="#1E3A8A"
-                    fillOpacity="0.2"
-                    stroke="#3B82F6"
-                    strokeWidth="1.2"
-                    strokeDasharray="4 2"
-                  />
-                </svg>
-              </div>
+                  {/* Decorative Graphic - Animated on Hover */}
+                  <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 200 200"
+                      width="160"
+                      height="160"
+                      className="transition-transform duration-500 ease-in-out group-hover:rotate-0 group-hover:translate-x-2 group-hover:translate-y-2 transform translate-x-8 translate-y-5 rotate-12"
+                    >
+                      {/* Main Card */}
+                      <rect
+                        x="40"
+                        y="30"
+                        width="80"
+                        height="110"
+                        rx="12"
+                        fill="#1E3A8A"
+                        fillOpacity="0.3"
+                        stroke="#3B82F6"
+                        strokeWidth="1.5"
+                      />
 
-              {/* Hover Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      {/* Secondary Card */}
+                      <rect
+                        x="25"
+                        y="50"
+                        width="80"
+                        height="110"
+                        rx="12"
+                        fill="#1E3A8A"
+                        fillOpacity="0.2"
+                        stroke="#3B82F6"
+                        strokeWidth="1.2"
+                        strokeDasharray="4 2"
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Hover Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-
-        <div className="mt-12">
-          <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center">
-            <div className="mx-auto max-w-md">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-16 w-16 mx-auto text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <h3 className="mt-4 text-lg font-medium text-white">
-                No flashcards yet
-              </h3>
-              <p className="mt-2 text-gray-400">
-                Get started by creating your first flashcard set
-              </p>
-              <div className="mt-6">
-                <Link
-                  href="/flashcard/create"
-                  className="flex max-w-60 mx-auto items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20"
-                >
+          ) : (
+            <div className="mt-12">
+              <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center">
+                <div className="mx-auto max-w-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                    className="h-16 w-16 mx-auto text-gray-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
                   >
                     <path
-                      fillRule="evenodd"
-                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                      clipRule="evenodd"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  Create Flashcard Set
-                </Link>
+                  <h3 className="mt-4 text-lg font-medium text-white">
+                    No flashcards yet
+                  </h3>
+                  <p className="mt-2 text-gray-400">
+                    Get started by creating your first flashcard set
+                  </p>
+                  <div className="mt-6">
+                    <Link
+                      href="/flashcard/create"
+                      className="flex max-w-60 mx-auto items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Create Flashcard Set
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

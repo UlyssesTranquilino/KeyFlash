@@ -39,19 +39,24 @@ export function AuthProvider({
         if (ignore) return;
 
         setLoading(true);
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+
+        // Secure user fetch
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser();
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
 
         if (!ignore) {
-          if (error) {
-            console.error("Error getting initial session:", error.message);
+          if (userError || sessionError) {
+            console.error(
+              "Error getting initial session/user:",
+              userError || sessionError
+            );
             setUser(null);
             setSession(null);
           } else {
-            setSession(session);
-            setUser(session?.user ?? null);
+            setUser(userData.user ?? null);
+            setSession(sessionData.session ?? null);
           }
 
           setLoading(false);

@@ -9,6 +9,7 @@ type termType = {
 };
 
 type flashcardDataType = {
+  id: string;
   user_id: string | undefined;
   title: string;
   description: string;
@@ -30,6 +31,43 @@ export async function getAllFlashcards(userId: string) {
     }
 
     return data;
+  } catch (error) {
+    console.error("Unexpected error inserting flashcard:", error);
+    return { error: "Unexpected error occurred" };
+  }
+}
+
+export async function editFlashcard(flashcardData: flashcardDataType) {
+  try {
+    const supabase = createClient();
+    // Check if user is authenticated
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error("User not authenticated");
+      return { error: "User not authenticated" };
+    }
+
+    const { data, error } = await supabase
+      .from("flashcards")
+      .update({
+        title: flashcardData.title,
+        description: flashcardData.description,
+        terms: flashcardData.terms,
+      })
+      .eq("id", flashcardData.id)
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Database error:", error);
+      return { error: error.message };
+    }
+
+    return { data, error: null };
   } catch (error) {
     console.error("Unexpected error inserting flashcard:", error);
     return { error: "Unexpected error occurred" };

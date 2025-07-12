@@ -1,5 +1,13 @@
+import { WpmProvider } from "@/app/context/WpmContext";
+import { FlashcardContextProvider } from "@/app/context/FlashcardContext";
 import FlashcardPageClient from "@/components/ui/flashcard/FlashcardPageClient";
 
-export default function Page({ params }: { params: { slug: string } }) {
-  return <FlashcardPageClient slug={params.slug} />;
+export default async function Page({ params }: { params: { slug: string } }) {
+  return (
+    <WpmProvider>
+      <FlashcardContextProvider>
+        <FlashcardPageClient slug={params.slug} />
+      </FlashcardContextProvider>
+    </WpmProvider>
+  );
 }
