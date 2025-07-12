@@ -269,6 +269,12 @@
   display: none;
 }
 
+@media (min-width: 350px) {
+  .switch {
+    flex-direction: row;
+  }
+}
+
 @media (min-width: 600px) {
   .bar {
     display: block;

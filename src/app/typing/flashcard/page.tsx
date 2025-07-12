@@ -347,8 +347,6 @@ const TypingFlashcards = () => {
         }
       }, 1500);
     }
-
-    console.log(answerInputRef);
   };
 
   const deletePreviousWord = useCallback(() => {
