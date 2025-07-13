@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash, CircleUserRound } from "lucide-react";
+import { Trash, CircleUserRound, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import { Label } from "@radix-ui/react-label";
@@ -141,6 +141,15 @@ export default function page() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => router.back()}
+        className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+      >
+        <ArrowLeft className="h-5 w-5" /> Back
+      </Button>
 
       <h1 className="text-center font-semibold text-lg md:text-xl mb-8 md:mb-10">
         Create Flashcard
