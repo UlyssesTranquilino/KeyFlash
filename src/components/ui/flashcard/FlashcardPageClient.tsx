@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
+  ArrowLeft,
   RotateCcw,
   TriangleAlert,
   MousePointer,
@@ -63,8 +64,11 @@ import { useFlashcard } from "@/app/context/FlashcardContext";
 import { useWpm } from "@/app/context/WpmContext";
 import { flushSync } from "react-dom";
 import { Switch } from "@/components/ui/switch";
+import SkeletonFlashcard from "./SkeletonFlashcard";
+import { SimpleResults } from "./ResultsComponent";
 
 const FlashcardPageClient = ({ slug }: { slug: string }) => {
+  const router = useRouter();
   const { user } = useAuth();
   const { showWpm } = useWpm();
   const id = slug.split("-")[0];
@@ -170,7 +174,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
         } else {
           setAllComplete(true);
         }
-      }, 1500);
+      }, 800);
     }
   };
 
@@ -234,7 +238,10 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   }, [setBlurAnswer]);
 
   const shuffleFlashcards = useCallback(() => {
+    // Create a deep copy of the terms array
     const shuffledTerms = [...flashcard.terms];
+
+    // Fisher-Yates shuffle algorithm
     for (let i = shuffledTerms.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffledTerms[i], shuffledTerms[j]] = [
@@ -243,20 +250,38 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       ];
     }
 
-    setFlashcard((prev: any) => ({
+    // Update state in one go to prevent inconsistencies
+    setFlashcard((prev) => ({
       ...prev,
       terms: shuffledTerms,
     }));
+
+    // Reset to first card after shuffle
+    setCurrent(0);
+    setCurrentTerm(shuffledTerms[0]);
     setIsShuffled(true);
     resetCurrentCard();
-    api?.scrollTo(0);
+
+    // Force carousel to reset position
+    setTimeout(() => {
+      api?.scrollTo(0);
+    }, 0);
   }, [flashcard.terms, api, resetCurrentCard]);
 
   const unshuffleFlashcards = useCallback(() => {
+    // Restore original order
     setFlashcard(copyFlashcardData);
+
+    // Reset to first card
+    setCurrent(0);
+    setCurrentTerm(copyFlashcardData.terms[0]);
     setIsShuffled(false);
     resetCurrentCard();
-    api?.scrollTo(0);
+
+    // Force carousel to reset position
+    setTimeout(() => {
+      api?.scrollTo(0);
+    }, 0);
   }, [copyFlashcardData, api, resetCurrentCard]);
 
   useEffect(() => {
@@ -275,6 +300,13 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const handleRestart = useCallback(() => {
     resetCurrentCard();
   }, [resetCurrentCard]);
+
+  const [showSimpleResults, setShowSimpleResults] = useState(false);
+  useEffect(() => {
+    if (allComplete) {
+      setShowSimpleResults(true);
+    }
+  }, [allComplete]);
 
   // Typing
   // WPM calculation
@@ -386,20 +418,44 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       (card: any) => !card.question?.trim() || !card.answer?.trim()
     );
 
-    if (hasEmptyFields || !title) {
+    if (hasEmptyFields || !copyFlashcardData.title) {
       toast.warning(
         "Please make sure all flashcards have both a question and an answer."
       );
       return;
     }
-    const newFlashcard = await editFlashcard(copyFlashcardData);
 
-    if (newFlashcard.error) {
-      toast.error("Failed to update flashcard: " + newFlashcard.error);
-    } else {
-      toast.success("Flashcard updated successfully!");
-      console.log(newFlashcard);
-      setFlashcard(newFlashcard.data);
+    try {
+      const { data, error } = await editFlashcard(copyFlashcardData);
+
+      if (error) {
+        toast.error("Failed to update flashcard: " + error);
+      } else {
+        toast.success("Flashcard updated successfully!");
+
+        // Update all states
+        setFlashcard(data);
+        setCopyFlashcardData(data);
+        setTitle(data.title);
+        setDescription(data.description);
+
+        // Reset carousel completely
+        setCurrentTerm(data.terms[0]);
+        setCurrent(0);
+
+        // Force carousel reset by using setTimeout
+        setTimeout(() => {
+          api?.scrollTo(0);
+          setUserInput("");
+          setUserAnswer("");
+          setCurrentPhase("question");
+          setQuestionCompleted(false);
+          setCardCompleted(false);
+        }, 0);
+        router.refresh();
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred");
     }
 
     setOpenEditFlashcard(false);
@@ -416,15 +472,47 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     });
   };
 
+  useEffect(() => {
+    if (allComplete) {
+      setShowSimpleResults(true);
+    }
+  }, [allComplete]);
+
+  const handleResetFlashcards = () => {
+    setShowSimpleResults(false);
+    setAllComplete(false);
+    setCorrectCount(0);
+    setWrongCount(0);
+    api?.scrollTo(0);
+    resetCurrentCard();
+    setShowResetConfirm(false);
+  };
+
   return (
     <div
-      className={`max-w-[900px] mx-auto px-2 sm:px-5 mb-20 ${
+      className={`max-w-[900px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden ${
         isFullScreen ? "fixed inset-0 top-1/5  z-50 p-0 m-0 " : ""
       }`}
     >
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+
+      <div className="-z-3 absolute bottom-0 -left-[500px] w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+
       <Toaster position="top-center" />
+
+      {showSimpleResults && (
+        <SimpleResults
+          correctCount={correctCount}
+          totalCards={flashcard.terms.length}
+          onRestart={handleResetFlashcards}
+          isQuizMode={isQuizMode}
+        />
+      )}
+
       {!loading ? (
-        <div>
+        <div className="relative -mt-3 sm:-mt-5">
+          <div className="absolute bottom-70 -right-3 -z-2 size-155 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-70%" />
+
           <Dialog open={isQuizModeConfirm} onOpenChange={setIsQuizModeConfirm}>
             <DialogContent className="max-w-[400px]">
               <DialogHeader>
@@ -507,33 +595,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 <Button
                   onClick={() => {
                     // Reset all cards state
-                    setUserInput("");
-                    setUserAnswer("");
-                    setCurrentIndex(0);
-                    setCurrentPhase("question");
-                    setQuestionCompleted(false);
-                    setCardCompleted(false);
-                    setStartTime(null);
-                    setWpm(0);
-                    setShowAnswer(false);
-                    setCorrect(false);
-                    setBlurAnswer(true);
-
-                    // Reset statistics
-                    setCorrectCount(0);
-                    setWrongCount(0);
-
-                    // Go back to the first card
-                    api?.scrollTo(0);
-                    setCurrent(0);
-
-                    // Focus the input
-                    setTimeout(() => {
-                      inputRef.current?.focus();
-                    }, 0);
-
-                    setIsQuizMode(false);
-                    setIsQuizModeConfirm(false);
+                    handleResetFlashcards();
                   }}
                   className="bg-red-600 hover:bg-red-700 text-white"
                 >
@@ -661,18 +723,6 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
                 <Button
                   onClick={() => {
-                    const MAX_CARDS_GUEST = 10;
-                    const isLoggedIn = false;
-                    const isGuest = !isLoggedIn;
-
-                    if (
-                      isGuest &&
-                      copyFlashcardData.length >= MAX_CARDS_GUEST
-                    ) {
-                      toast.warning("Sign in to add more than 20 cards.");
-                      return;
-                    }
-
                     setCopyFlashcardData((prev: any) => {
                       let newTerms = prev.terms;
                       newTerms = [
@@ -713,11 +763,23 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
           {!isFullScreen && (
             <div className="my-3 x-auto flex flex-col mb-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.back()}
+                className="rounded-md p-2 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+              >
+                <ArrowLeft className="h-5 w-5" /> Back
+              </Button>
               <div className="flex justify-between gap-3 w-full">
-                <h1 className="font-semibold text-lg">{flashcard.title}</h1>
-
+                <div className="flex items-center">
+                  <h1 className="font-semibold text-lg">{flashcard.title}</h1>
+                </div>
                 <Button
-                  onClick={() => setOpenEditFlashcard(true)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenEditFlashcard(true);
+                  }}
                   variant="ghost"
                   className="text-gray-400 hover:text-white"
                 >
@@ -725,7 +787,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   Edit
                 </Button>
               </div>
-              <p className="text-gray-300 ">{flashcard.description}</p>
+              <p className="text-gray-300 max-w-170">{flashcard.description}</p>
             </div>
           )}
 
@@ -969,15 +1031,15 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        className="flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
+                        className={cn(
+                          "flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
+                          isShuffled ? "text-blue-400" : "text-gray-400"
+                        )}
                         onClick={
                           isShuffled ? unshuffleFlashcards : shuffleFlashcards
                         }
                       >
                         <Shuffle className="w-5 h-5" />
-                        <span className="hidden text-sm">
-                          {isShuffled ? "Unshuffle" : "Shuffle"}
-                        </span>
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -987,18 +1049,18 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 </div>
 
                 <div className="w-full col-span-3 relative">
-                  <div className="text-center w-30 sm:w-34 mx-auto relative">
+                  <div className="text-center w-25 sm:w-34 mx-auto relative">
                     <CarouselPrevious
                       disabled={isQuizMode}
-                      className="flex absolute left-0 top-1/2 -translate-y-1/2 z-10"
+                      className="flex absolute left-0 top-1/2 -translate-y-1/2 z-10 scale-75 sm:scale-100"
                     />
-                    <div className="text-gray-400">
+                    <div className="text-gray-400 text-sm sm:text-base">
                       {current + 1} / {count}
                     </div>
 
                     <CarouselNext
                       disabled={isQuizMode}
-                      className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10"
+                      className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10 scale-75 sm:scale-100"
                     />
                   </div>
                   {isQuizMode && (
@@ -1112,7 +1174,9 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           )}
         </div>
       ) : (
-        <div>Loading</div>
+        <div>
+          <SkeletonFlashcard />
+        </div>
       )}
     </div>
   );
