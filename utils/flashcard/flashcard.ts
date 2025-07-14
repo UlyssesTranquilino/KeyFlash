@@ -26,13 +26,13 @@ export async function getAllFlashcards(userId: string) {
       .eq("user_id", userId);
 
     if (error) {
-      console.error("Error fetching flashcards:", error);
+      console.error("Error fetching flashcards: ", error);
       return { error: error.message };
     }
 
     return data;
   } catch (error) {
-    console.error("Unexpected error inserting flashcard:", error);
+    console.error("Unexpected error getting all flashcards: ", error);
     return { error: "Unexpected error occurred" };
   }
 }

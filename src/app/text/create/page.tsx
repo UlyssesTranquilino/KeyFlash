@@ -9,19 +9,45 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { insertText } from "../../../../utils/text/textUtils";
+import { cn } from "@/lib/utils";
 
 const CreateText = () => {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
 
-  const handleCreateText = () => {
+  const handleCreateText = async () => {
     if (!title || !text) {
+      toast.warning(
+        "Please make sure all flashcards have both a question and an answer."
+      );
+
+      return;
+    }
+
+    try {
+      let textData = {
+        title: title,
+        text: text,
+      };
+
+      const { data, error } = await insertText(textData);
+      toast.success("Flashcard updated successfully!");
+
+      console.log("data: ", data);
+    } catch (err) {
+      toast.error("An unexpected error occurred");
     }
   };
 
   return (
-    <div className="px-3 flex flex-col  w-full">
+    <div className="px-3 flex flex-col  w-full max-w-[900px] mx-auto overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+
+      <div className="-z-3 absolute bottom-0 left-0 w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+
+      <Toaster position="top-center" />
       <Button
         variant="ghost"
         size="icon"
@@ -31,11 +57,11 @@ const CreateText = () => {
         <ArrowLeft className="h-5 w-5" /> Back
       </Button>
 
-      <h1 className="text-center font-semibold text-lg md:text-xl mb-8 md:mb-10">
+      <h1 className="text-center font-semibold text-lg md:text-xl mb-8">
         Write Text
       </h1>
 
-      <div className="my-3 flex flex-col gap-3">
+      <div className="mb-3 flex flex-col gap-3">
         <div className="flex flex-col gap-3">
           <Label htmlFor="email">Title</Label>
           <Input
@@ -58,6 +84,13 @@ const CreateText = () => {
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
+        </div>
+
+        <div className="text-gray-500 text-sm sm:text-base">
+          {text.length} characters -
+          <span className={cn(" ", text.length > 500 && "text-red-400")}>
+            Max 1000 characters
+          </span>
         </div>
       </div>
 
