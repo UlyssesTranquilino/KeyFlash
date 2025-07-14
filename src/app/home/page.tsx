@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
 import { getAllFlashcards } from "../../../utils/flashcard/flashcard";
+import { getAllTexts } from "../../../utils/text/textUtils";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -50,30 +51,41 @@ export default function HomePage() {
         </div>
         <Link
           href="/signin"
-          className=" flex items-center justify-center w-full  max-w-50"
+          className="flex items-center justify-center w-full max-w-50 hover:scale-[1.01] transition-transform duration-200"
         >
-          <Button className="mt-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-600/20">
+          <Button className="mt-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-600/20 hover:text-blue-300 transition-colors duration-200">
             Log in
           </Button>
         </Link>
-        <div className="absolute bottom-40  -left-4 lg:left-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-        <div className="absolute top-10  -right-4 lg:right-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+        <div className="absolute bottom-40 -left-4 lg:left-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+        <div className="absolute top-10 -right-4 lg:right-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
       </div>
     );
   }
 
-  // Initial quote fetch
+  // Initial quote and text fetch
   useEffect(() => {
     const fetchFlashcards = async () => {
       const data = await getAllFlashcards(user?.id);
+
       if (Array.isArray(data)) {
         setFlashcards(data);
       } else {
         setFlashcards([]);
       }
-      console.log("Data: data", data);
+    };
+
+    const fetchTexts = async () => {
+      const data = await getAllTexts();
+
+      if (Array.isArray(data)) {
+        setTexts(data);
+      } else {
+        setTexts([]);
+      }
     };
     fetchFlashcards();
+    fetchTexts();
   }, []);
 
   function slugify(str: string) {
@@ -84,17 +96,17 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container relative max-w-[900px]  mx-auto px-4 py-4 overflow-hidden">
+    <div className="container relative max-w-[900px] mx-auto px-4 py-4 overflow-hidden">
       <div className="absolute top-0 -right-[200px] w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="-z-3 absolute -bottom-50 -left-[200px] w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-white">
+          <h1 className="text-xl sm:text-2xl font-bold text-white hover:text-blue-400 transition-colors duration-300">
             Welcome, {user.user_metadata?.full_name || user.email}!
           </h1>
-          <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3">
+          <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 hover:text-white transition-colors duration-300">
             Current Streak: 3🔥
           </p>
         </header>
@@ -103,62 +115,66 @@ export default function HomePage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
         <Link
           href="/typing/random"
-          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700 /90relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm "
+          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 transition-all group"
         >
-          <div className="absolute -top-55 -right-4 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-          {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
+          <div className="absolute -top-55 -right-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           <div className="flex flex-col items-center gap-2">
-            <Dices />
-            <p className={`text-base  mb-1 text-blue-400`}>Random Typing</p>
+            <Dices className="text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-all duration-300" />
+            <p className="text-base mb-1 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+              Random Typing
+            </p>
           </div>
         </Link>
 
         <Link
           href="/typing/quote"
-          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm "
+          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 transition-all group"
         >
-          <div className="absolute -top-15 -left-5 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-          {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
+          <div className="absolute -top-15 -left-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           <div className="flex flex-col items-center gap-2">
-            <Quote />
-            <p className={`text-base  mb-1 text-blue-400`}>Quote Typing</p>
+            <Quote className="text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-all duration-300" />
+            <p className="text-base mb-1 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+              Quote Typing
+            </p>
           </div>
         </Link>
 
         <Link
           href="/typing/code"
-          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90  relative overflow-hidden h-23 flex items-center justify-center text-center  p-5 w-full  rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm "
+          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 transition-all group"
         >
           <div className="absolute -top-15 -left-15 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-          {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
           <div className="flex flex-col items-center gap-2">
-            <Code />
-            <p className={`text-base  mb-1 text-blue-400`}>Code Typing</p>
+            <Code className="text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-all duration-300" />
+            <p className="text-base mb-1 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+              Code Typing
+            </p>
           </div>
         </Link>
 
-        {/* <div className="mb-3 scale-130 w-14 ">{icon}</div> */}
         <Popover>
           <PopoverTrigger
             asChild
-            className="cursor-pointer border border-transparent hover:border-blue-400/60 transition-all duration-300 ease-in-out shadow-xs shadow-blue-700/90 relative overflow-hidden flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm"
+            className="cursor-pointer border border-transparent hover:border-blue-400/60 transition-all duration-300 ease-in-out shadow-xs shadow-blue-700/90 relative overflow-hidden flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 group"
           >
             <div className="flex flex-col items-center w-full h-23">
-              <CirclePlus className="scale-120 transition-transform duration-300" />
-              <p className="text-base mt-2  text-blue-400">Create</p>
+              <CirclePlus className="scale-120 transition-transform duration-300 text-blue-400 group-hover:text-blue-300 group-hover:scale-125" />
+              <p className="text-base mt-2 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+                Create
+              </p>
               <div className="absolute -z-2 size-80 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>
             </div>
           </PopoverTrigger>
 
-          <PopoverContent className="bg-gray-950 w-36 md:w-45">
+          <PopoverContent className="bg-gray-950 w-36 md:w-45 border-gray-800">
             <div className="flex flex-col items-center gap-3">
               <Link href="/flashcard/create" className="w-full">
-                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20">
+                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
                   Flashcard
                 </Button>
               </Link>
               <Link href="/typing/custom" className="w-full">
-                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20">
+                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
                   Text
                 </Button>
               </Link>
@@ -168,9 +184,9 @@ export default function HomePage() {
       </div>
 
       <div className="mt-12">
-        <h1 className="font-medium text-lg mb-3">
+        <h1 className="font-medium text-lg mb-3 ">
           Flashcards{" "}
-          <span className="ml-1 text-sm text-gray-300">
+          <span className="ml-1 text-sm text-gray-300 ">
             ({flashcards.length})
           </span>
         </h1>
@@ -186,17 +202,17 @@ export default function HomePage() {
                     const slug = `${card.id}-${slugify(card.title)}`;
                     router.push(`/flashcard/${slug}`);
                   }}
-                  className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg"
+                  className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                 >
                   {/* Content */}
                   <div className="relative z-10 p-5 h-full flex flex-col">
                     <div className="mb-2">
-                      <h2 className="font-semibold text-lg text-white group-hover:text-blue-400 transition-colors">
+                      <h2 className="max-w-50 font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1">
                         {card.title}
                       </h2>
                     </div>
                     <div className="mt-auto flex justify-between items-center">
-                      <span className="text-sm text-gray-400">
+                      <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
                         {card.terms.length} terms
                       </span>
                       <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 p-3 rounded-md"></button>
@@ -204,7 +220,7 @@ export default function HomePage() {
                   </div>
 
                   {/* Decorative Graphic - Animated on Hover */}
-                  <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity">
+                  <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity duration-300">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 200 200"
@@ -242,17 +258,17 @@ export default function HomePage() {
                   </div>
 
                   {/* Hover Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute  inset-0 bg-gradient-to-t from-blue-800/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="mt-12">
-              <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center">
+              <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center hover:border-blue-500 transition-colors duration-300">
                 <div className="mx-auto max-w-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-16 w-16 mx-auto text-gray-500"
+                    className="h-16 w-16 mx-auto text-gray-500 hover:text-blue-400 transition-colors duration-300"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -264,16 +280,16 @@ export default function HomePage() {
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                     />
                   </svg>
-                  <h3 className="mt-4 text-lg font-medium text-white">
+                  <h3 className="mt-4 text-lg font-medium text-white hover:text-blue-400 transition-colors duration-300">
                     No flashcards yet
                   </h3>
-                  <p className="mt-2 text-gray-400">
+                  <p className="mt-2 text-gray-400 hover:text-gray-300 transition-colors duration-300">
                     Get started by creating your first flashcard set
                   </p>
                   <div className="mt-6">
                     <Link
                       href="/flashcard/create"
-                      className="flex max-w-60 mx-auto items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20"
+                      className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -298,7 +314,7 @@ export default function HomePage() {
       </div>
 
       <div className="mt-12">
-        <h1 className="font-medium text-lg mb-3">
+        <h1 className="font-medium text-lg mb-3 ">
           Texts
           <span className="ml-1 text-sm text-gray-300">({texts.length})</span>
         </h1>
@@ -307,88 +323,58 @@ export default function HomePage() {
           {texts.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {/* Flashcard Item */}
-              {flashcards?.map((card: any) => (
+              {texts?.map((card: any) => (
                 <div
                   key={card.id}
                   onClick={() => {
                     const slug = `${card.id}-${slugify(card.title)}`;
-                    router.push(`/flashcard/${slug}`);
+                    router.push(`/text/${slug}`);
                   }}
-                  className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg"
+                  className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br  from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                 >
                   {/* Content */}
                   <div className="relative z-10 p-5 h-full flex flex-col">
                     <div className="mb-2">
-                      <h2 className="font-semibold text-lg text-white group-hover:text-blue-400 transition-colors">
+                      <h2 className="font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1">
                         {card.title}
                       </h2>
-                    </div>
-                    <div className="mt-auto flex justify-between items-center">
-                      <span className="text-sm text-gray-400">
-                        {card.terms.length} terms
-                      </span>
-                      <button className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 p-3 rounded-md"></button>
                     </div>
                   </div>
 
                   {/* Decorative Graphic - Animated on Hover */}
-                  <div className="absolute right-0 bottom-0 opacity-70 group-hover:opacity-90 transition-opacity">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 200 200"
-                      width="160"
-                      height="160"
-                      className="transition-transform duration-500 ease-in-out group-hover:rotate-0 group-hover:translate-x-2 group-hover:translate-y-2 transform translate-x-8 translate-y-5 rotate-12"
-                    >
-                      {/* Main Card */}
-                      <rect
-                        x="40"
-                        y="30"
-                        width="80"
-                        height="110"
-                        rx="12"
-                        fill="#1E3A8A"
-                        fillOpacity="0.3"
-                        stroke="#3B82F6"
-                        strokeWidth="1.5"
-                      />
-
-                      {/* Secondary Card */}
-                      <rect
-                        x="25"
-                        y="50"
-                        width="80"
-                        height="110"
-                        rx="12"
-                        fill="#1E3A8A"
-                        fillOpacity="0.2"
-                        stroke="#3B82F6"
-                        strokeWidth="1.2"
-                        strokeDasharray="4 2"
-                      />
-                    </svg>
+                  <div className="z-1 absolute right-10 bottom-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300">
+                    <Type
+                      className="scale-300 rotate-20 stroke-1 text-blue-500 
+                    group-hover:rotate-0 
+                    group-hover:scale-[3.1] 
+                    group-hover:-translate-x-5
+                    group-hover:-translate-y-2
+                    transition-all duration-500 ease-in-out"
+                    />
                   </div>
 
                   {/* Hover Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute  inset-0 bg-gradient-to-t from-blue-800/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  {/* <div className="absolute rotate-20 -bottom-10 -right-13 h-150 w-17 bg-blue-950/50 -z-0" /> */}
                 </div>
               ))}
             </div>
           ) : (
             <div className="mt-12">
-              <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center">
+              <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center hover:border-blue-500 transition-colors duration-300">
                 <div className="mx-auto max-w-md">
-                  <Type className="scale-140 mx-auto  text-gray-500 mb" />
-                  <h3 className="mt-8 text-lg font-medium text-white">
+                  <Type className="scale-140 mx-auto text-gray-500 hover:text-blue-400 transition-colors duration-300" />
+                  <h3 className="mt-8 text-lg font-medium text-white hover:text-blue-400 transition-colors duration-300">
                     No Texts yet
                   </h3>
-                  <p className="mt-2 text-gray-400">
+                  <p className="mt-2 text-gray-400 hover:text-gray-300 transition-colors duration-300">
                     Get started by creating your first text
                   </p>
                   <div className="mt-6">
                     <Link
                       href="/text/create"
-                      className="flex max-w-60 mx-auto items-center  justify-center  p-3 rounded-lg  gap-3 w-full cursor-pointer  text-blue-400 bg-gray-800/50 hover:bg-blue-700/20"
+                      className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

@@ -43,7 +43,7 @@ export const FlashcardContextProvider = ({
 export const useFlashcard = () => {
   const context = useContext(FlashcardContext);
   if (!context) {
-    throw new Error("useCode must be used within a CodeProvider");
+    throw new Error("useCode must be used within a FlashcardProvider");
   }
   return context;
 };
