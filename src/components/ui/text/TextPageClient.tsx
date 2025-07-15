@@ -28,7 +28,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
   const { user } = useAuth();
   const id = slug.split("-")[0];
-  const { showWpm } = useWpm();
+  const { showWpm, setShowWpm } = useWpm();
   const [textData, setTextData] = useState<any>({
     title: "",
     typingText: "",
@@ -175,17 +175,29 @@ const TextPageClient = ({ slug }: { slug: string }) => {
               >
                 <ArrowLeft className="h-5 w-5" /> Back
               </Button>
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setOpenEditText(true);
-                }}
-                variant="ghost"
-                className="text-gray-400 hover:text-white"
-              >
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
+              <div>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowWpm(!showWpm);
+                  }}
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                >
+                  WPM
+                </Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenEditText(true);
+                  }}
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                >
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </div>
             </div>
             <div className="flex items-center">
               <h1 className="font-semibold text-lg mt-3">{textData.title}</h1>

@@ -96,17 +96,17 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container relative max-w-[900px] mx-auto px-4 py-4 overflow-hidden">
-      <div className="absolute top-0 -right-[200px] w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+    <div className="container relative max-w-[900px] mx-auto px-4 py-4  ">
+      <div className="absolute top-0 right-0 w-70 sm:w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="-z-3 absolute -bottom-50 -left-[200px] w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-white hover:text-blue-400 transition-colors duration-300">
+          <h1 className="text-xl sm:text-2xl font-bold text-white  ">
             Welcome, {user.user_metadata?.full_name || user.email}!
           </h1>
-          <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 hover:text-white transition-colors duration-300">
+          <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
             Current Streak: 3🔥
           </p>
         </header>

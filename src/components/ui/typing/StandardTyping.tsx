@@ -15,6 +15,7 @@ import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
 // Context
 import { useWpm } from "@/app/context/WpmContext";
 import { useEditText } from "@/app/context/AddTextContext";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 // Debounce utility
 const debounce = (func: any, wait: any) => {
@@ -28,6 +29,7 @@ const debounce = (func: any, wait: any) => {
     timeout = setTimeout(later, wait);
   };
 };
+const MISTAKE_LIMIT = 10;
 
 const StandardTyping = ({ text }) => {
   const { showWpm } = useWpm();
@@ -121,7 +123,11 @@ const StandardTyping = ({ text }) => {
       idleTimeoutRef.current = setTimeout(() => setIsIdle(true), 1000);
     };
 
+    const events = ["mousemove", "keydown", "mousedown", "touchstart"];
+    events.forEach((e) => window.addEventListener(e, handleActivity));
+
     return () => {
+      events.forEach((e) => window.removeEventListener(e, handleActivity));
       if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
     };
   }, []);
@@ -151,9 +157,6 @@ const StandardTyping = ({ text }) => {
 
   // Reset Test
   const resetTest = useCallback(() => {
-    // Clear any pending debounce
-    if (debouncedWpmUpdate.cancel) debouncedWpmUpdate.cancel();
-
     setUserInput("");
     setCurrentIndex(0);
     setStartTime(null);
@@ -295,22 +298,23 @@ const StandardTyping = ({ text }) => {
       const value = e.target.value;
       const currentTime = Date.now();
 
+      // Block further typing if mistakes exceed the limit
+      if (mistakes >= MISTAKE_LIMIT && value.length > userInput.length) {
+        return;
+      }
+
       // Set idle state immediately
       setIsIdle(false);
 
-      // Start timer on first input
       if (!startTime) {
         setStartTime(currentTime);
       }
 
-      // Update input immediately (high priority)
       setUserInput(value);
       setCurrentIndex(value.length);
 
-      // Batch non-critical updates
       startTransition(() => {
         if (textData) {
-          // Optimized character counting
           let correct = 0;
           const minLength = Math.min(value.length, textData.length);
 
@@ -322,24 +326,24 @@ const StandardTyping = ({ text }) => {
             }
           }
 
-          setCorrectChars(correct);
-          setIncorrectChars(value.length - correct);
-          setMistakes(value.length - correct);
+          const newMistakes = value.length - correct;
 
-          // Check completion
+          setCorrectChars(correct);
+          setIncorrectChars(newMistakes);
+          setMistakes(newMistakes);
+
           if (value.length === textData.length) {
             setEndTime(currentTime);
             setCompleted(true);
           }
         }
 
-        // Update WPM with debouncing
         if (startTime && value.length > 0) {
           debouncedWpmUpdate(value.length, startTime);
         }
       });
     },
-    [textData, startTime, debouncedWpmUpdate]
+    [textData, startTime, debouncedWpmUpdate, mistakes, userInput.length]
   );
 
   const deletePreviousWord = useCallback(() => {
@@ -475,7 +479,11 @@ const StandardTyping = ({ text }) => {
           wpm={wpm}
           startTime={startTime}
           endTime={endTime || Date.now()}
-          accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
+          accuracy={
+            correctChars + incorrectChars === 0
+              ? 0
+              : (correctChars / (correctChars + incorrectChars)) * 100
+          }
           correctChars={correctChars}
           incorrectChars={incorrectChars}
           totalChars={textData.length || 0}
