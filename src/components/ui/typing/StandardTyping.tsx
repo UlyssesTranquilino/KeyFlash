@@ -16,6 +16,10 @@ import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
 import { useWpm } from "@/app/context/WpmContext";
 import { useEditText } from "@/app/context/AddTextContext";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { FixedSizeList as List } from "react-window";
+
+// Constants
+const MISTAKE_LIMIT = 10;
 
 // Debounce utility
 const debounce = (func: any, wait: any) => {
@@ -29,11 +33,13 @@ const debounce = (func: any, wait: any) => {
     timeout = setTimeout(later, wait);
   };
 };
-const MISTAKE_LIMIT = 10;
 
 const StandardTyping = ({ text }) => {
   const { showWpm } = useWpm();
   const { setOpenAddText } = useEditText();
+
+  const lineHeight = 30; // Adjust based on your font size
+  const containerHeight = 400; // Set your desired height
 
   const [userInput, setUserInput] = useState("");
   const [isFocused, setIsFocused] = useState(true);
@@ -181,7 +187,15 @@ const StandardTyping = ({ text }) => {
   const highlightedText = useMemo(() => {
     if (!textData) return null;
 
-    const lines = textData.split("\n");
+    const lines = useMemo(() => {
+      const chunkSize = 100; // Characters per line
+      const chunks = [];
+      for (let i = 0; i < textData.length; i += chunkSize) {
+        chunks.push(textData.slice(i, i + chunkSize));
+      }
+      return chunks;
+    }, [textData]);
+
     const userInputChars = userInput.split("");
     let charIndex = 0;
 
@@ -271,6 +285,36 @@ const StandardTyping = ({ text }) => {
       );
     });
   }, [textData, userInput, isIdle]);
+
+  // Virtualized row renderer
+  const Row = ({ index, style }) => {
+    const line = lines[index];
+    const lineStart = index * 100;
+
+    return (
+      <div style={style} className="line">
+        {line.split("").map((char, i) => {
+          const globalPos = lineStart + i;
+          const isCurrent = globalPos === userInput.length;
+          const isTyped = globalPos < userInput.length;
+          const isCorrect = isTyped ? userInput[globalPos] === char : false;
+
+          return (
+            <span
+              key={i}
+              className={`
+              char 
+              ${isCurrent ? "current" : ""}
+              ${isTyped ? (isCorrect ? "correct" : "incorrect") : ""}
+            `}
+            >
+              {char}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   const handleRefetch = useCallback(async () => {
     setLoading(true);
@@ -443,7 +487,15 @@ const StandardTyping = ({ text }) => {
               onMouseDown={(e) => e.preventDefault()} // Prevent text selection interfering with focus
             >
               <div className="whitespace-pre-wrap break-words font-mono text-left">
-                {highlightedText}
+                <List
+                  ref={listRef}
+                  height={containerHeight}
+                  itemCount={lines.length}
+                  itemSize={lineHeight}
+                  width="100%"
+                >
+                  {Row}
+                </List>
               </div>
             </motion.div>
 

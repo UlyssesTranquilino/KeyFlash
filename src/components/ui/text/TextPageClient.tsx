@@ -23,6 +23,7 @@ import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { copyTracedFiles } from "next/dist/build/utils";
 import { editText } from "../../../../utils/text/textUtils";
+import { cn } from "@/lib/utils";
 
 const TextPageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
@@ -143,6 +144,19 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                       }}
                     />
                   </div>
+
+                  <div className="text-gray-500">
+                    {copytextData.typingText.length} characters -
+                    <span
+                      className={cn(
+                        "text-gray-500",
+                        copytextData.typingText.length > 1000 && "text-red-400",
+                        copytextData.typingText.length > 1000 && "text-red-400"
+                      )}
+                    >
+                      Max 100 characters
+                    </span>
+                  </div>
                 </div>
 
                 <div className="mt-6 flex justify-end gap-3">
@@ -155,6 +169,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                     Cancel
                   </Button>
                   <Button
+                    disabled={copytextData.typingText.length > 1000}
                     onClick={handleEditText}
                     className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
                   >
@@ -182,7 +197,10 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                     setShowWpm(!showWpm);
                   }}
                   variant="ghost"
-                  className="text-gray-400 hover:text-white"
+                  className={cn(
+                    "text-gray-400 hover:text-white",
+                    showWpm && "text-blue-400 hover:text-blue-400"
+                  )}
                 >
                   WPM
                 </Button>
