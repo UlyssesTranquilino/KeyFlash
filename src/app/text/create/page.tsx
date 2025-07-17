@@ -17,6 +17,13 @@ const CreateText = () => {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
 
+  function slugify(str: string) {
+    return str
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  }
+
   const handleCreateText = async () => {
     if (!title || !text) {
       toast.warning(
@@ -29,13 +36,14 @@ const CreateText = () => {
     try {
       let textData = {
         title: title,
-        text: text,
+        typingText: text,
       };
 
       const { data, error } = await insertText(textData);
       toast.success("Flashcard updated successfully!");
 
-      console.log("data: ", data);
+      const slug = `${data.id}-${slugify(title)}`;
+      router.push(`/text/${slug}`);
     } catch (err) {
       toast.error("An unexpected error occurred");
     }
@@ -43,7 +51,7 @@ const CreateText = () => {
 
   return (
     <div className="px-3 flex flex-col  w-full max-w-[900px] mx-auto overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+      <div className="absolute top-0 right-0 w-[300px] h-[300px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="-z-3 absolute bottom-0 left-0 w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
@@ -89,7 +97,7 @@ const CreateText = () => {
         <div className="text-gray-500 text-sm sm:text-base">
           {text.length} characters -
           <span className={cn(" ", text.length > 500 && "text-red-400")}>
-            Max 1000 characters
+            Max 500 characters
           </span>
         </div>
       </div>
