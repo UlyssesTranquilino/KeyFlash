@@ -6,7 +6,13 @@ import { useRouter } from "next/navigation";
 import { useWpm } from "@/app/context/WpmContext";
 import { getText } from "../../../../utils/text/textUtils";
 import { Button } from "../button";
-import { ArrowLeft, Pencil } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ArrowLeft, Pencil, Trash2, EllipsisVertical } from "lucide-react";
 import StandardTyping from "../typing/StandardTyping";
 import {
   Dialog,
@@ -24,6 +30,8 @@ import { Input } from "@/components/ui/input";
 import { copyTracedFiles } from "next/dist/build/utils";
 import { editText } from "../../../../utils/text/textUtils";
 import { cn } from "@/lib/utils";
+import { deleteText } from "../../../../utils/text/textUtils";
+import TextSkeleton from "./TextSkeleton";
 
 const TextPageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
@@ -40,6 +48,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
   });
   const [loading, setLoading] = useState(true);
   const [openEditText, setOpenEditText] = useState(false);
+  const [openConfrmDelete, setOpenConfirmDelete] = useState(false);
 
   const handleEditText = async () => {
     if (!copytextData.title || !copytextData.typingText) {
@@ -74,6 +83,23 @@ const TextPageClient = ({ slug }: { slug: string }) => {
     setOpenEditText(false);
   };
 
+  const handleDeleteText = async () => {
+    try {
+      const { error } = await deleteText(id); // You'll need to implement deleteText in your textUtils
+
+      if (error) {
+        toast.error("Failed to delete text: " + error);
+      } else {
+        toast.success("Text deleted successfully!");
+        router.push("/texts"); // Redirect after deletion
+      }
+
+      router.back();
+    } catch (err) {
+      toast.error("An unexpected error occurred");
+    }
+  };
+
   useEffect(() => {
     const fetchText = async () => {
       if (user?.id) {
@@ -97,6 +123,37 @@ const TextPageClient = ({ slug }: { slug: string }) => {
       <Toaster position="top-center" />
       {!loading ? (
         <div>
+          <Dialog open={openConfrmDelete} onOpenChange={setOpenConfirmDelete}>
+            <DialogContent className="max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle className="text-lg">Delete Text</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. The text will be permanently
+                  deleted and removed from your library.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOpenConfirmDelete(false);
+                  }}
+                  className="text-gray-200 hover:text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    handleDeleteText();
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Delete
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={openEditText} onOpenChange={setOpenEditText}>
             <DialogContent
               onOpenAutoFocus={(e) => e.preventDefault()}
@@ -150,11 +207,10 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                     <span
                       className={cn(
                         "text-gray-500",
-                        copytextData.typingText.length > 1000 && "text-red-400",
-                        copytextData.typingText.length > 1000 && "text-red-400"
+                        copytextData.typingText.length > 500 && "text-red-400"
                       )}
                     >
-                      Max 100 characters
+                      Max 500 characters
                     </span>
                   </div>
                 </div>
@@ -169,7 +225,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                     Cancel
                   </Button>
                   <Button
-                    disabled={copytextData.typingText.length > 1000}
+                    disabled={copytextData.typingText.length > 500}
                     onClick={handleEditText}
                     className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
                   >
@@ -190,6 +246,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
               >
                 <ArrowLeft className="h-5 w-5" /> Back
               </Button>
+
               <div>
                 <Button
                   onClick={(e) => {
@@ -204,17 +261,33 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                 >
                   WPM
                 </Button>
-                <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpenEditText(true);
-                  }}
-                  variant="ghost"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      <EllipsisVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-40 bg-gray-900 border-gray-700">
+                    <DropdownMenuItem
+                      onClick={() => setOpenEditText(true)}
+                      className="cursor-pointer focus:bg-gray-800"
+                    >
+                      <Pencil className="mr-2 h-4 w-4" />
+                      <span>Edit</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setOpenConfirmDelete(true)}
+                      className="cursor-pointer focus:bg-gray-800 text-red-400 "
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             <div className="flex items-center">
@@ -225,7 +298,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
           <StandardTyping text={textData.typingText} />
         </div>
       ) : (
-        <div>Loading</div>
+        <TextSkeleton />
       )}
     </div>
   );

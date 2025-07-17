@@ -15,11 +15,6 @@ import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
 // Context
 import { useWpm } from "@/app/context/WpmContext";
 import { useEditText } from "@/app/context/AddTextContext";
-import { useVirtualizer } from "@tanstack/react-virtual";
-import { FixedSizeList as List } from "react-window";
-
-// Constants
-const MISTAKE_LIMIT = 10;
 
 // Debounce utility
 const debounce = (func: any, wait: any) => {
@@ -34,12 +29,11 @@ const debounce = (func: any, wait: any) => {
   };
 };
 
+const MAX_CONSECUTIVE_MISTAKES = 5;
+
 const StandardTyping = ({ text }) => {
   const { showWpm } = useWpm();
   const { setOpenAddText } = useEditText();
-
-  const lineHeight = 30; // Adjust based on your font size
-  const containerHeight = 400; // Set your desired height
 
   const [userInput, setUserInput] = useState("");
   const [isFocused, setIsFocused] = useState(true);
@@ -64,6 +58,8 @@ const StandardTyping = ({ text }) => {
   const [testId, setTestId] = useState(Date.now());
   const [isHoveringNewTexts, setIsHoveringNewTexts] = useState(false);
   const [isClickingOnText, setIsClickingOnText] = useState(false);
+
+  const [consecutiveMistakes, setConsecutiveMistakes] = useState(0);
 
   // Auto-scroll to cursor
   const scrollToCursor = useCallback(() => {
@@ -129,11 +125,7 @@ const StandardTyping = ({ text }) => {
       idleTimeoutRef.current = setTimeout(() => setIsIdle(true), 1000);
     };
 
-    const events = ["mousemove", "keydown", "mousedown", "touchstart"];
-    events.forEach((e) => window.addEventListener(e, handleActivity));
-
     return () => {
-      events.forEach((e) => window.removeEventListener(e, handleActivity));
       if (idleTimeoutRef.current) clearTimeout(idleTimeoutRef.current);
     };
   }, []);
@@ -163,6 +155,9 @@ const StandardTyping = ({ text }) => {
 
   // Reset Test
   const resetTest = useCallback(() => {
+    // Clear any pending debounce
+    if (debouncedWpmUpdate.cancel) debouncedWpmUpdate.cancel();
+
     setUserInput("");
     setCurrentIndex(0);
     setStartTime(null);
@@ -174,6 +169,7 @@ const StandardTyping = ({ text }) => {
     setMistakes(0);
     setEndTime(null);
     setTestId(Date.now());
+    setConsecutiveMistakes(0);
 
     // Reset scroll position
     if (textDisplayRef.current) {
@@ -187,15 +183,7 @@ const StandardTyping = ({ text }) => {
   const highlightedText = useMemo(() => {
     if (!textData) return null;
 
-    const lines = useMemo(() => {
-      const chunkSize = 100; // Characters per line
-      const chunks = [];
-      for (let i = 0; i < textData.length; i += chunkSize) {
-        chunks.push(textData.slice(i, i + chunkSize));
-      }
-      return chunks;
-    }, [textData]);
-
+    const lines = textData.split("\n");
     const userInputChars = userInput.split("");
     let charIndex = 0;
 
@@ -286,36 +274,6 @@ const StandardTyping = ({ text }) => {
     });
   }, [textData, userInput, isIdle]);
 
-  // Virtualized row renderer
-  const Row = ({ index, style }) => {
-    const line = lines[index];
-    const lineStart = index * 100;
-
-    return (
-      <div style={style} className="line">
-        {line.split("").map((char, i) => {
-          const globalPos = lineStart + i;
-          const isCurrent = globalPos === userInput.length;
-          const isTyped = globalPos < userInput.length;
-          const isCorrect = isTyped ? userInput[globalPos] === char : false;
-
-          return (
-            <span
-              key={i}
-              className={`
-              char 
-              ${isCurrent ? "current" : ""}
-              ${isTyped ? (isCorrect ? "correct" : "incorrect") : ""}
-            `}
-            >
-              {char}
-            </span>
-          );
-        })}
-      </div>
-    );
-  };
-
   const handleRefetch = useCallback(async () => {
     setLoading(true);
     setTextData("Upload again"); // Use context's setQuote
@@ -342,12 +300,14 @@ const StandardTyping = ({ text }) => {
       const value = e.target.value;
       const currentTime = Date.now();
 
-      // Block further typing if mistakes exceed the limit
-      if (mistakes >= MISTAKE_LIMIT && value.length > userInput.length) {
+      // ❌ Block typing if 5 or more consecutive mistakes and trying to type further
+      if (
+        consecutiveMistakes >= MAX_CONSECUTIVE_MISTAKES &&
+        value.length > userInput.length
+      ) {
         return;
       }
 
-      // Set idle state immediately
       setIsIdle(false);
 
       if (!startTime) {
@@ -371,10 +331,19 @@ const StandardTyping = ({ text }) => {
           }
 
           const newMistakes = value.length - correct;
-
           setCorrectChars(correct);
           setIncorrectChars(newMistakes);
           setMistakes(newMistakes);
+
+          // ✅ Set consecutive mistakes
+          if (
+            value.length > userInput.length && // Only when adding characters
+            value[value.length - 1] !== textData[value.length - 1]
+          ) {
+            setConsecutiveMistakes((prev) => prev + 1);
+          } else {
+            setConsecutiveMistakes(0);
+          }
 
           if (value.length === textData.length) {
             setEndTime(currentTime);
@@ -387,7 +356,13 @@ const StandardTyping = ({ text }) => {
         }
       });
     },
-    [textData, startTime, debouncedWpmUpdate, mistakes, userInput.length]
+    [
+      textData,
+      startTime,
+      debouncedWpmUpdate,
+      consecutiveMistakes,
+      userInput.length,
+    ]
   );
 
   const deletePreviousWord = useCallback(() => {
@@ -487,15 +462,7 @@ const StandardTyping = ({ text }) => {
               onMouseDown={(e) => e.preventDefault()} // Prevent text selection interfering with focus
             >
               <div className="whitespace-pre-wrap break-words font-mono text-left">
-                <List
-                  ref={listRef}
-                  height={containerHeight}
-                  itemCount={lines.length}
-                  itemSize={lineHeight}
-                  width="100%"
-                >
-                  {Row}
-                </List>
+                {highlightedText}
               </div>
             </motion.div>
 
@@ -531,11 +498,7 @@ const StandardTyping = ({ text }) => {
           wpm={wpm}
           startTime={startTime}
           endTime={endTime || Date.now()}
-          accuracy={
-            correctChars + incorrectChars === 0
-              ? 0
-              : (correctChars / (correctChars + incorrectChars)) * 100
-          }
+          accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
           correctChars={correctChars}
           incorrectChars={incorrectChars}
           totalChars={textData.length || 0}

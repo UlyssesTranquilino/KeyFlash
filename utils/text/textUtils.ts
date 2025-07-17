@@ -141,3 +141,34 @@ export async function editText(textData: textType) {
     return { error: "Unexpected error occurred" };
   }
 }
+
+export async function deleteText(id: string) {
+  try {
+    const supabase = createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error("User not authenticated");
+      return { error: "User not authenticated" };
+    }
+
+    const { data, error } = await supabase
+      .from("texts")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Database error: ", error);
+      return { error: error.message };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    console.error("Unexpected error inserting flashcard:", error);
+    return { error: "Unexpected error occurred" };
+  }
+}

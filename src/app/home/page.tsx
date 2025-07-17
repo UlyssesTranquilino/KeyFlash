@@ -207,7 +207,7 @@ export default function HomePage() {
                   {/* Content */}
                   <div className="relative z-10 p-5 h-full flex flex-col">
                     <div className="mb-2">
-                      <h2 className="max-w-50 font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1">
+                      <h2 className="max-w-50 font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1 ">
                         {card.title}
                       </h2>
                     </div>
@@ -335,7 +335,7 @@ export default function HomePage() {
                   {/* Content */}
                   <div className="relative z-10 p-5 h-full flex flex-col">
                     <div className="mb-2">
-                      <h2 className="font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1">
+                      <h2 className="max-w-50 truncate font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1 ">
                         {card.title}
                       </h2>
                     </div>
