@@ -91,10 +91,10 @@ const TextPageClient = ({ slug }: { slug: string }) => {
         toast.error("Failed to delete text: " + error);
       } else {
         toast.success("Text deleted successfully!");
-        router.push("/texts"); // Redirect after deletion
+        router.push("/home"); // Redirect after deletion
       }
 
-      router.back();
+      // router.back();
     } catch (err) {
       toast.error("An unexpected error occurred");
     }
