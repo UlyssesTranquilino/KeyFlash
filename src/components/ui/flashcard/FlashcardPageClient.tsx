@@ -519,7 +519,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   return (
     <div
-      className={`max-w-[900px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden ${
+      className={`max-w-[900px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden mt-14 ${
         isFullScreen ? "fixed inset-0 top-1/5  z-50 p-0 m-0 " : ""
       }`}
     >

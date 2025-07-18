@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/app/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   CirclePlus,
@@ -9,6 +9,7 @@ import {
   Code,
   CircleUserRound,
   Type,
+  ChevronRight,
 } from "lucide-react";
 import {
   Popover,
@@ -24,9 +25,10 @@ import { useRouter } from "next/navigation";
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, session, loading } = useAuth();
+  const { user, session } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [texts, setTexts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   if (loading) {
     return (
@@ -96,12 +98,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container relative max-w-[900px] mx-auto px-4 py-4  ">
-      <div className="absolute top-0 right-0 w-70 sm:w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+    <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
+      <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
-      <div className="-z-3 absolute -bottom-50 -left-[200px] w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+      <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl ">
         <header className="mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-white  ">
             Welcome, {user.user_metadata?.full_name || user.email}!
@@ -115,7 +117,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
         <Link
           href="/typing/random"
-          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 transition-all group"
+          className="cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
         >
           <div className="absolute -top-55 -right-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           <div className="flex flex-col items-center gap-2">
@@ -128,7 +130,7 @@ export default function HomePage() {
 
         <Link
           href="/typing/quote"
-          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 transition-all group"
+          className="cursor-pointer bg-black  hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
         >
           <div className="absolute -top-15 -left-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           <div className="flex flex-col items-center gap-2">
@@ -141,7 +143,7 @@ export default function HomePage() {
 
         <Link
           href="/typing/code"
-          className="cursor-pointer hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 transition-all group"
+          className="cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
         >
           <div className="absolute -top-15 -left-15 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
           <div className="flex flex-col items-center gap-2">
@@ -155,9 +157,9 @@ export default function HomePage() {
         <Popover>
           <PopoverTrigger
             asChild
-            className="cursor-pointer border border-transparent hover:border-blue-400/60 transition-all duration-300 ease-in-out shadow-xs shadow-blue-700/90 relative overflow-hidden flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm hover:bg-gray-800/50 group"
+            className="cursor-pointer bg-black border border-transparent hover:border-blue-400/60 transition-all duration-300 ease-in-out shadow-xs shadow-blue-700/90 relative overflow-hidden flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm  group"
           >
-            <div className="flex flex-col items-center w-full h-23">
+            <div className="flex flex-col items-center w-full h-23 lg:h-30">
               <CirclePlus className="scale-120 transition-transform duration-300 text-blue-400 group-hover:text-blue-300 group-hover:scale-125" />
               <p className="text-base mt-2 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
                 Create
@@ -184,18 +186,27 @@ export default function HomePage() {
       </div>
 
       <div className="mt-12">
-        <h1 className="font-medium text-lg mb-3 ">
-          Flashcards{" "}
-          <span className="ml-1 text-sm text-gray-300 ">
-            ({flashcards.length})
-          </span>
-        </h1>
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="font-medium text-lg mb-3 ">
+            Flashcards{" "}
+            <span className="ml-1 text-sm text-gray-300 ">
+              ({flashcards.length})
+            </span>
+          </h1>
 
+          <Button
+            size="icon"
+            onClick={() => router.push("/texts")}
+            className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+          >
+            Show All <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
         <div>
           {flashcards.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-4 lg:gap-6">
               {/* Flashcard Item */}
-              {flashcards?.map((card: any) => (
+              {flashcards?.slice(0, 4).map((card: any) => (
                 <div
                   key={card.id}
                   onClick={() => {
@@ -206,8 +217,8 @@ export default function HomePage() {
                 >
                   {/* Content */}
                   <div className="relative z-10 p-5 h-full flex flex-col">
-                    <div className="mb-2">
-                      <h2 className="max-w-50 font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1 ">
+                    <div className="mb-2 h-20">
+                      <h2 className="truncate max-w-50 font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1 ">
                         {card.title}
                       </h2>
                     </div>
@@ -314,16 +325,26 @@ export default function HomePage() {
       </div>
 
       <div className="mt-12">
-        <h1 className="font-medium text-lg mb-3 ">
-          Texts
-          <span className="ml-1 text-sm text-gray-300">({texts.length})</span>
-        </h1>
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="font-medium text-lg mb-3 ">
+            Texts
+            <span className="ml-1 text-sm text-gray-300">({texts.length})</span>
+          </h1>
+
+          <Button
+            size="icon"
+            onClick={() => router.push("/flashcards")}
+            className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+          >
+            Show All <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
 
         <div>
           {texts.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-4 lg:gap-6">
               {/* Flashcard Item */}
-              {texts?.map((card: any) => (
+              {texts?.slice(0, 4).map((card: any) => (
                 <div
                   key={card.id}
                   onClick={() => {
