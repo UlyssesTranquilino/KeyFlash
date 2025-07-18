@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { jakartaSans } from "./ui/fonts";
+import { jakartaSans } from "../ui/fonts";
 import "./globals.css";
-import { ThemeProvider } from "./ui/theme-provider";
+import { ThemeProvider } from "../ui/theme-provider";
 import AuthProviderWrapper from "@/components/ui/AuthProviderWrapper";
+
+import Navbar from "../ui/navbar/navbar";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,6 +26,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <Navbar />
             {children}
           </ThemeProvider>
         </AuthProviderWrapper>

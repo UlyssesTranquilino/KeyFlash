@@ -168,7 +168,7 @@ export async function deleteText(id: string) {
 
     return { data, error: null };
   } catch (error) {
-    console.error("Unexpected error inserting flashcard:", error);
+    console.error("Unexpected error deleting text:", error);
     return { error: "Unexpected error occurred" };
   }
 }

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import Link from "next/link";
+import { spaceMono } from "@/app/ui/fonts";
 import {
   RotateCcw,
   TriangleAlert,
@@ -610,14 +611,15 @@ const TypingFlashcards = () => {
                   ) : (
                     <>
                       {" "}
-                      You're not logged in. You can add up to 10 cards.{" "}
+                      You're not logged in. You can only add up to 10 cards.{" "}
                       <Link
                         href="/signin"
                         className="font-semibold text-blue-400 hover:underline"
                       >
                         Sign in
                       </Link>{" "}
-                      to save and add more.
+                      to save your progress, unlock more features, and add
+                      additional cards.
                     </>
                   )}
                 </div>
@@ -904,7 +906,7 @@ const TypingFlashcards = () => {
 
       <Carousel
         setApi={setApi}
-        className="max-w-[800px] mx-auto relative"
+        className={`max-w-[800px] mx-auto relative ${spaceMono.className}`}
         opts={{
           watchDrag: !isTestMode, // Disable swipe in test mode
           dragFree: isTestMode, // Makes it harder to accidentally swipe
@@ -917,62 +919,62 @@ const TypingFlashcards = () => {
               key={index}
               className="h-96 rounded-2xl bg-gray-900/70 relative overflow-hidden"
             >
-              <div className="flex flex-col items-center  h-full p-8">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setBlurAnswer(!blurAnswer)}
-                      className={cn(
-                        "absolute right-2 top-4 flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
-                        blurAnswer
-                          ? "text-blue-400"
-                          : "text-gray-400 hover:text-white"
-                      )}
+              <div className="flex flex-col items-center justify-center h-full p-8">
+                <div className="absolute top-6 right-0 w-full items-center flex justify-between px-3">
+                  {/* Phase indicator */}
+                  <div className="flex items-center gap-3">
+                    <div
+                      onClick={() => setCurrentPhase("question")}
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                        currentPhase === "question"
+                          ? "bg-blue-600/20 text-blue-400"
+                          : questionCompleted
+                          ? "bg-green-600/20 text-green-400"
+                          : "bg-gray-600/20 text-gray-400"
+                      }`}
                     >
-                      {!blurAnswer ? (
-                        <Eye className="scale-78" />
-                      ) : (
-                        <EyeClosed className="scale-78" />
-                      )}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{!blurAnswer ? "Hide Answer" : "Show Answer"}</p>
-                  </TooltipContent>
-                </Tooltip>
+                      {questionCompleted && <CheckCircle className="w-4 h-4" />}
+                      <span className="text-xs">Question</span>
+                    </div>
 
-                {/* Phase indicator */}
-                <div className="mb-6 mt-8  flex items-center gap-4">
-                  <div
-                    onClick={() => setCurrentPhase("question")}
-                    className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
-                      currentPhase === "question"
-                        ? "bg-blue-600/20 text-blue-400"
-                        : questionCompleted
-                        ? "bg-green-600/20 text-green-400"
-                        : "bg-gray-600/20 text-gray-400"
-                    }`}
-                  >
-                    {questionCompleted && <CheckCircle className="w-4 h-4" />}
-                    <span>Question</span>
+                    <div
+                      onClick={() => setCurrentPhase("answer")}
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                        currentPhase === "answer"
+                          ? "bg-blue-600/20 text-blue-400"
+                          : cardCompleted
+                          ? "bg-green-600/20 text-green-400"
+                          : "bg-gray-600/20 text-gray-400"
+                      }`}
+                    >
+                      {cardCompleted && <CheckCircle className="w-4 h-4" />}
+                      <span className="text-xs">Answer</span>
+                    </div>
                   </div>
-                  <div
-                    className={`w-8 h-0.5 ${
-                      questionCompleted ? "bg-green-400" : "bg-gray-600"
-                    }`}
-                  />
-                  <div
-                    onClick={() => setCurrentPhase("answer")}
-                    className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
-                      currentPhase === "answer"
-                        ? "bg-blue-600/20 text-blue-400"
-                        : cardCompleted
-                        ? "bg-green-600/20 text-green-400"
-                        : "bg-gray-600/20 text-gray-400"
-                    }`}
-                  >
-                    {cardCompleted && <CheckCircle className="w-4 h-4" />}
-                    <span>Answer</span>
+
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={() => setBlurAnswer(!blurAnswer)}
+                          className={cn(
+                            "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                            blurAnswer
+                              ? "text-blue-400"
+                              : "text-gray-400 hover:text-white"
+                          )}
+                        >
+                          {!blurAnswer ? (
+                            <Eye className="scale-78" />
+                          ) : (
+                            <EyeClosed className="scale-78" />
+                          )}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{!blurAnswer ? "Hide Answer" : "Show Answer"}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
 
@@ -1063,28 +1065,6 @@ const TypingFlashcards = () => {
         </CarouselContent>
 
         <div className=" w-full absolute right-1/2  -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 ">
-            <div className="flex gap-1 items-center  ">
-              {/* <Switch
-                id="code-toggle"
-                checked={isTestMode}
-                onCheckedChange={setIsTestMode}
-                className={cn(
-                  "scale-80",
-                  "data-[state=checked]:bg-blue-400",
-                  "data-[state=checked]:border-blue-400",
-                  "data-[state=checked]:ring-blue-400"
-                )}
-              />
-              <Label
-                htmlFor="code-toggle"
-                className="text-sm flex items-center gap-2"
-              >
-                Test
-              </Label> */}
-            </div>
-          </div>
-
           <div className="w-full  col-span-3 relative">
             <div className="text-center w-30 sm:w-34 mx-auto  relative ">
               <CarouselPrevious

@@ -17,6 +17,13 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { spaceMono } from "@/app/ui/fonts";
+import {
   ArrowLeft,
   RotateCcw,
   TriangleAlert,
@@ -38,6 +45,8 @@ import {
   Shuffle,
   Maximize,
   Minimize,
+  Trash2,
+  EllipsisVertical,
 } from "lucide-react";
 import {
   Dialog,
@@ -47,6 +56,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
 import {
   Carousel,
   CarouselContent,
@@ -66,11 +76,12 @@ import { flushSync } from "react-dom";
 import { Switch } from "@/components/ui/switch";
 import SkeletonFlashcard from "./SkeletonFlashcard";
 import { SimpleResults } from "./ResultsComponent";
+import { deleteFlashcard } from "../../../../utils/flashcard/flashcard";
 
 const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
   const { user } = useAuth();
-  const { showWpm } = useWpm();
+  const { showWpm, setShowWpm } = useWpm();
   const id = slug.split("-")[0];
   const [api, setApi] = useState<CarouselApi>();
   const [flashcard, setFlashcard] = useState<any>({
@@ -132,6 +143,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+
   useEffect(() => {
     const fetchFlashcard = async () => {
       if (user?.id) {
@@ -148,6 +161,22 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     };
     fetchFlashcard();
   }, [user, id]);
+
+  // Handle Delete Flashcard
+  const handleDeleteFlashcard = async () => {
+    try {
+      const { error } = await deleteFlashcard(id);
+
+      if (error) {
+        toast.error("Failed to delete flashcard: " + error);
+      } else {
+        toast.success("Flashcard deleted successfully!");
+        router.push("/home");
+      }
+    } catch (err) {
+      toast.error("An unenxpected error occured");
+    }
+  };
 
   // Handle answer submission in blur mode
   const handleAnswerSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -490,7 +519,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   return (
     <div
-      className={`max-w-[900px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden ${
+      className={`max-w-[900px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden mt-14 ${
         isFullScreen ? "fixed inset-0 top-1/5  z-50 p-0 m-0 " : ""
       }`}
     >
@@ -512,6 +541,37 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       {!loading ? (
         <div className="relative -mt-3 sm:-mt-5">
           <div className="absolute bottom-70 -right-3 -z-2 size-155 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-70%" />
+
+          <Dialog open={openConfirmDelete} onOpenChange={setOpenConfirmDelete}>
+            <DialogContent className="max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle className="text-lg">Delete Flashcard</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. The text will be permanently
+                  deleted and removed from your library.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-end gap-3 mt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOpenConfirmDelete(false);
+                  }}
+                  className="text-gray-200 hover:text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    handleDeleteFlashcard();
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Delete
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
           <Dialog open={isQuizModeConfirm} onOpenChange={setIsQuizModeConfirm}>
             <DialogContent className="max-w-[400px]">
@@ -771,27 +831,78 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
               >
                 <ArrowLeft className="h-5 w-5" /> Back
               </Button>
-              <div className="flex justify-between gap-3 w-full">
+              <div className="flex justify-between items-center gap-3 w-full">
                 <div className="flex items-center">
                   <h1 className="font-semibold text-lg">{flashcard.title}</h1>
                 </div>
-                <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpenEditFlashcard(true);
-                  }}
-                  variant="ghost"
-                  className="text-gray-400 hover:text-white"
-                >
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
+
+                <div className="flex gap-2 ">
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowWpm(!showWpm);
+                    }}
+                    variant="ghost"
+                    className={cn(
+                      "text-gray-400 hover:text-white",
+                      showWpm && "text-blue-400 hover:text-blue-400"
+                    )}
+                  >
+                    WPM
+                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className="text-gray-400 hover:text-white"
+                      >
+                        <EllipsisVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-40 bg-gray-900 border-gray-700">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          e.preventDefault();
+                          setOpenEditFlashcard(true);
+                        }}
+                        className="cursor-pointer focus:bg-gray-800"
+                      >
+                        <Pencil className="mr-2 h-4 w-4" />
+                        <span>Edit</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setOpenConfirmDelete(true)}
+                        className="cursor-pointer focus:bg-gray-800 text-red-400 "
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
               <p className="text-gray-300 max-w-170">{flashcard.description}</p>
             </div>
           )}
 
           <div className={`${isFullScreen ? "h-screen " : "h-[100vh] pt-3"}`}>
+            <div className="mb-6  flex items-center justify-between max-w-[800px] mx-auto">
+              {showWpm ? (
+                <motion.div
+                  initial={{ y: 20, opacity: 0, scale: 0.95 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  exit={{ y: 20, opacity: 0, scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="mt-2 text-blue-400 font-mono w-full text-right"
+                >
+                  {wpm} WPM
+                </motion.div>
+              ) : (
+                <div className="h-0" />
+              )}
+            </div>
+
             <Carousel
               setApi={setApi}
               className="mx-auto relative"
@@ -801,7 +912,9 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 skipSnaps: isQuizMode, // Prevents partial swipes from changing cards
               }}
             >
-              <CarouselContent className="max-w-[900px] w-full mx-auto gap-x-6">
+              <CarouselContent
+                className={`max-w-[900px] w-full mx-auto gap-x-6 ${spaceMono.className} `}
+              >
                 {flashcard?.terms.map((item: any, index: any) => (
                   <CarouselItem
                     key={index}
@@ -809,66 +922,68 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                       isFullScreen ? "h-100" : "h-96"
                     }`}
                   >
-                    <div className="flex flex-col items-center h-full p-8">
-                      <div className="absolute right-2 top-4 flex gap-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => setBlurAnswer(!blurAnswer)}
-                              className={cn(
-                                "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
-                                blurAnswer
-                                  ? "text-blue-400"
-                                  : "text-gray-400 hover:text-white"
-                              )}
-                            >
-                              {!blurAnswer ? (
-                                <Eye className="scale-78" />
-                              ) : (
-                                <EyeClosed className="scale-78" />
-                              )}
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{!blurAnswer ? "Hide Answer" : "Show Answer"}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+                    <div className="flex flex-col items-center justify-center h-full p-8">
+                      <div className="absolute top-6 right-0 w-full items-center flex justify-between px-3">
+                        {/* Phase indicator */}
+                        <div className="flex items-center gap-3">
+                          <div
+                            onClick={() => setCurrentPhase("question")}
+                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                              currentPhase === "question"
+                                ? "bg-blue-600/20 text-blue-400"
+                                : questionCompleted
+                                ? "bg-green-600/20 text-green-400"
+                                : "bg-gray-600/20 text-gray-400"
+                            }`}
+                          >
+                            {questionCompleted && (
+                              <CheckCircle className="w-4 h-4" />
+                            )}
+                            <span className="text-xs">Question</span>
+                          </div>
 
-                      {/* Phase indicator */}
-                      <div className="mb-6 mt-8 flex items-center gap-4">
-                        <div
-                          onClick={() => setCurrentPhase("question")}
-                          className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
-                            currentPhase === "question"
-                              ? "bg-blue-600/20 text-blue-400"
-                              : questionCompleted
-                              ? "bg-green-600/20 text-green-400"
-                              : "bg-gray-600/20 text-gray-400"
-                          }`}
-                        >
-                          {questionCompleted && (
-                            <CheckCircle className="w-4 h-4" />
-                          )}
-                          <span>Question</span>
+                          <div
+                            onClick={() => setCurrentPhase("answer")}
+                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                              currentPhase === "answer"
+                                ? "bg-blue-600/20 text-blue-400"
+                                : cardCompleted
+                                ? "bg-green-600/20 text-green-400"
+                                : "bg-gray-600/20 text-gray-400"
+                            }`}
+                          >
+                            {cardCompleted && (
+                              <CheckCircle className="w-4 h-4" />
+                            )}
+                            <span className="text-xs">Answer</span>
+                          </div>
                         </div>
-                        <div
-                          className={`w-8 h-0.5 ${
-                            questionCompleted ? "bg-green-400" : "bg-gray-600"
-                          }`}
-                        />
-                        <div
-                          onClick={() => setCurrentPhase("answer")}
-                          className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
-                            currentPhase === "answer"
-                              ? "bg-blue-600/20 text-blue-400"
-                              : cardCompleted
-                              ? "bg-green-600/20 text-green-400"
-                              : "bg-gray-600/20 text-gray-400"
-                          }`}
-                        >
-                          {cardCompleted && <CheckCircle className="w-4 h-4" />}
-                          <span>Answer</span>
+
+                        <div>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => setBlurAnswer(!blurAnswer)}
+                                className={cn(
+                                  "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                                  blurAnswer
+                                    ? "text-blue-400"
+                                    : "text-gray-400 hover:text-white"
+                                )}
+                              >
+                                {!blurAnswer ? (
+                                  <Eye className="scale-78" />
+                                ) : (
+                                  <EyeClosed className="scale-78" />
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {!blurAnswer ? "Hide Answer" : "Show Answer"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
                         </div>
                       </div>
 

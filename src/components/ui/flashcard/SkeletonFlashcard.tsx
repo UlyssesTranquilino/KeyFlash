@@ -7,7 +7,10 @@ const SkeletonFlashcard = () => {
           <div className="flex justify-between gap-3 w-full">
             <Skeleton className="h-8 w-1/2 rounded-md" />
 
-            <Skeleton className="h-5 w-1/6 rounded-md" />
+            <div className="flex  justify-end gap-3 w-full h-full">
+              <Skeleton className="h-8 w-1/8 rounded-md" />
+              <Skeleton className="h-8 w-5 rounded-md" />
+            </div>
           </div>
 
           <Skeleton className="h-5 w-3/4 rounded-md mt-3" />
