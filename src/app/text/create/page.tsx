@@ -40,7 +40,7 @@ const CreateText = () => {
       };
 
       const { data, error } = await insertText(textData);
-      toast.success("Flashcard updated successfully!");
+      toast.success("Text created successfully!");
 
       const slug = `${data.id}-${slugify(title)}`;
       router.push(`/text/${slug}`);
@@ -66,7 +66,7 @@ const CreateText = () => {
       </Button>
 
       <h1 className="text-center font-semibold text-lg md:text-xl mb-8">
-        Write Text
+        Create Text
       </h1>
 
       <div className="mb-3 flex flex-col gap-3">

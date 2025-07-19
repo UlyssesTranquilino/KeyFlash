@@ -30,6 +30,23 @@ export default function HomePage() {
   const [texts, setTexts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Initial quote and text fetch
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      const data = await getAllFlashcards(user?.id);
+      console.log("Data: ", data);
+      setLoading(false);
+
+      if (Array.isArray(data)) {
+        setFlashcards(data);
+      } else {
+        setFlashcards([]);
+      }
+    };
+    setLoading(true);
+    fetchFlashcards();
+  }, []);
+
   function slugify(str: string) {
     return str
       .toLowerCase()
@@ -47,7 +64,7 @@ export default function HomePage() {
         </div>
 
         <div>
-          <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-4 lg:gap-6">
+          <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
             {Array.from({ length: 4 }).map((_, index) => (
               <Skeleton key={index} className="rounded-xl h-40" />
             ))}
@@ -83,22 +100,6 @@ export default function HomePage() {
     );
   }
 
-  // Initial quote and text fetch
-  useEffect(() => {
-    const fetchFlashcards = async () => {
-      const data = await getAllFlashcards(user?.id);
-      setLoading(false);
-
-      if (Array.isArray(data)) {
-        setFlashcards(data);
-      } else {
-        setFlashcards([]);
-      }
-    };
-    setLoading(true);
-    fetchFlashcards();
-  }, []);
-
   return (
     <div className="h-screen container relative max-w-[1350px] px-2 md:px-5 mx-auto  overflow-hidden -mt-2">
       <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
@@ -116,7 +117,7 @@ export default function HomePage() {
         </div>
         <div>
           {flashcards.length > 0 ? (
-            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
               {/* Flashcard Item */}
               {flashcards?.slice(0, 4).map((card: any) => (
                 <div

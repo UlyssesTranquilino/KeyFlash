@@ -3,6 +3,8 @@ import { jakartaSans } from "./ui/fonts";
 import "./globals.css";
 import { ThemeProvider } from "./ui/theme-provider";
 import AuthProviderWrapper from "@/components/ui/AuthProviderWrapper";
+import Navbar from "./ui/navbar/navbar";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,6 +26,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <ConditionalNavbar />
             {children}
           </ThemeProvider>
         </AuthProviderWrapper>

@@ -28,95 +28,142 @@ import { toast } from "sonner";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { copyTracedFiles } from "next/dist/build/utils";
-import { editText } from "../../../../utils/text/textUtils";
 import { cn } from "@/lib/utils";
-import { deleteText } from "../../../../utils/text/textUtils";
-import TextSkeleton from "./TextSkeleton";
+import { deleteCode, getCode } from "../../../../utils/code/codeUtils";
+import { editCode } from "../../../../utils/code/codeUtils";
+import CodeTyping from "../typing/CodeTyping";
+import CodeTypingId from "./CodeTypingId";
+import SkeletonCode from "./SkeletonCode";
 
-const TextPageClient = ({ slug }: { slug: string }) => {
+const CodePageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
   const { user } = useAuth();
   const id = slug.split("-")[0];
   const { showWpm, setShowWpm } = useWpm();
-  const [textData, setTextData] = useState<any>({
+  const [codeData, setCodeData] = useState<any>({
     title: "",
-    typingText: "",
+    description: "",
+    language: "",
+    code: "",
+    time_complexity: "",
+    space_complexity: "",
+    difficulty: "",
   });
-  const [copytextData, setCopyTextData] = useState<any>({
+  const [copyCodeData, setCopyCodeData] = useState<any>({
     title: "",
-    typingText: "",
+    description: "",
+    language: "",
+    code: "",
+    time_complexity: "",
+    space_complexity: "",
+    difficulty: "",
   });
   const [loading, setLoading] = useState(true);
-  const [openEditText, setOpenEditText] = useState(false);
+  const [openEditCode, setOpenEditCode] = useState(false);
   const [openConfrmDelete, setOpenConfirmDelete] = useState(false);
 
   const handleEditText = async () => {
-    if (!copytextData.title || !copytextData.typingText) {
-      toast.warning("Please make sure text have title and an typing text.");
+    if (!copyCodeData.title || !copyCodeData.code) {
+      toast.warning("Please make sure text have title and an typing code.");
       return;
     }
 
     try {
-      const { data, error } = await editText({
+      const { data, error } = await editCode({
         id: id,
-        title: copytextData.title,
-        typingText: copytextData.typingText,
+        title: copyCodeData.title,
+        description: copyCodeData.description,
+        code: copyCodeData.code,
+        created_at: copyCodeData.created_at,
+        user_id: user?.id,
       });
 
       if (error) {
-        toast.error("Failed to update text: " + error);
+        toast.error("Failed to update code: " + error);
       } else {
-        toast.success("Text updated successfully!");
+        toast.success("Code updated successfully!");
 
         let updatedData = {
           title: data.title,
-          typingText: data.typingText,
+          description: data.description,
+          code: data.code,
         };
-        setTextData(updatedData);
-        setCopyTextData(updatedData);
+        setCodeData(updatedData);
+        setCopyCodeData(updatedData);
         router.refresh();
       }
     } catch (err) {
       toast.error("An unexpected error occurred");
     }
 
-    setOpenEditText(false);
+    setOpenEditCode(false);
   };
 
   const handleDeleteText = async () => {
     try {
-      const { error } = await deleteText(id); // You'll need to implement deleteText in your textUtils
+      const { error } = await deleteCode(id);
 
       if (error) {
-        toast.error("Failed to delete text: " + error);
+        toast.error("Failed to delete code: " + error);
       } else {
-        toast.success("Text deleted successfully!");
+        toast.success("Code deleted successfully!");
         router.push("/dashboard"); // Redirect after deletion
       }
 
-      // router.back();
+      router.back();
     } catch (err) {
       toast.error("An unexpected error occurred");
     }
   };
 
   useEffect(() => {
-    const fetchText = async () => {
+    const fetchCode = async () => {
       if (user?.id) {
         setLoading(true);
-        const { data } = await getText(id);
+        const { data } = await getCode(id);
+
         let fetchedData = {
           title: data.title,
-          typingText: data.typingText,
+          description: data.description,
+          code: data.code,
+          language: data.language,
+          time_complexity: data.time_complexity,
+          space_complexity: data.space_complexity,
+          difficulty: data.difficulty,
         };
 
-        setTextData(fetchedData);
-        setCopyTextData(fetchedData);
+        setCodeData(fetchedData);
+        setCopyCodeData(fetchedData);
         setLoading(false);
       }
     };
-    fetchText();
+    fetchCode();
   }, [user, id]);
+
+  // Style Difficulty
+  const styleDifficulty = (difficulty: any) => {
+    difficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+
+    if (difficulty == "Easy") {
+      return (
+        <div className="bg-gray-900 text-green-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
+          {difficulty}
+        </div>
+      );
+    } else if (difficulty == "Medium") {
+      return (
+        <div className="bg-gray-900 text-orange-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
+          {difficulty}
+        </div>
+      );
+    } else {
+      return (
+        <div className="bg-gray-900 text-red-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
+          {difficulty}
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="max-w-[1000px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden">
@@ -126,7 +173,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
           <Dialog open={openConfrmDelete} onOpenChange={setOpenConfirmDelete}>
             <DialogContent className="max-w-[400px]">
               <DialogHeader>
-                <DialogTitle className="text-lg">Delete Text</DialogTitle>
+                <DialogTitle className="text-lg">Delete Code</DialogTitle>
                 <DialogDescription>
                   This action cannot be undone. The text will be permanently
                   deleted and removed from your library.
@@ -154,14 +201,14 @@ const TextPageClient = ({ slug }: { slug: string }) => {
             </DialogContent>
           </Dialog>
 
-          <Dialog open={openEditText} onOpenChange={setOpenEditText}>
+          <Dialog open={openEditCode} onOpenChange={setOpenEditCode}>
             <DialogContent
               onOpenAutoFocus={(e) => e.preventDefault()}
               className="!max-w-[750px] w-full h-[80vh] flex flex-col"
             >
               <DialogHeader className="">
                 <DialogTitle className="text-xl font-semibold text-center">
-                  Edit Text
+                  Edit Code
                 </DialogTitle>
                 <DialogDescription className="text-sm text-gray-400"></DialogDescription>
               </DialogHeader>
@@ -176,9 +223,9 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                       placeholder="Enter title"
                       required
                       className="input-glow !bg-gray-900 !border-0"
-                      value={copytextData.title}
+                      value={copyCodeData.title}
                       onChange={(e) => {
-                        setCopyTextData((prev: any) => ({
+                        setCopyCodeData((prev: any) => ({
                           ...prev,
                           title: e.target.value,
                         }));
@@ -192,9 +239,9 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                       id="typingText"
                       placeholder="Enter typing text"
                       className="input-glow !bg-gray-900 !border-0 leading-normal"
-                      value={copytextData.typingText}
+                      value={copyCodeData.typingText}
                       onChange={(e) => {
-                        setCopyTextData((prev: any) => ({
+                        setCopyCodeData((prev: any) => ({
                           ...prev,
                           typingText: e.target.value,
                         }));
@@ -203,14 +250,14 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                   </div>
 
                   <div className="text-gray-500">
-                    {copytextData.typingText.length} characters -
+                    {copyCodeData.code.length} characters -
                     <span
                       className={cn(
                         "text-gray-500",
-                        copytextData.typingText.length > 500 && "text-red-400"
+                        copyCodeData.code.length > 1000 && "text-red-400"
                       )}
                     >
-                      Max 500 characters
+                      Max 1000 characters
                     </span>
                   </div>
                 </div>
@@ -218,14 +265,14 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                 <div className="mt-6 flex justify-end gap-3">
                   <Button
                     onClick={() => {
-                      setOpenEditText(false);
+                      setOpenEditCode(false);
                     }}
                     className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
                   >
                     Cancel
                   </Button>
                   <Button
-                    disabled={copytextData.typingText.length > 500}
+                    disabled={copyCodeData.code.length > 1000}
                     onClick={handleEditText}
                     className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
                   >
@@ -273,7 +320,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-40 bg-gray-900 border-gray-700">
                     <DropdownMenuItem
-                      onClick={() => setOpenEditText(true)}
+                      onClick={() => setOpenEditCode(true)}
                       className="cursor-pointer focus:bg-gray-800"
                     >
                       <Pencil className="mr-2 h-4 w-4" />
@@ -290,18 +337,55 @@ const TextPageClient = ({ slug }: { slug: string }) => {
                 </DropdownMenu>
               </div>
             </div>
-            <div className="flex items-center">
-              <h1 className="font-semibold text-lg mt-3">{textData.title}</h1>
+
+            {/* Code Information */}
+            <div className="pl-2 flex items-center">
+              <div className="my-3">
+                <h1 className="mb-3 font-medium text-lg md:text-2xl lg:text-[1.7em]">
+                  {codeData?.title}
+                </h1>
+                <div className="flex items-center flex-wrap gap-2 mb-3">
+                  {codeData?.difficulty
+                    ? styleDifficulty(codeData?.difficulty)
+                    : ""}
+
+                  {codeData.time_complexity && (
+                    <div className="bg-gray-900 text-blue-300 w-auto px-3 flex items-center justify-center text-sm rounded-full p-1">
+                      Time Complexity: {codeData?.time_complexity}
+                    </div>
+                  )}
+
+                  {codeData.space_complexity && (
+                    <div className="bg-gray-900 text-blue-300 w-auto px-3 flex items-center justify-center text-sm rounded-full p-1">
+                      Space Complexity: {codeData?.space_complexity}
+                    </div>
+                  )}
+                </div>
+                <p className="text-sm md:text-base mt-1 max-w-4xl text-gray-300">
+                  {codeData?.description}
+                </p>
+              </div>
             </div>
           </div>
 
-          <StandardTyping text={textData.typingText} />
+          <div className="lg:pr-20">
+            <CodeTyping
+              text={codeData.code}
+              title={codeData.title}
+              description={codeData.description}
+              difficulty={codeData.difficulty}
+              timeComplexity={codeData.time_complexity}
+              spaceComplexity={codeData.space_complexity}
+            />
+          </div>
         </div>
       ) : (
-        <TextSkeleton />
+        <div>
+          <SkeletonCode />
+        </div>
       )}
     </div>
   );
 };
 
-export default TextPageClient;
+export default CodePageClient;

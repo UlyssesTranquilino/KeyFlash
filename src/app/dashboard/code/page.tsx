@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
-import { getAllTexts } from "../../../../utils/text/textUtils";
+import { getAllCodes } from "../../../../utils/code/codeUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import Link from "next/link";
@@ -26,22 +26,23 @@ import { useRouter } from "next/navigation";
 export default function HomePage() {
   const router = useRouter();
   const { user, session } = useAuth();
-  const [texts, setTexts] = useState<any[]>([]);
+  const [codes, setCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Initial quote and text fetch
   useEffect(() => {
-    const fetchTexts = async () => {
-      const data = await getAllTexts();
+    const fetchCodes = async () => {
+      const { data } = await getAllCodes();
+
       setLoading(false);
       if (Array.isArray(data)) {
-        setTexts(data);
+        setCodes(data);
       } else {
-        setTexts([]);
+        setCodes([]);
       }
     };
     setLoading(true);
-    fetchTexts();
+    fetchCodes();
   }, []);
 
   function slugify(str: string) {
@@ -107,21 +108,21 @@ export default function HomePage() {
       <div className="mt-12">
         <div className="flex justify-between items-center mb-2">
           <h1 className="font-medium text-lg mb-3 ">
-            Texts
-            <span className="ml-1 text-sm text-gray-300">({texts.length})</span>
+            Codes
+            <span className="ml-1 text-sm text-gray-300">({codes.length})</span>
           </h1>
         </div>
 
         <div>
-          {texts.length > 0 ? (
+          {codes.length > 0 ? (
             <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
-              {/* Flashcard Item */}
-              {texts?.map((card: any) => (
+              {/* Code Item */}
+              {codes?.map((card: any) => (
                 <div
                   key={card.id}
                   onClick={() => {
                     const slug = `${card.id}-${slugify(card.title)}`;
-                    router.push(`/text/${slug}`);
+                    router.push(`/code/${slug}`);
                   }}
                   className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br  from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                 >
@@ -136,7 +137,7 @@ export default function HomePage() {
 
                   {/* Decorative Graphic - Animated on Hover */}
                   <div className="z-1 absolute right-10 bottom-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300">
-                    <Type
+                    <Code
                       className="scale-300 rotate-20 stroke-1 text-blue-500 
                     group-hover:rotate-0 
                     group-hover:scale-[3.1] 
@@ -157,16 +158,16 @@ export default function HomePage() {
             <div className="mt-12">
               <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center hover:border-blue-500 transition-colors duration-300">
                 <div className="mx-auto max-w-md">
-                  <Type className="scale-140 mx-auto text-gray-500 hover:text-blue-400 transition-colors duration-300" />
+                  <Code className="scale-140 mx-auto text-gray-500 hover:text-blue-400 transition-colors duration-300" />
                   <h3 className="mt-8 text-lg font-medium text-white hover:text-blue-400 transition-colors duration-300">
-                    No Texts yet
+                    No Codes yet
                   </h3>
                   <p className="mt-2 text-gray-400 hover:text-gray-300 transition-colors duration-300">
-                    Get started by creating your first text
+                    Get started by creating your first code
                   </p>
                   <div className="mt-6">
                     <Link
-                      href="/text/create"
+                      href="/code/create"
                       className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg
@@ -181,7 +182,7 @@ export default function HomePage() {
                           clipRule="evenodd"
                         />
                       </svg>
-                      Create Text
+                      Create Code
                     </Link>
                   </div>
                 </div>

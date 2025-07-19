@@ -24,7 +24,7 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
-  return redirect("/home");
+  return redirect("/dashboard");
 }
 
 // app/signup/actions.ts
