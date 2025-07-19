@@ -19,21 +19,213 @@ import {
 import { useEffect, useState } from "react";
 import { getAllFlashcards } from "../../../utils/flashcard/flashcard";
 import { getAllTexts } from "../../../utils/text/textUtils";
+import { getAllCodes } from "../../../utils/code/codeUtils";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function HomePage() {
   const router = useRouter();
   const { user, session } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [texts, setTexts] = useState<any[]>([]);
+  const [codes, setCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Initial quote and text fetch
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      const data = await getAllFlashcards(user?.id);
+
+      if (Array.isArray(data)) {
+        setFlashcards(data);
+      } else {
+        setFlashcards([]);
+      }
+    };
+
+    const fetchTexts = async () => {
+      const data = await getAllTexts();
+
+      if (Array.isArray(data)) {
+        setTexts(data);
+      } else {
+        setTexts([]);
+      }
+    };
+
+    const fetchCodes = async () => {
+      const { data } = await getAllCodes();
+
+      if (Array.isArray(data)) {
+        setCodes(data);
+      } else {
+        setCodes([]);
+      }
+      setLoading(false);
+    };
+
+    setLoading(true);
+    fetchFlashcards();
+    fetchTexts();
+    fetchCodes();
+  }, []);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
+      <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
+        <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+
+        <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+
+        <div className="max-w-4xl ">
+          <header className="mb-8">
+            <h1 className="text-xl sm:text-2xl font-bold text-white  ">
+              Welcome, {user.user_metadata?.full_name || user.email}!
+            </h1>
+            <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
+              Current Streak: 3🔥
+            </p>
+          </header>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
+          <Link
+            href="/typing/random"
+            className="cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
+          >
+            <div className="absolute -top-55 -right-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+            <div className="flex flex-col items-center gap-2">
+              <Dices className="text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-all duration-300" />
+              <p className="text-base mb-1 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+                Random Typing
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/typing/quote"
+            className="cursor-pointer bg-black  hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
+          >
+            <div className="absolute -top-15 -left-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+            <div className="flex flex-col items-center gap-2">
+              <Quote className="text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-all duration-300" />
+              <p className="text-base mb-1 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+                Quote Typing
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/typing/code"
+            className="cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
+          >
+            <div className="absolute -top-15 -left-15 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+            <div className="flex flex-col items-center gap-2">
+              <Code className="text-blue-400 group-hover:text-blue-300 group-hover:scale-110 transition-all duration-300" />
+              <p className="text-base mb-1 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+                Code Typing
+              </p>
+            </div>
+          </Link>
+
+          <Popover>
+            <PopoverTrigger
+              asChild
+              className="cursor-pointer bg-black border border-transparent hover:border-blue-400/60 transition-all duration-300 ease-in-out shadow-xs shadow-blue-700/90 relative overflow-hidden flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm  group"
+            >
+              <div className="flex flex-col items-center w-full h-23 lg:h-30">
+                <CirclePlus className="scale-120 transition-transform duration-300 text-blue-400 group-hover:text-blue-300 group-hover:scale-125" />
+                <p className="text-base mt-2 text-blue-400 group-hover:text-blue-300 group-hover:font-medium transition-all duration-300">
+                  Create
+                </p>
+                <div className="absolute -z-2 size-80 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>
+              </div>
+            </PopoverTrigger>
+
+            <PopoverContent className="bg-gray-950 w-36 md:w-45 border-gray-800">
+              <div className="flex flex-col items-center gap-3">
+                <Link href="/flashcard/create" className="w-full">
+                  <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
+                    Flashcard
+                  </Button>
+                </Link>
+                <Link href="/typing/custom" className="w-full">
+                  <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
+                    Text
+                  </Button>
+                </Link>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="mt-12">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="font-medium text-lg mb-3 ">Flashcards </h1>
+
+            <Button
+              size="icon"
+              onClick={() => router.push("/flashcards")}
+              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+            >
+              Show All <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div>
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="rounded-xl h-40" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-12">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="font-medium text-lg mb-3 ">Texts</h1>
+
+            <Button
+              size="icon"
+              onClick={() => router.push("/texts")}
+              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+            >
+              Show All <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div>
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="rounded-xl h-40" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-12">
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="font-medium text-lg mb-3 ">Codes</h1>
+
+            <Button
+              size="icon"
+              onClick={() => router.push("/code")}
+              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+            >
+              Show All <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div>
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-4 lg:gap-6">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="rounded-xl h-40" />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -65,37 +257,37 @@ export default function HomePage() {
     );
   }
 
-  // Initial quote and text fetch
-  useEffect(() => {
-    const fetchFlashcards = async () => {
-      const data = await getAllFlashcards(user?.id);
-
-      if (Array.isArray(data)) {
-        setFlashcards(data);
-      } else {
-        setFlashcards([]);
-      }
-    };
-
-    const fetchTexts = async () => {
-      const data = await getAllTexts();
-
-      if (Array.isArray(data)) {
-        setTexts(data);
-      } else {
-        setTexts([]);
-      }
-    };
-    fetchFlashcards();
-    fetchTexts();
-  }, []);
-
   function slugify(str: string) {
     return str
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)+/g, "");
   }
+
+  // Style Difficulty
+  const styleDifficulty = (difficulty: string) => {
+    difficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+
+    if (difficulty == "Easy") {
+      return (
+        <div className="bg-gray-900 text-green-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
+          {difficulty}
+        </div>
+      );
+    } else if (difficulty == "Medium") {
+      return (
+        <div className="bg-gray-900 text-orange-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
+          {difficulty}
+        </div>
+      );
+    } else {
+      return (
+        <div className="bg-gray-900 text-red-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
+          {difficulty}
+        </div>
+      );
+    }
+  };
 
   return (
     <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
@@ -175,9 +367,14 @@ export default function HomePage() {
                   Flashcard
                 </Button>
               </Link>
-              <Link href="/typing/custom" className="w-full">
+              <Link href="/text/create" className="w-full">
                 <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
                   Text
+                </Button>
+              </Link>
+              <Link href="/code/create" className="w-full">
+                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
+                  Code
                 </Button>
               </Link>
             </div>
@@ -196,7 +393,7 @@ export default function HomePage() {
 
           <Button
             size="icon"
-            onClick={() => router.push("/texts")}
+            onClick={() => router.push("/flashcards")}
             className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
           >
             Show All <ChevronRight className="h-5 w-5" />
@@ -204,7 +401,7 @@ export default function HomePage() {
         </div>
         <div>
           {flashcards.length > 0 ? (
-            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
               {/* Flashcard Item */}
               {flashcards?.slice(0, 4).map((card: any) => (
                 <div
@@ -410,6 +607,101 @@ export default function HomePage() {
                         />
                       </svg>
                       Create Text
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-2">
+          <h1 className="font-medium text-lg mb-3 ">
+            Codes
+            <span className="ml-1 text-sm text-gray-300">({codes.length})</span>
+          </h1>
+
+          <Button
+            size="icon"
+            onClick={() => router.push("/code")}
+            className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+          >
+            Show All <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <div>
+          {codes.length > 0 ? (
+            <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
+              {/* Flashcard Item */}
+              {codes?.slice(0, 4).map((card: any) => (
+                <div
+                  key={card.id}
+                  onClick={() => {
+                    const slug = `${card.id}-${slugify(card.title)}`;
+                    router.push(`/code/${slug}`);
+                  }}
+                  className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br  from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
+                >
+                  {/* Content */}
+                  <div className="relative z-10 p-5 h-full flex flex-col">
+                    <div className="mb-2">
+                      <h2 className="max-w-50 truncate font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300 group-hover:translate-x-1 ">
+                        {card.title}
+                      </h2>
+                    </div>
+                  </div>
+
+                  {/* Decorative Graphic - Animated on Hover */}
+                  <div className="z-1 absolute right-10 bottom-10 opacity-70 group-hover:opacity-90 transition-opacity duration-300">
+                    <Code
+                      className="scale-300 rotate-20 stroke-1 text-blue-500 
+                    group-hover:rotate-0 
+                    group-hover:scale-[3.1] 
+                    group-hover:-translate-x-5
+                    group-hover:-translate-y-2
+                    transition-all duration-500 ease-in-out"
+                    />
+                  </div>
+
+                  {/* Hover Gradient Overlay */}
+                  <div className="absolute  inset-0 bg-gradient-to-t from-blue-800/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                  {/* <div className="absolute rotate-20 -bottom-10 -right-13 h-150 w-17 bg-blue-950/50 -z-0" /> */}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-12">
+              <div className="bg-gray-900/50 rounded-xl border-2 border-dashed border-gray-700 p-12 text-center hover:border-blue-500 transition-colors duration-300">
+                <div className="mx-auto max-w-md">
+                  <Code className="scale-140 mx-auto text-gray-500 hover:text-blue-400 transition-colors duration-300" />
+                  <h3 className="mt-8 text-lg font-medium text-white hover:text-blue-400 transition-colors duration-300">
+                    No Code yet
+                  </h3>
+                  <p className="mt-2 text-gray-400 hover:text-gray-300 transition-colors duration-300">
+                    Get started by creating your first code
+                  </p>
+                  <div className="mt-6">
+                    <Link
+                      href="/code/create"
+                      className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Create Code
                     </Link>
                   </div>
                 </div>

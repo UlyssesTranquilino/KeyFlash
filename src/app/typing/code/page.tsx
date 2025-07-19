@@ -404,7 +404,7 @@ const CodeType = () => {
       {!isLoading ? (
         <div>
           {!completed ? (
-            <div className="px-4 pb-6">
+            <div className="px-4 pb-4 mt-20">
               {showWpm && (
                 <motion.div
                   initial={{ y: -17, opacity: 0, scale: 0.95 }}

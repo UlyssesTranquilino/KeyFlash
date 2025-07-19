@@ -73,9 +73,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 5 155 155"
-            width="44"
-            height="44"
+            viewBox="0 10 150 150"
+            width="50"
+            height="50"
             fill="none"
             stroke="currentColor"
             strokeWidth="13"
@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <rect
               x="30"
               y="40"
-              width="79"
+              width="64"
               height="99"
               rx="10"
               transform="rotate(16 120 220)"

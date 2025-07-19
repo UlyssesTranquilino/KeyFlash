@@ -171,7 +171,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
         toast.error("Failed to delete flashcard: " + error);
       } else {
         toast.success("Flashcard deleted successfully!");
-        router.push("/home");
+        router.push("/dashboard");
       }
     } catch (err) {
       toast.error("An unenxpected error occured");

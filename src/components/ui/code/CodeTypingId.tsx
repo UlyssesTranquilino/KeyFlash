@@ -20,25 +20,24 @@ const debounce = (func: any, wait: any) => {
 };
 
 interface CodeTypingProps {
-  text: string;
+  code: string;
   title?: string;
   description?: string;
+  language: string;
   difficulty?: string;
-  timeComplexity?: string;
-  spaceComplexity?: string;
+  time_complexity?: string;
+  space_complexity?: string;
 }
 
-const CodeTyping: React.FC<CodeTypingProps> = ({
-  text,
-  title = "Custom Code",
-  description = "Practice typing this code snippet",
-  difficulty = "Medium",
-  timeComplexity = "O(n)",
-  spaceComplexity = "O(1)",
-}) => {
-  console.log("Text: ", text);
-  // Context
-  const { showWpm } = useWpm();
+const CodeTypingId = ({ codeData }: { codeData: CodeTypingProps }) => {
+  const text = codeData.code;
+  const title = codeData.title;
+  const description = codeData.description;
+  const difficulty = codeData.difficulty;
+  const time_complexity = codeData.time_complexity;
+  const space_complexity = codeData.space_complexity;
+  const language = codeData.language;
+
   // Typing state
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [userInput, setUserInput] = useState("");
@@ -327,73 +326,7 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
     setIsFocused(false);
   }, []);
 
-  return (
-    <div className="lg:pl-20 text-white min-h-screen relative">
-      {!completed ? (
-        <div className="px-4 pb-6 relative">
-          {showWpm && (
-            <motion.div
-              initial={{ y: -17, opacity: 0, scale: 0.95 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: -17, opacity: 0, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="absolute -top-16 z-10 right-0 self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
-            >
-              {userInput.length == 0 ? 0 : wpm} WPM
-            </motion.div>
-          )}
-          <div className="relative overflow-auto mt-12 bg-black p-6 rounded-lg border border-gray-700/40">
-            <pre className="line-numbers">
-              <code className="md:text-lg lg:text-lg font-mono leading-relaxed">
-                {highlightedCode}
-              </code>
-            </pre>
-
-            {/* Hidden input */}
-            <textarea
-              ref={inputRef}
-              value={userInput}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              className="absolute inset-0 opacity-0 z-10"
-              autoFocus
-              aria-hidden="true"
-            />
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-3 sm:gap-14 md:gap-22 lg:gap-28 my-10">
-            <button
-              className="flex items-center justify-center lg:text-lg mt-4 p-2 px-6 hover:text-gray-300 hover:bg-gray-900 rounded-sm text-gray-400 transition-colors"
-              onClick={resetTest}
-            >
-              <RotateCcw className="mr-2 lg:mr-3 w-4 h-4 lg:scale-130" />
-              Reset
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="mt-16">
-          <Results
-            wpm={wpm}
-            startTime={startTime}
-            endTime={endTime || Date.now()}
-            accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
-            correctChars={correctChars}
-            incorrectChars={incorrectChars}
-            totalChars={text.length}
-            quote={text}
-            author={"code"}
-            mistakes={mistakes}
-            handleRefetch={() => setOpenAddText(true)}
-            handleRetype={resetTest}
-          />
-        </div>
-      )}
-    </div>
-  );
+  return <div className="lg:pl-20 text-white min-h-screen relative"></div>;
 };
 
-export default CodeTyping;
+export default CodeTypingId;
