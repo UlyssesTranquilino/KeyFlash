@@ -6,13 +6,14 @@ import { TimerProvider } from "@/app/context/TimerContext";
 import { QuoteProvider } from "@/app/context/QuoteContext";
 
 export default async function Page({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   return (
     <QuoteProvider>
       <TimerProvider>
         <AddTextProvider>
           <WpmProvider>
             <TextContextProvider>
-              <TextPageClient slug={params.slug} />
+              <TextPageClient slug={slug} />
             </TextContextProvider>
           </WpmProvider>
         </AddTextProvider>

@@ -1065,8 +1065,8 @@ const TypingFlashcards = () => {
         </CarouselContent>
 
         <div className=" w-full absolute right-1/2  -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
-          <div className="w-full  col-span-3 relative">
-            <div className="text-center w-30 sm:w-34 mx-auto  relative ">
+          <div className="w-full flex items-end justify-end col-span-3  relative">
+            <div className=" text-center w-30 sm:w-34  relative  ">
               <CarouselPrevious
                 disabled={isTestMode}
                 className="flex  absolute left-0  top-1/2 -translate-y-1/2 z-10"
@@ -1097,7 +1097,7 @@ const TypingFlashcards = () => {
           </div>
 
           {/* Progress and controls */}
-          <div className="flex justify-end gap-5">
+          <div className="flex col-span-2  justify-end gap-5">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
