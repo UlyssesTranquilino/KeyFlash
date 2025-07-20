@@ -16,6 +16,7 @@ const Results = ({
   endTime,
   handleRefetch,
   handleRetype,
+  sessionType = "multiple",
 }: {
   wpm: number;
   accuracy: number;
@@ -29,6 +30,7 @@ const Results = ({
   endTime: number;
   handleRefetch: () => void;
   handleRetype: (quoteData: any) => void;
+  sessionType?: string;
 }) => {
   const { time } = useTimer();
   const { setQuote, originalQuote } = useQuote();
@@ -157,12 +159,14 @@ const Results = ({
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-4">
-        <button
-          onClick={handleRefetch}
-          className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
-        >
-          New {author === "" ? "Texts" : author == "code" ? "Code" : "Quote"}
-        </button>
+        {sessionType === "multiple" && (
+          <button
+            onClick={handleRefetch}
+            className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
+          >
+            New {author === "" ? "Texts" : author == "code" ? "Code" : "Quote"}
+          </button>
+        )}
         <button
           onClick={() => {
             handleRetype(originalQuote ?? quote);

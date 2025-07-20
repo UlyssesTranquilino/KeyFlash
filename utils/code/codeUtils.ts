@@ -150,7 +150,7 @@ export async function editCode(codeData: codeDataType) {
       return { error: error.message };
     }
 
-    return data;
+    return { data, error: null };
   } catch (error) {
     console.error("Unexpected error getting all codes: ", error);
     return { error: "Unexpected error occcured" };

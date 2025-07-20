@@ -17,6 +17,9 @@ import {
   LifeBuoy,
   Send,
   Code,
+  Dices,
+  Quote,
+  FolderCode,
 } from "lucide-react";
 
 import { NavSecondary } from "./nav-secondary";
@@ -69,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: "Flashcards",
-        url: "/dashboard/flashcard",
+        url: "/dashboard/flashcards",
         icon: (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -105,12 +108,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: "Texts",
-        url: "/dashboard/text",
+        url: "/dashboard/texts",
         icon: Type,
       },
       {
         title: "Codes",
-        url: "/dashboard/code",
+        url: "/dashboard/codes",
+        icon: FolderCode,
+      },
+    ],
+    navTyping: [
+      {
+        name: "Text",
+        url: "/dashboard/typing/random",
+        icon: Dices,
+      },
+      {
+        name: "Quote",
+        url: "/typing/quote",
+        icon: Quote,
+      },
+      {
+        name: "Code",
+        url: "/typing/code",
         icon: Code,
       },
     ],
@@ -140,6 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="bg-black/60">
         <NavMain items={data.navMain} />
+        <NavProjects projects={data.navTyping} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter className="bg-black/60">

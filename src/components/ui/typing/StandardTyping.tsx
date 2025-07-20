@@ -507,6 +507,7 @@ const StandardTyping = ({ text }) => {
           mistakes={mistakes}
           handleRefetch={() => setOpenAddText(true)}
           handleRetype={handleReType}
+          sessionType="single"
         />
       )}
     </div>

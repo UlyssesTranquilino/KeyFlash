@@ -22,6 +22,7 @@ const SkeletonCode = () => {
               <Skeleton className="h-6 w-15 rounded-full" />
               <Skeleton className="h-6 w-22 rounded-full" />
               <Skeleton className="h-6 w-22 rounded-full" />
+              <Skeleton className="h-6 w-22 rounded-full" />
             </div>
           </div>
         </div>

@@ -6,16 +6,15 @@ import { RotateCcw } from "lucide-react";
 import Results from "@/components/ui/typing/Results";
 import { useWpm } from "@/app/context/WpmContext";
 
-// Debounce utility
-const debounce = (func: any, wait: any) => {
-  let timeout: any;
-  return function executedFunction(...args: any) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
+// Memoize debounce utility
+const debounce = <T extends (...args: any[]) => void>(
+  func: T,
+  wait: number
+) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
     clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+    timeout = setTimeout(() => func(...args), wait);
   };
 };
 
@@ -26,6 +25,7 @@ interface CodeTypingProps {
   difficulty?: string;
   timeComplexity?: string;
   spaceComplexity?: string;
+  sessionType?: string; // Optional, for future use
 }
 
 const CodeTyping: React.FC<CodeTypingProps> = ({
@@ -35,77 +35,74 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
   difficulty = "Medium",
   timeComplexity = "O(n)",
   spaceComplexity = "O(1)",
+  sessionType = "multiple",
 }) => {
-  console.log("Text: ", text);
   // Context
   const { showWpm } = useWpm();
-  // Typing state
+
+  // Refs
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // State
   const [userInput, setUserInput] = useState("");
   const [isIdle, setIsIdle] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(true);
-
-  // Time
   const [startTime, setStartTime] = useState<number | null>(null);
   const [endTime, setEndTime] = useState<number | null>(null);
   const [completed, setCompleted] = useState(false);
-
-  // Stats
-  const [correctChars, setCorrectChars] = useState(0);
-  const [incorrectChars, setInCorrectChars] = useState(0);
-  const [mistakes, setMistakes] = useState(0);
+  const [stats, setStats] = useState({
+    correctChars: 0,
+    incorrectChars: 0,
+    mistakes: 0,
+  });
   const [wpm, setWpm] = useState(0);
 
-  // Style Difficulty
-  const styleDifficulty = (difficulty: string) => {
-    difficulty = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+  // Memoized difficulty style
+  const difficultyElement = useMemo(() => {
+    const formattedDifficulty =
+      difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+    const colorClasses =
+      {
+        Easy: "text-green-300",
+        Medium: "text-orange-300",
+        Hard: "text-red-300",
+      }[formattedDifficulty] || "text-orange-300";
 
-    if (difficulty == "Easy") {
-      return (
-        <div className="bg-gray-900 text-green-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
-          {difficulty}
-        </div>
-      );
-    } else if (difficulty == "Medium") {
-      return (
-        <div className="bg-gray-900 text-orange-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
-          {difficulty}
-        </div>
-      );
-    } else {
-      return (
-        <div className="bg-gray-900 text-red-300 px-2 w-auto flex items-center justify-center text-sm rounded-full p-1">
-          {difficulty}
-        </div>
-      );
-    }
-  };
+    return (
+      <div
+        className={`bg-gray-900 ${colorClasses} px-2 w-auto flex items-center justify-center text-sm rounded-full p-1`}
+      >
+        {formattedDifficulty}
+      </div>
+    );
+  }, [difficulty]);
 
   // Reset Text
   const resetTest = useCallback(() => {
     setUserInput("");
-    setCurrentIndex(0);
     setStartTime(null);
     setWpm(0);
     setIsIdle(true);
     setCompleted(false);
-    setCorrectChars(0);
-    setInCorrectChars(0);
-    setMistakes(0);
+    setStats({ correctChars: 0, incorrectChars: 0, mistakes: 0 });
     inputRef.current?.focus();
   }, []);
 
   // Debounced WPM calculation
   const debouncedWpmUpdate = useMemo(
     () =>
-      debounce((inputLength: any, start: any) => {
+      debounce((inputLength: number, start: number) => {
         const timeElapsed = (Date.now() - start) / 60000;
         const words = inputLength > 0 ? Math.max(1, inputLength / 5) : 0;
         setWpm(Math.round(words / timeElapsed));
       }, 100),
     []
   );
+
+  // Precompute line lengths for absolute index calculation
+  const lineLengths = useMemo(() => {
+    return text.split("\n").map((line) => line.length);
+  }, [text]);
 
   // Highlight code
   const highlightedCode = useMemo(() => {
@@ -114,85 +111,67 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
     }
 
     const inputLength = userInput.length;
+    const lines = text.split("\n");
 
-    return (
-      <>
-        {text.split("\n").map((line: string, lineIndex: number) => (
-          <div key={lineIndex} className="relative min-h-[1.5rem]">
-            {/* Line number */}
-            <span className="absolute left-0 text-gray-700 select-none w-8 text-right pr-2">
-              {lineIndex + 1}
-            </span>
-            {/* Line content */}
-            <div className="pl-10">
-              {line.length === 0 ? (
-                <span className="text-gray-500">&nbsp;</span>
-              ) : (
-                line.split("").map((char: string, charIndex: number) => {
-                  let absoluteIndex = 0;
-                  for (let i = 0; i < lineIndex; i++) {
-                    absoluteIndex += text.split("\n")[i].length + 1;
-                  }
-                  absoluteIndex += charIndex;
+    return lines.map((line, lineIndex) => {
+      const lineStartIndex =
+        lineIndex === 0
+          ? 0
+          : lineLengths
+              .slice(0, lineIndex)
+              .reduce((sum, len) => sum + len + 1, 0);
 
-                  const isCursor = absoluteIndex === inputLength;
-                  const isTyped = absoluteIndex < inputLength;
-                  const isCorrect =
-                    isTyped && userInput[absoluteIndex] === char;
+      return (
+        <div key={lineIndex} className="relative min-h-[1.5rem]">
+          <span className="absolute left-0 text-gray-700 select-none w-8 text-right pr-2">
+            {lineIndex + 1}
+          </span>
+          <div className="pl-10">
+            {line.length === 0 ? (
+              <span className="text-gray-500">&nbsp;</span>
+            ) : (
+              line.split("").map((char, charIndex) => {
+                const absoluteIndex = lineStartIndex + charIndex;
+                const isCursor = absoluteIndex === inputLength;
+                const isTyped = absoluteIndex < inputLength;
+                const isCorrect = isTyped && userInput[absoluteIndex] === char;
 
-                  const className = isTyped
-                    ? isCorrect
-                      ? "text-white bg-green-900/20"
-                      : "text-red-400 bg-red-900/30"
-                    : "text-gray-500";
+                const className = isTyped
+                  ? isCorrect
+                    ? "text-white bg-green-900/20"
+                    : "text-red-400 bg-red-900/30"
+                  : "text-gray-500";
 
-                  const displayChar = char === " " ? "\u00A0" : char;
+                const displayChar = char === " " ? "\u00A0" : char;
 
-                  return (
-                    <span
-                      key={`${lineIndex}-${charIndex}`}
-                      className="relative"
-                    >
-                      {isCursor && (
-                        <span
-                          className={`absolute left-0 top-[1px] w-0.5 h-4 bg-blue-400 z-10 ${
-                            isIdle ? "animate-pulse" : "animate-pulse"
-                          }`}
-                        />
-                      )}
-                      <span className={className}>{displayChar}</span>
-                    </span>
-                  );
-                })
-              )}
-              {/* Handle cursor at end of line */}
-              {(() => {
-                let lineEndIndex = 0;
-                for (let i = 0; i <= lineIndex; i++) {
-                  if (i < lineIndex) {
-                    lineEndIndex += text.split("\n")[i].length + 1;
-                  } else {
-                    lineEndIndex += text.split("\n")[i].length;
-                  }
-                }
                 return (
-                  inputLength === lineEndIndex && (
-                    <span className="relative">
+                  <span key={`${lineIndex}-${charIndex}`} className="relative">
+                    {isCursor && (
                       <span
-                        className={`absolute left-0 top-0 w-0.5 h-5 bg-blue-400 z-10 ${
+                        className={`absolute left-0 top-[1px] w-0.5 h-4 bg-blue-400 z-10 ${
                           isIdle ? "animate-pulse" : "animate-pulse"
                         }`}
                       />
-                    </span>
-                  )
+                    )}
+                    <span className={className}>{displayChar}</span>
+                  </span>
                 );
-              })()}
-            </div>
+              })
+            )}
+            {inputLength === lineStartIndex + line.length && (
+              <span className="relative">
+                <span
+                  className={`absolute left-0 top-0 w-0.5 h-5 bg-blue-400 z-10 ${
+                    isIdle ? "animate-pulse" : "animate-pulse"
+                  }`}
+                />
+              </span>
+            )}
           </div>
-        ))}
-      </>
-    );
-  }, [text, userInput, isIdle]);
+        </div>
+      );
+    });
+  }, [text, userInput, isIdle, lineLengths]);
 
   // Input Change with character tracking
   const handleInputChange = useCallback(
@@ -200,48 +179,55 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
       const value = e.target.value;
       const currentTime = Date.now();
 
-      // Set idle state immediately
       setIsIdle(false);
 
-      // Start timer on first input
       if (!startTime) {
         setStartTime(currentTime);
       }
 
-      // Update input immediately
       setUserInput(value);
-      setCurrentIndex(value.length);
 
-      // Character Counting - count all correct characters from start
+      // Character Counting
       let correct = 0;
-      let incorrect = 0;
       const minLength = Math.min(value.length, text.length);
 
       for (let i = 0; i < minLength; i++) {
         if (value[i] === text[i]) {
           correct++;
         } else {
-          incorrect = value.length - correct;
-          break;
+          const incorrect = value.length - correct;
+          setStats({
+            correctChars: correct,
+            incorrectChars: incorrect,
+            mistakes: incorrect,
+          });
+
+          if (value.length === text.length) {
+            setEndTime(currentTime);
+            setCompleted(true);
+          }
+
+          if (startTime && value.length > 0) {
+            debouncedWpmUpdate(value.length, startTime);
+          }
+          return;
         }
       }
 
-      // If we've typed more than the code length, all extra characters are incorrect
-      if (value.length > text.length) {
-        incorrect += value.length - text.length;
-      }
+      // Handle extra characters
+      const incorrect =
+        value.length > text.length ? value.length - text.length : 0;
+      setStats({
+        correctChars: correct,
+        incorrectChars: incorrect,
+        mistakes: incorrect,
+      });
 
-      setCorrectChars(correct);
-      setInCorrectChars(incorrect);
-      setMistakes(incorrect);
-
-      // Check completion - must match exactly
       if (value.length === text.length) {
         setEndTime(currentTime);
         setCompleted(true);
       }
 
-      // Update WPM with debouncing
       if (startTime && value.length > 0) {
         debouncedWpmUpdate(value.length, startTime);
       }
@@ -251,14 +237,13 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
 
   // Delete Previous Word
   const deletePreviousWord = useCallback(() => {
-    let deleteTo = currentIndex - 1;
+    let deleteTo = userInput.length - 1;
     while (deleteTo > 0 && userInput[deleteTo - 1] !== " ") deleteTo--;
     const newInput = userInput.substring(0, deleteTo);
     setUserInput(newInput);
-    setCurrentIndex(deleteTo);
-  }, [currentIndex, userInput]);
+  }, [userInput]);
 
-  // Improved Enter key handling
+  // Handle Key Down
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Backspace" && e.ctrlKey) {
@@ -269,20 +254,16 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
 
       if (e.key === "Tab") {
         e.preventDefault();
-        const nextCharIndex = userInput.length;
-        if (nextCharIndex < text.length) {
-          let newInput = userInput;
-          let newIndex = nextCharIndex;
+        let newInput = userInput;
+        let newIndex = userInput.length;
 
-          // Add spaces until we match the expected indentation
-          while (newIndex < text.length && text[newIndex] === " ") {
-            newInput += " ";
-            newIndex++;
-          }
-
-          setUserInput(newInput);
-          setCurrentIndex(newIndex);
+        // Add spaces until we match the expected indentation
+        while (newIndex < text.length && text[newIndex] === " ") {
+          newInput += " ";
+          newIndex++;
         }
+
+        setUserInput(newInput);
         return;
       }
 
@@ -291,41 +272,31 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
         const nextCharIndex = userInput.length;
 
         if (
-          (nextCharIndex < text.length && text[nextCharIndex] === "\n") ||
-          text[nextCharIndex] === ""
+          nextCharIndex < text.length &&
+          (text[nextCharIndex] === "\n" || text[nextCharIndex] === "")
         ) {
           let newInput = userInput + "\n";
           let newIndex = nextCharIndex + 1;
 
-          // Automatically add indentation spaces that follow the newline
+          // Automatically add indentation spaces
           while (newIndex < text.length && text[newIndex] === " ") {
             newInput += " ";
             newIndex++;
           }
 
-          // Update state with the new input and cursor position
           setUserInput(newInput);
-          setCurrentIndex(newIndex);
-
-          // Trigger input change handling
           const syntheticEvent = {
             target: { value: newInput },
           } as React.ChangeEvent<HTMLTextAreaElement>;
           handleInputChange(syntheticEvent);
         }
-        return;
       }
     },
     [deletePreviousWord, userInput, text, handleInputChange]
   );
 
-  const handleInputFocus = useCallback(() => {
-    setIsFocused(true);
-  }, []);
-
-  const handleInputBlur = useCallback(() => {
-    setIsFocused(false);
-  }, []);
+  const handleInputFocus = useCallback(() => setIsFocused(true), []);
+  const handleInputBlur = useCallback(() => setIsFocused(false), []);
 
   return (
     <div className="lg:pl-20 text-white min-h-screen relative">
@@ -339,7 +310,7 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="absolute -top-16 z-10 right-0 self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
             >
-              {userInput.length == 0 ? 0 : wpm} WPM
+              {userInput.length === 0 ? 0 : wpm} WPM
             </motion.div>
           )}
           <div className="relative overflow-auto mt-12 bg-black p-6 rounded-lg border border-gray-700/40">
@@ -349,7 +320,6 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
               </code>
             </pre>
 
-            {/* Hidden input */}
             <textarea
               ref={inputRef}
               value={userInput}
@@ -363,7 +333,6 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
             />
           </div>
 
-          {/* Controls */}
           <div className="flex items-center justify-center gap-3 sm:gap-14 md:gap-22 lg:gap-28 my-10">
             <button
               className="flex items-center justify-center lg:text-lg mt-4 p-2 px-6 hover:text-gray-300 hover:bg-gray-900 rounded-sm text-gray-400 transition-colors"
@@ -380,15 +349,20 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
             wpm={wpm}
             startTime={startTime}
             endTime={endTime || Date.now()}
-            accuracy={(correctChars / (correctChars + incorrectChars)) * 100}
-            correctChars={correctChars}
-            incorrectChars={incorrectChars}
+            accuracy={
+              (stats.correctChars /
+                (stats.correctChars + stats.incorrectChars)) *
+              100
+            }
+            correctChars={stats.correctChars}
+            incorrectChars={stats.incorrectChars}
             totalChars={text.length}
             quote={text}
             author={"code"}
-            mistakes={mistakes}
-            handleRefetch={() => setOpenAddText(true)}
+            mistakes={stats.mistakes}
+            handleRefetch={() => {}}
             handleRetype={resetTest}
+            sessionType={sessionType}
           />
         </div>
       )}

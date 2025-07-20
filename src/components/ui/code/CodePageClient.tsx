@@ -7,12 +7,28 @@ import { useWpm } from "@/app/context/WpmContext";
 import { getText } from "../../../../utils/text/textUtils";
 import { Button } from "../button";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowLeft, Pencil, Trash2, EllipsisVertical } from "lucide-react";
+import {
+  ArrowLeft,
+  Pencil,
+  Trash2,
+  EllipsisVertical,
+  ChevronsUpDown,
+  Check,
+} from "lucide-react";
 import StandardTyping from "../typing/StandardTyping";
 import {
   Dialog,
@@ -34,6 +50,31 @@ import { editCode } from "../../../../utils/code/codeUtils";
 import CodeTyping from "../typing/CodeTyping";
 import CodeTypingId from "./CodeTypingId";
 import SkeletonCode from "./SkeletonCode";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+
+// Programming languages
+const languages = [
+  { value: "Javascript", label: "JavaScript" },
+  { value: "Python", label: "Python" },
+  { value: "Java", label: "Java" },
+  { value: "C++", label: "C++" },
+  { value: "Go", label: "Go" },
+  { value: "Typescript", label: "TypeScript" },
+  { value: "Other", label: "Other" },
+  // { value: "pseudocode", label: "Pseudocode" },
+];
 
 const CodePageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
@@ -61,6 +102,12 @@ const CodePageClient = ({ slug }: { slug: string }) => {
   const [loading, setLoading] = useState(true);
   const [openEditCode, setOpenEditCode] = useState(false);
   const [openConfrmDelete, setOpenConfirmDelete] = useState(false);
+  const [openLang, setOpenLang] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [language, setLanguage] = useState("");
+  const [timeComplexity, setTimeComplexity] = useState("");
+  const [spaceComplexity, setSpaceComplexity] = useState("");
 
   const handleEditText = async () => {
     if (!copyCodeData.title || !copyCodeData.code) {
@@ -76,6 +123,10 @@ const CodePageClient = ({ slug }: { slug: string }) => {
         code: copyCodeData.code,
         created_at: copyCodeData.created_at,
         user_id: user?.id,
+        language: language === "Other" ? selectedLanguage : language,
+        difficulty: difficulty,
+        time_complexity: timeComplexity,
+        space_complexity: spaceComplexity,
       });
 
       if (error) {
@@ -131,7 +182,8 @@ const CodePageClient = ({ slug }: { slug: string }) => {
           space_complexity: data.space_complexity,
           difficulty: data.difficulty,
         };
-
+        setLanguage(data.language);
+        setSelectedLanguage(data.language);
         setCodeData(fetchedData);
         setCopyCodeData(fetchedData);
         setLoading(false);
@@ -233,17 +285,153 @@ const CodePageClient = ({ slug }: { slug: string }) => {
                     />
                   </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-2  justify-start  gap-3">
+                    <div className="flex flex-col  gap-3">
+                      <Label htmlFor="language">
+                        Language{" "}
+                        <span className="text-gray-400 px-1">(optional)</span>
+                      </Label>
+
+                      <div className="flex gap-3">
+                        <Popover open={openLang} onOpenChange={setOpenLang}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openLang}
+                              className="w-[95px] md:w-full max-w-[150px] sm:w-[200px] justify-between border-0 truncate"
+                            >
+                              {language || "Language"}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+
+                          <PopoverContent className="w-[200px] p-0 ml-3 md:ml-12">
+                            <Command shouldFilter={false}>
+                              <CommandInput
+                                placeholder="Search or type..."
+                                value={language}
+                                onValueChange={(val) => setLanguage(val)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    setOpenLang(false);
+                                  }
+                                }}
+                              />
+                              <CommandList>
+                                <CommandEmpty>
+                                  No match. Press Enter to use this value.
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {languages.map((lang) => (
+                                    <CommandItem
+                                      key={lang.value}
+                                      value={lang.value}
+                                      onSelect={(val) => {
+                                        setLanguage(val);
+                                        setOpenLang(false);
+                                      }}
+                                    >
+                                      {lang.label}
+                                      <Check
+                                        className={cn(
+                                          "ml-auto",
+                                          language === lang.value
+                                            ? "opacity-100"
+                                            : "opacity-0"
+                                        )}
+                                      />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        {language == "Other" && (
+                          <Input
+                            id="language"
+                            type="text"
+                            placeholder="Type Language"
+                            required
+                            className="input-glow !bg-gray-900 !border-0"
+                            value={selectedLanguage}
+                            onChange={(e) =>
+                              setSelectedLanguage(e.target.value)
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col  gap-3 ">
+                      <Label htmlFor="title">
+                        Difficulty{" "}
+                        <span className="text-gray-400 px-1 ">(optional)</span>
+                      </Label>
+                      <Select
+                        value={copyCodeData.difficulty}
+                        onValueChange={(value) => setDifficulty(value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select Difficulty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Difficulty</SelectLabel>
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="hard">Hard</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-3 ">
+                      <Label htmlFor="space">
+                        Time Complexity{" "}
+                        <span className="text-gray-400 px-1 ">(optional)</span>
+                      </Label>
+                      <Input
+                        id="space"
+                        type="text"
+                        placeholder="e.g. O(n)"
+                        required
+                        className="input-glow !bg-gray-900 !border-0"
+                        value={timeComplexity}
+                        onChange={(e) => setTimeComplexity(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex flex-col  gap-3 ">
+                      <Label htmlFor="space">
+                        Space Complexity{" "}
+                        <span className="text-gray-400 px-1 ">(optional)</span>
+                      </Label>
+                      <Input
+                        id="space"
+                        type="text"
+                        placeholder="e.g. O(n)"
+                        required
+                        className="input-glow !bg-gray-900 !border-0"
+                        value={spaceComplexity}
+                        onChange={(e) => setSpaceComplexity(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex flex-col gap-3">
-                    <Label htmlFor="email">Typing Text </Label>
+                    <Label htmlFor="code">Code </Label>
                     <Textarea
-                      id="typingText"
-                      placeholder="Enter typing text"
+                      id="typingCode"
+                      placeholder="Enter code"
                       className="input-glow !bg-gray-900 !border-0 leading-normal"
-                      value={copyCodeData.typingText}
+                      value={copyCodeData.code}
                       onChange={(e) => {
                         setCopyCodeData((prev: any) => ({
                           ...prev,
-                          typingText: e.target.value,
+                          code: e.target.value,
                         }));
                       }}
                     />
@@ -261,24 +449,24 @@ const CodePageClient = ({ slug }: { slug: string }) => {
                     </span>
                   </div>
                 </div>
+              </div>
 
-                <div className="mt-6 flex justify-end gap-3">
-                  <Button
-                    onClick={() => {
-                      setOpenEditCode(false);
-                    }}
-                    className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    disabled={copyCodeData.code.length > 1000}
-                    onClick={handleEditText}
-                    className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
-                  >
-                    Save
-                  </Button>
-                </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <Button
+                  onClick={() => {
+                    setOpenEditCode(false);
+                  }}
+                  className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  disabled={copyCodeData.code.length > 1000}
+                  onClick={handleEditText}
+                  className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
+                >
+                  Save
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -320,7 +508,10 @@ const CodePageClient = ({ slug }: { slug: string }) => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-40 bg-gray-900 border-gray-700">
                     <DropdownMenuItem
-                      onClick={() => setOpenEditCode(true)}
+                      onClick={() => {
+                        setOpenEditCode(true);
+                        setCopyCodeData(codeData);
+                      }}
                       className="cursor-pointer focus:bg-gray-800"
                     >
                       <Pencil className="mr-2 h-4 w-4" />
@@ -360,6 +551,11 @@ const CodePageClient = ({ slug }: { slug: string }) => {
                       Space Complexity: {codeData?.space_complexity}
                     </div>
                   )}
+                  {codeData.language && (
+                    <div className="bg-gray-900 text-blue-300 w-auto px-3 flex items-center justify-center text-sm rounded-full p-1">
+                      {codeData?.language}
+                    </div>
+                  )}
                 </div>
                 <p className="text-sm md:text-base mt-1 max-w-4xl text-gray-300">
                   {codeData?.description}
@@ -376,6 +572,7 @@ const CodePageClient = ({ slug }: { slug: string }) => {
               difficulty={codeData.difficulty}
               timeComplexity={codeData.time_complexity}
               spaceComplexity={codeData.space_complexity}
+              sessionType="single"
             />
           </div>
         </div>

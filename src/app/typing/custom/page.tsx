@@ -269,7 +269,7 @@ const Story = () => {
         <div>
           {isCode ? (
             <div>
-              <CodeTyping text={text} />
+              <CodeTyping text={text} sessionType="single" />
             </div>
           ) : (
             <StandardTyping text={text} />

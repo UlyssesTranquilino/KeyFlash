@@ -238,7 +238,7 @@ const CreateText = () => {
             <Input
               id="space"
               type="text"
-              placeholder="O(n)"
+              placeholder="e.g. O(n)"
               required
               className="input-glow !bg-gray-900 !border-0"
               value={timeComplexity}
@@ -254,7 +254,7 @@ const CreateText = () => {
             <Input
               id="space"
               type="text"
-              placeholder="O(n)"
+              placeholder="e.g. O(n)"
               required
               className="input-glow !bg-gray-900 !border-0"
               value={spaceComplexity}
