@@ -44,6 +44,29 @@ export function NavMain({
         {items.map((item) => {
           const isActive = pathname === item.url;
 
+          if (item.items && item.items.length > 0) {
+            return (
+              <SidebarMenuSub key={item.title}>
+                <SidebarMenuSubButton
+                  tooltip={item.title}
+                  className={`h-10 ${
+                    isActive
+                      ? "bg-gray-900 text-white hover:bg-blue-950/30"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {item.icon &&
+                    (React.isValidElement(item.icon) ? (
+                      item.icon
+                    ) : (
+                      <item.icon className="scale-120" />
+                    ))}
+                  <span className="ml-2">{item.title}</span>
+                </SidebarMenuSubButton>
+              </SidebarMenuSub>
+            );
+          }
+
           return (
             <Collapsible
               key={item.title}
@@ -56,10 +79,10 @@ export function NavMain({
                   <Link href={item.url} passHref>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      className={`h-10  ${
+                      className={`h-10 cursor-pointer ${
                         isActive
                           ? "bg-gray-900 text-white hover:bg-blue-950/30"
-                          : ""
+                          : "text-gray-400"
                       }`}
                     >
                       {item.icon &&

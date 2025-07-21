@@ -30,7 +30,7 @@ const debounce = (func: any, wait: any) => {
   };
 };
 
-const QuoteType = () => {
+const QuoteType = ({ sessionType = "multiple" }) => {
   // Contexts
   const { quote, setQuote, lowerCaseQuote, startCaseQuote, isLowercase } =
     useQuote();
@@ -390,7 +390,7 @@ const QuoteType = () => {
               transition={{ duration: 0.3, ease: "easeOut" }}
               className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.7rem] text-center transition-opacity duration-100 ${
                 spaceMono.className
-              } leading-8 mb-8 h-[160px] sm:h-[200px] cursor-text overflow-hidden ${
+              } leading-8 mb-8  cursor-text overflow-hidden ${
                 !isFocused ? "blur-sm opacity-60" : "blur-0 opacity-100"
               }`}
               onClick={handleTextClick}
@@ -450,6 +450,7 @@ const QuoteType = () => {
             mistakes={mistakes}
             handleRefetch={loadNextQuote}
             handleRetype={handleReType}
+            sessionType={sessionType}
           />
         </div>
       )}

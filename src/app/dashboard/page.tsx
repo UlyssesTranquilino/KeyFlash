@@ -111,9 +111,9 @@ export default function HomePage() {
             <h1 className="text-xl sm:text-2xl font-bold text-white  ">
               Welcome, {user.user_metadata?.full_name || user.email}!
             </h1>
-            <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
+            {/* <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
               Current Streak: 3🔥
-            </p>
+            </p> */}
           </header>
         </div>
 
@@ -191,14 +191,6 @@ export default function HomePage() {
         <div className="mt-12">
           <div className="flex justify-between items-center mb-2">
             <h1 className="font-medium text-lg mb-3 ">Flashcards </h1>
-
-            <Button
-              size="icon"
-              onClick={() => router.push("/dashboard/flashcards")}
-              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
-            >
-              Show All <ChevronRight className="h-5 w-5" />
-            </Button>
           </div>
 
           <div>
@@ -213,14 +205,6 @@ export default function HomePage() {
         <div className="mt-12">
           <div className="flex justify-between items-center mb-2">
             <h1 className="font-medium text-lg mb-3 ">Texts</h1>
-
-            <Button
-              size="icon"
-              onClick={() => router.push("/dashboard/texts")}
-              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
-            >
-              Show All <ChevronRight className="h-5 w-5" />
-            </Button>
           </div>
 
           <div>
@@ -235,14 +219,6 @@ export default function HomePage() {
         <div className="mt-12">
           <div className="flex justify-between items-center mb-2">
             <h1 className="font-medium text-lg mb-3 ">Codes</h1>
-
-            <Button
-              size="icon"
-              onClick={() => router.push("/dashboard/code")}
-              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
-            >
-              Show All <ChevronRight className="h-5 w-5" />
-            </Button>
           </div>
 
           <div>
@@ -300,9 +276,9 @@ export default function HomePage() {
           <h1 className="text-xl sm:text-2xl font-bold text-white  ">
             Welcome, {user.user_metadata?.full_name || user.email}!
           </h1>
-          <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
+          {/* <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
             Current Streak: 3🔥
-          </p>
+          </p> */}
         </header>
       </div>
 
@@ -391,13 +367,15 @@ export default function HomePage() {
             </span>
           </h1>
 
-          <Button
-            size="icon"
-            onClick={() => router.push("/dashboard/flashcards")}
-            className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
-          >
-            Show All <ChevronRight className="h-5 w-5" />
-          </Button>
+          {flashcards.length > 4 && (
+            <Button
+              size="icon"
+              onClick={() => router.push("/dashboard/flashcards")}
+              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+            >
+              Show All <ChevronRight className="h-5 w-5" />
+            </Button>
+          )}
         </div>
         <div>
           {flashcards.length > 0 ? (
@@ -527,14 +505,15 @@ export default function HomePage() {
             Texts
             <span className="ml-1 text-sm text-gray-300">({texts.length})</span>
           </h1>
-
-          <Button
-            size="icon"
-            onClick={() => router.push("/dashboard/flashcards")}
-            className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
-          >
-            Show All <ChevronRight className="h-5 w-5" />
-          </Button>
+          {texts.length > 4 && (
+            <Button
+              size="icon"
+              onClick={() => router.push("/dashboard/flashcards")}
+              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+            >
+              Show All <ChevronRight className="h-5 w-5" />
+            </Button>
+          )}
         </div>
 
         <div>
@@ -623,13 +602,15 @@ export default function HomePage() {
             <span className="ml-1 text-sm text-gray-300">({codes.length})</span>
           </h1>
 
-          <Button
-            size="icon"
-            onClick={() => router.push("/code")}
-            className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
-          >
-            Show All <ChevronRight className="h-5 w-5" />
-          </Button>
+          {codes.length > 4 && (
+            <Button
+              size="icon"
+              onClick={() => router.push("/code")}
+              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+            >
+              Show All <ChevronRight className="h-5 w-5" />
+            </Button>
+          )}
         </div>
 
         <div>
