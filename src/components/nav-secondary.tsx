@@ -32,10 +32,10 @@ export function NavSecondary({
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   asChild
-                  className={`h-10  ${
+                  className={`h-10 cursor-pointer  ${
                     isActive
                       ? "bg-gray-900 text-white hover:bg-blue-950/30"
-                      : ""
+                      : "text-gray-400"
                   }`}
                 >
                   <a href={item.url}>

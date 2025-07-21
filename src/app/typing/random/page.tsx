@@ -40,7 +40,7 @@ const debounce = (func: any, wait: any) => {
   };
 };
 
-const Words = () => {
+const Words = ({ sessionType = "multiple" }) => {
   const timerContext = useTimer();
   const time = timerContext?.time;
   const setTime = timerContext?.setTime;
@@ -409,7 +409,7 @@ const Words = () => {
     <div className="relative min-h-[50vh] flex flex-col items-center -mt-5 sm:mt-17">
       {(!completed && (time === -1 || (remaining ?? 0) > 0)) ||
       ((time ?? 0) > 0 && (remaining ?? 0) > 0) ? (
-        <div className="mt-12 sm:mt-0 flex flex-col">
+        <div className="mt-12 sm:mt-0 flex flex-col relative">
           {showWpm && (
             <motion.div
               initial={{ y: -17, opacity: 0, scale: 0.95 }}
@@ -430,7 +430,7 @@ const Words = () => {
                 className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer mt-5"
                 onClick={handleTextClick}
               >
-                <div className="lg:mr-15 mx-auto flex flex-col sm:flex-row gap-2 items-center justify-center mt-14 p-2 text-blue-400 font-semibold  text-lg md:text-xl text-center">
+                <div className="mx-auto flex flex-col sm:flex-row gap-2 items-center justify-center mt-14 p-2 text-blue-400 font-semibold  text-lg md:text-xl text-center">
                   <Pointer className="block lg:hidden" />{" "}
                   <MousePointer className=" hidden lg:block" />{" "}
                   <span>Click to focus and start typing</span>
@@ -533,6 +533,7 @@ const Words = () => {
             mistakes={mistakes}
             handleRefetch={handleRestart}
             handleRetype={handleReType}
+            sessionType={sessionType}
           />
         </div>
       )}

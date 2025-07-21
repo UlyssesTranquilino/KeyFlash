@@ -20,6 +20,7 @@ import {
   Dices,
   Quote,
   FolderCode,
+  Plus,
 } from "lucide-react";
 
 import { NavSecondary } from "./nav-secondary";
@@ -52,18 +53,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         logo: GalleryVerticalEnd,
         plan: "Enterprise",
       },
-      {
-        name: "Acme Corp.",
-        logo: AudioWaveform,
-        plan: "Startup",
-      },
-      {
-        name: "Evil Corp.",
-        logo: Command,
-        plan: "Free",
-      },
     ],
     navMain: [
+      {
+        title: "Create",
+        url: "/",
+        icon: Plus,
+        isActive: true,
+        items: [
+          {
+            title: "Flashcard",
+            url: "/flashcard/create/",
+          },
+          {
+            title: "Text",
+            url: "/text/create/",
+          },
+          {
+            title: "Code",
+            url: "/code/create/",
+          },
+        ],
+      },
       {
         title: "Home",
         url: "/dashboard",
@@ -125,12 +136,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         name: "Quote",
-        url: "/typing/quote",
+        url: "/dashboard/typing/quote",
         icon: Quote,
       },
       {
         name: "Code",
-        url: "/typing/code",
+        url: "/dashboard/typing/code",
         icon: Code,
       },
     ],

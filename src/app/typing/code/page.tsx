@@ -435,6 +435,10 @@ const CodeType = () => {
                     <div className="bg-gray-900 text-blue-300 w-auto px-3 flex items-center justify-center text-sm rounded-full p-1">
                       Space Complexity: {codeData?.space_complexity}
                     </div>
+
+                    <div className="bg-gray-900 text-blue-300 w-auto px-3 flex items-center justify-center text-sm rounded-full p-1">
+                      {codeData?.language}
+                    </div>
                   </div>
                   <p className="text-sm md:text-base mt-1 max-w-4xl text-gray-300">
                     {codeData?.description}

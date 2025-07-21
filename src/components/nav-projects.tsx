@@ -56,7 +56,14 @@ export function NavProjects({
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
                   <Link href={item.url} passHref>
-                    <SidebarMenuButton tooltip={item.name}>
+                    <SidebarMenuButton
+                      tooltip={item.name}
+                      className={`h-10 cursor-pointer  ${
+                        isActive
+                          ? "bg-gray-900 text-white hover:bg-blue-950/30"
+                          : "text-gray-400"
+                      }`}
+                    >
                       <item.icon className="scale-120" />
 
                       <span className="ml-2">{item.name}</span>
