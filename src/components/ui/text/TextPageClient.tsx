@@ -119,7 +119,7 @@ const TextPageClient = ({ slug }: { slug: string }) => {
   }, [user, id]);
 
   return (
-    <div className="max-w-[1000px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden">
+    <div className="max-w-[1100px] h-full w-full mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden">
       <Toaster position="top-center" />
       {!loading ? (
         <div>

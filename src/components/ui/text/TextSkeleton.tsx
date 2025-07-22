@@ -2,7 +2,7 @@ import { Skeleton } from "../skeleton";
 const TextSkeleton = () => {
   return (
     <div>
-      <div className="max-w-[900px] mx-auto px-2 sm:px-5 mb-20">
+      <div className="max-w-[1100px] w-full mx-auto px-2 sm:px-5 mb-20">
         <div className="my-3 x-auto flex flex-col mb-10 ">
           <div className="flex w-full">
             <Skeleton className="h-8 w-15 rounded-md" />

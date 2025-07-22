@@ -12,6 +12,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   Dialog,
   DialogContent,
@@ -23,10 +24,11 @@ import {
 
 // Utils
 
-import { insertFlashcard } from "../../../../utils/flashcard/flashcard";
+import { insertFlashcard } from "../../../../../utils/flashcard/flashcard";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function page() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -44,6 +46,18 @@ export default function page() {
   ]);
 
   const [openReset, setOpenReset] = useState(false);
+
+  useEffect(() => {
+    const dataParam = searchParams.get("data");
+    if (dataParam) {
+      try {
+        const decodedData = JSON.parse(decodeURIComponent(dataParam));
+        setFlashCardData(decodedData);
+      } catch (error) {
+        console.error("Error parsing flashcard data:", error);
+      }
+    }
+  }, [searchParams]);
 
   const handleDelete = (id: string) => {
     if (!flashCardData || flashCardData.length <= 0) return;
@@ -88,7 +102,7 @@ export default function page() {
       toast.success("Flashcard created successfully!");
 
       const slug = `${newCard.id}-${slugify(newCard.title)}`;
-      router.push(`/flashcard/${slug}`);
+      router.push(`/dashboard/flashcards/${slug}`);
     } catch (error) {
       toast.error("Failed to create flashcard");
       console.error(error);
@@ -98,7 +112,7 @@ export default function page() {
   const { user, loading, session } = useAuth();
 
   return (
-    <div className="px-2 max-w-[900px] mx-auto mb-14">
+    <div className="px-2 max-w-[1100px] mx-auto mb-14 md:px-0 w-full">
       <Toaster position="top-center" />
       <Dialog open={openReset} onOpenChange={setOpenReset}>
         <DialogContent className="max-w-[400px]">

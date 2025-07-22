@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { insertText } from "../../../../utils/text/textUtils";
+import { insertText } from "../../../../../utils/text/textUtils";
 import { cn } from "@/lib/utils";
 
 const CreateText = () => {
@@ -50,8 +50,8 @@ const CreateText = () => {
   };
 
   return (
-    <div className="px-3 flex flex-col  w-full max-w-[900px] mx-auto overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-[300px] h-[300px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+    <div className="px-3 flex flex-col  w-full max-w-[1100px] mx-auto overflow-hidden relative">
+      <div className="absolute top-4 right-4 md:top-25 md:right-30 w-[150px] h-[150px]  sm:w-[300px] sm:h-[300px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="-z-3 absolute bottom-0 left-0 w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 

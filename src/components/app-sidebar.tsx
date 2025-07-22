@@ -63,15 +63,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         items: [
           {
             title: "Flashcard",
-            url: "/flashcard/create/",
+            url: "/dashboard/flashcard/create/",
           },
           {
             title: "Text",
-            url: "/text/create/",
+            url: "/dashboard/texts/create/",
           },
           {
             title: "Code",
-            url: "/code/create/",
+            url: "/dashboard/codes/create/",
           },
         ],
       },
