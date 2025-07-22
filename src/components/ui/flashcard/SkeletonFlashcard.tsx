@@ -2,7 +2,7 @@ import { Skeleton } from "../skeleton";
 const SkeletonFlashcard = () => {
   return (
     <div>
-      <div className="max-w-[900px] mx-auto px-2 sm:px-5 mb-20">
+      <div className="mt-20 max-w-[1100px]  w-full mx-auto px-1 sm:px-5 md:px-0 mb-20 relative overflow-hidden">
         <div className="my-3 x-auto flex flex-col mb-10">
           <div className="flex justify-between gap-3 w-full">
             <Skeleton className="h-8 w-1/2 rounded-md" />
@@ -18,7 +18,7 @@ const SkeletonFlashcard = () => {
 
         {/* Flashcard Carousel Skeleton */}
         <div className="h-[100vh] pt-3">
-          <div className="rounded-2xl bg-gray-900/70 h-96 relative overflow-hidden">
+          <div className="rounded-2xl bg-gray-900/70 h-100 max-w-[1000px] relative overflow-hidden">
             <div className="flex flex-col items-center h-full p-8"></div>
           </div>
 

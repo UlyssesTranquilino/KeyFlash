@@ -47,6 +47,7 @@ import {
   Minimize,
   Trash2,
   EllipsisVertical,
+  Home,
 } from "lucide-react";
 import {
   Dialog,
@@ -442,7 +443,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     }
   }, [isClickingOnText]);
 
-  const handleEditFlashcard = async () => {
+  const handleEditFlashcard = async (e: any) => {
     const hasEmptyFields = copyFlashcardData.terms.some(
       (card: any) => !card.question?.trim() || !card.answer?.trim()
     );
@@ -519,13 +520,13 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   return (
     <div
-      className={`max-w-[900px] mx-auto px-2 sm:px-5 mb-20 relative overflow-hidden mt-14 ${
+      className={`max-w-[1100px]  w-full mx-auto px-1 sm:px-5 md:px-0 mb-20 relative overflow-hidden  ${
         isFullScreen ? "fixed inset-0 top-1/5  z-50 p-0 m-0 " : ""
       }`}
     >
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+      <div className="-z-3 absolute top-0 md:top-20 md:right-20 right-0 w-[400px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
-      <div className="-z-3 absolute bottom-0 -left-[500px] w-[600px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+      <div className="-z-3 absolute bottom-0 -left-[500px] w-[400px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <Toaster position="top-center" />
 
@@ -677,7 +678,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 <DialogDescription className="text-sm text-gray-400"></DialogDescription>
               </DialogHeader>
 
-              <div className="mt-4 px-2 flex flex-col gap-5 overflow-scroll  ">
+              <div className=" px-2 flex flex-col gap-5 overflow-scroll  ">
                 <div className="my-3 flex flex-col gap-3">
                   <div className="flex flex-col gap-3">
                     <Label htmlFor="email">Title</Label>
@@ -822,15 +823,25 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           </Dialog>
 
           {!isFullScreen && (
-            <div className="my-3 x-auto flex flex-col mb-10">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.back()}
-                className="rounded-md p-2 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
-              >
-                <ArrowLeft className="h-5 w-5" /> Back
-              </Button>
+            <div className=" x-auto flex flex-col mb-10">
+              <div className="flex gap-1 mb-10  mt-3">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => router.back()}
+                  className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+                >
+                  <ArrowLeft className="h-5 w-5" /> Back
+                </Button>
+                {/* <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => router.back()}
+                  className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+                >
+                  <Home className="h-5 w-5" /> Home
+                </Button> */}
+              </div>
               <div className="flex justify-between items-center gap-3 w-full">
                 <div className="flex items-center">
                   <h1 className="font-semibold text-lg">{flashcard.title}</h1>
@@ -862,7 +873,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-40 bg-gray-900 border-gray-700">
                       <DropdownMenuItem
-                        onClick={() => {
+                        onClick={(e: any) => {
                           e.preventDefault();
                           setOpenEditFlashcard(true);
                         }}
@@ -887,7 +898,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           )}
 
           <div className={`${isFullScreen ? "h-screen " : "h-[100vh] pt-3"}`}>
-            <div className="mb-6  flex items-center justify-between max-w-[800px] mx-auto">
+            <div className="mb-6  flex items-center justify-between max-w-[1000px] mx-auto">
               {showWpm ? (
                 <motion.div
                   initial={{ y: 20, opacity: 0, scale: 0.95 }}
@@ -905,7 +916,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
             <Carousel
               setApi={setApi}
-              className="mx-auto relative"
+              className="mx-auto relative max-w-[1000px] "
               opts={{
                 watchDrag: !isQuizMode, // Disable swipe in quiz mode
                 dragFree: isQuizMode, // Makes it harder to accidentally swipe
@@ -913,13 +924,13 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
               }}
             >
               <CarouselContent
-                className={`max-w-[900px] w-full mx-auto gap-x-6 ${spaceMono.className} `}
+                className={` w-full mx-auto gap-x-6 ${spaceMono.className} `}
               >
                 {flashcard?.terms.map((item: any, index: any) => (
                   <CarouselItem
                     key={index}
-                    className={`rounded-2xl bg-gray-900/70 relative overflow-hidden ${
-                      isFullScreen ? "h-100" : "h-96"
+                    className={`max-w-[1100px] rounded-2xl bg-gray-900/70 relative overflow-hidden ${
+                      isFullScreen ? "h-100" : "h-100"
                     }`}
                   >
                     <div className="flex flex-col items-center justify-center h-full p-8">
@@ -1092,7 +1103,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
               </CarouselContent>
 
               <div className="w-full absolute right-1/2 -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
-                <div className="flex items-center justify-start flex-nowrap sm:items-center gap-3 sm:gap-5">
+                <div className="flex items-center justify-start flex-nowrap sm:items-center gap-2 sm:gap-5">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex flex-col switch gap-1 items-center">
@@ -1193,7 +1204,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 </div>
 
                 {/* Progress and controls */}
-                <div className="flex justify-end gap-5">
+                <div className="flex justify-end gap-2 sm:gap-5">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
@@ -1222,7 +1233,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                       <p>Restart Card</p>
                     </TooltipContent>
                   </Tooltip>
-                  <Tooltip>
+                  {/* <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => setIsFullScreen(!isFullScreen)}
@@ -1238,7 +1249,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                     <TooltipContent>
                       <p>{isFullScreen ? "Exit Fullscreen" : "Fullscreen"}</p>
                     </TooltipContent>
-                  </Tooltip>
+                  </Tooltip> */}
                 </div>
               </div>
             </Carousel>

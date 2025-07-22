@@ -263,7 +263,7 @@ export default function HomePage() {
                     key={card.id}
                     onClick={() => {
                       const slug = `${card.id}-${slugify(card.title)}`;
-                      router.push(`/flashcard/${slug}`);
+                      router.push(`/dashboard/flashcards/${slug}`);
                     }}
                     className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                   >

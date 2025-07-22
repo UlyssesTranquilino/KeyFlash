@@ -421,7 +421,7 @@ const StandardTyping = ({ text }) => {
           {/* Overlay */}
           {!isFocused && !completed && !isHoveringNewTexts && (
             <div
-              className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer mt-5"
+              className="absolute w-full h-[30vh] bg-black/10 z-10 cursor-pointer "
               onClick={handleTextClick}
             >
               <div className="mx-auto flex flex-col sm:flex-row gap-2 items-center justify-center mt-14 p-2 text-blue-400 font-semibold  text-lg md:text-xl text-center">

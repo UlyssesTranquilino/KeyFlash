@@ -173,7 +173,7 @@ export default function HomePage() {
 
             <PopoverContent className="bg-gray-950 w-36 md:w-45 border-gray-800">
               <div className="flex flex-col items-center gap-3">
-                <Link href="/flashcard/create" className="w-full">
+                <Link href="/dashboard/flashcards/create" className="w-full">
                   <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
                     Flashcard
                   </Button>
@@ -284,7 +284,7 @@ export default function HomePage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
         <Link
-          href="/typing/random"
+          href="/dashboard/typing/random"
           className="cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
         >
           <div className="absolute -top-55 -right-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
@@ -297,7 +297,7 @@ export default function HomePage() {
         </Link>
 
         <Link
-          href="/typing/quote"
+          href="/dashboard/typing/quote"
           className="cursor-pointer bg-black  hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
         >
           <div className="absolute -top-15 -left-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
@@ -310,7 +310,7 @@ export default function HomePage() {
         </Link>
 
         <Link
-          href="/typing/code"
+          href="/dashboard/typing/code"
           className="cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
         >
           <div className="absolute -top-15 -left-15 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
@@ -338,17 +338,17 @@ export default function HomePage() {
 
           <PopoverContent className="bg-gray-950 w-36 md:w-45 border-gray-800">
             <div className="flex flex-col items-center gap-3">
-              <Link href="/flashcard/create" className="w-full">
+              <Link href="/dashboard/flashcards/create" className="w-full">
                 <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
                   Flashcard
                 </Button>
               </Link>
-              <Link href="/text/create" className="w-full">
+              <Link href="/dashboard/texts/create" className="w-full">
                 <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
                   Text
                 </Button>
               </Link>
-              <Link href="/code/create" className="w-full">
+              <Link href="/dashboard/codes/create" className="w-full">
                 <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
                   Code
                 </Button>
@@ -386,7 +386,7 @@ export default function HomePage() {
                   key={card.id}
                   onClick={() => {
                     const slug = `${card.id}-${slugify(card.title)}`;
-                    router.push(`/flashcard/${slug}`);
+                    router.push(`/dashboard/flashcards/${slug}`);
                   }}
                   className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                 >
@@ -474,7 +474,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-6">
                     <Link
-                      href="/flashcard/create"
+                      href="/dashboard/flashcards/create"
                       className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg
@@ -525,7 +525,7 @@ export default function HomePage() {
                   key={card.id}
                   onClick={() => {
                     const slug = `${card.id}-${slugify(card.title)}`;
-                    router.push(`/text/${slug}`);
+                    router.push(`/dashboard/texts/${slug}`);
                   }}
                   className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br  from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                 >
@@ -570,7 +570,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-6">
                     <Link
-                      href="/text/create"
+                      href="/dashboard/text/create"
                       className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg
@@ -622,7 +622,7 @@ export default function HomePage() {
                   key={card.id}
                   onClick={() => {
                     const slug = `${card.id}-${slugify(card.title)}`;
-                    router.push(`/code/${slug}`);
+                    router.push(`/dashboard/codes/${slug}`);
                   }}
                   className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br  from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                 >
@@ -667,7 +667,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-6">
                     <Link
-                      href="/code/create"
+                      href="/dashboard/code/create"
                       className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg

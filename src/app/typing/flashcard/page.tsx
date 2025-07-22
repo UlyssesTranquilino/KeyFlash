@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import Link from "next/link";
 import { spaceMono } from "@/app/ui/fonts";
+
 import {
   RotateCcw,
   TriangleAlert,
@@ -54,9 +55,12 @@ import { type CarouselApi } from "@/components/ui/carousel";
 import { useWpm } from "@/app/context/WpmContext";
 import { useFlashcard } from "@/app/context/FlashcardContext";
 import { useAuth } from "@/app/context/AuthContext";
+// import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const TypingFlashcards = () => {
   const { user } = useAuth();
+  const router = useRouter();
   const { showWpm } = useWpm();
   const { blurAnswer, setBlurAnswer, openEditFlashcard, setOpenEditFlashcard } =
     useFlashcard();
@@ -445,6 +449,49 @@ const TypingFlashcards = () => {
     );
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".txt")) {
+      toast.error("Please upload a .txt file");
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const cards = parseFlashcardText(text);
+
+      if (cards.length > 0) {
+        setCopyFlashcardData(cards);
+        toast.success(`Successfully imported ${cards.length} flashcards`);
+
+        const encodedData = encodeURIComponent(JSON.stringify(cards));
+        router.push(`/flashcard/create?data=${encodedData}`);
+      } else {
+        toast.warning("No valid flashcards found in the file");
+      }
+    } catch (error) {
+      toast.error("Error reading file");
+      console.error(error);
+    }
+  };
+
+  const parseFlashcardText = (text: string) => {
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.includes("-"))
+      .map((line, index) => {
+        const [question, answer] = line.split("-").map((part) => part.trim());
+        return {
+          id: Date.now() + index,
+          question,
+          answer,
+        };
+      });
+  };
+
   return (
     <div className="max-w-4xl mx-auto  sm:p-4">
       <Toaster position="top-center" />
@@ -740,7 +787,26 @@ const TypingFlashcards = () => {
                       isGuest &&
                       copyFlashcardData.length >= MAX_CARDS_GUEST
                     ) {
-                      toast.warning("Sign in to add more than 20 cards.");
+                      if (!user) {
+                        toast.warning("Sign in to add more than 20 cards.");
+                      } else {
+                        toast.warning(
+                          <>
+                            <p>
+                              Proceed to flashcard dashboard to add more cards.
+                              <Link
+                                href="/dashboard/flashcards"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:underline"
+                              >
+                                {" "}
+                                Flashcards Dashboard
+                              </Link>
+                            </p>
+                          </>
+                        );
+                      }
                       return;
                     }
 
@@ -770,16 +836,38 @@ const TypingFlashcards = () => {
                     </h2>
                   </div>
                 )}
+
+                <div className=" text-sm text-gray-400 mb-4">
+                  <p>File format should be:</p>
+                  <p className="font-mono bg-gray-900 p-2 rounded mt-1">
+                    question - answer
+                  </p>
+                  <p className="mt-2">Example:</p>
+                  <div className="font-mono bg-gray-900 p-2 rounded text-left">
+                    <p>What is the capital of France? - Paris</p>
+                    <p>Largest planet in our solar system? - Jupiter</p>
+                  </div>
+                </div>
                 <div
                   className={cn(
                     "border-2 border-dashed border-blue-300/60 rounded-lg p-3 text-center ",
                     !user && "blur-xs"
                   )}
                 >
-                  <div className="flex flex-col items-center justify-center gap-2">
+                  <div className="p-3 flex flex-col items-center justify-center gap-2">
                     <FileUp className="h-8 w-8 text-gray-400" />
-                    <p className="text-sm font-medium">Upload a text file</p>
-                    <p className="text-xs text-gray-500">Supports .txt files</p>
+                    <p className=" font-medium">Upload a text file</p>
+                    <p className=" text-gray-500">Supports .txt files</p>
+
+                    <label className="mt-2 px-4 py-2 bg-blue-900/30 text-blue-400 rounded-md cursor-pointer hover:bg-blue-900/50 transition-colors">
+                      Select File
+                      <input
+                        type="file"
+                        accept=".txt"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
+                    </label>
                   </div>
                 </div>
               </TabsContent>
