@@ -34,17 +34,50 @@ import { cn } from "@/lib/utils";
 import StandardTyping from "@/components/ui/typing/StandardTyping";
 import { useEditText } from "@/app/context/AddTextContext";
 import CodeTyping from "@/components/ui/typing/CodeTyping";
+import { useAuth } from "@/app/context/AuthContext";
 
 const Story = () => {
   const { openAddText, setOpenAddText } = useEditText();
+  const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState("write");
-  const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
 
   //Typing
   const [isCode, setIsCode] = useState(false);
+  const [text, setText] = useState(() => {
+    if (typeof window != "undefined") {
+      const saved = localStorage.getItem("savedText");
+      return saved || "";
+    }
+
+    return "";
+  });
+
+  // Only open popup if no text exists
+  useEffect(() => {
+    if (text.length === 0) {
+      setOpenAddText(true);
+    } else {
+      setOpenAddText(false);
+    }
+  }, [text, setOpenAddText]);
+
+  // Save to localStorage whenever text changes
+  useEffect(() => {
+    localStorage.setItem("savedText", text);
+  }, [text]);
+
+  // Save code mode preference
+  useEffect(() => {
+    const savedMode = localStorage.getItem("isCodeMode");
+    setIsCode(savedMode === "true");
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("isCodeMode", String(isCode));
+  }, [isCode]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -67,9 +100,13 @@ const Story = () => {
   };
 
   const handleSubmit = () => {
-    // Handle submission logic here
-    console.log("Submitted:", { text, file, url });
     setText(text);
+    setOpenAddText(false);
+  };
+
+  const clearSavedText = () => {
+    setText("");
+    localStorage.removeItem("savedText");
     setOpenAddText(false);
   };
 
@@ -83,7 +120,7 @@ const Story = () => {
           </DialogTrigger> */}
           <DialogContent className="!max-w-[750px] w-full ">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">
+              <DialogTitle className="text-xl font-semibold text-center">
                 Add Your Text Content
               </DialogTitle>
               <DialogDescription className="text-sm text-gray-500">
@@ -249,7 +286,10 @@ const Story = () => {
             <div className="mt-6 flex justify-end gap-3">
               <Button
                 // disabled={text.length === 0 || text.length > 500}
-                onClick={() => setOpenAddText(false)}
+                onClick={() => {
+                  setOpenAddText(false);
+                  clearSavedText();
+                }}
                 className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
               >
                 Cancel
