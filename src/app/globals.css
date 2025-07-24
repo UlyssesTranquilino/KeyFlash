@@ -394,3 +394,25 @@ span.wrong {
     --sidebar-ring: oklch(0.439 0 0);
   }
 }
+
+.text-container {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.text-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.flashcard-content {
+  width: 100%;
+  max-width: 600px;
+}
+
+.text-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

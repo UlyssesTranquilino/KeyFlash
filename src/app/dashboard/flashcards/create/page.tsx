@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash, CircleUserRound, ArrowLeft } from "lucide-react";
+import { Trash, CircleUserRound, ArrowLeft, FileUp } from "lucide-react";
 import Link from "next/link";
 
 import { Label } from "@radix-ui/react-label";
@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +30,7 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function page() {
   const searchParams = useSearchParams();
+  const { user, loading, session } = useAuth();
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -46,19 +48,32 @@ export default function page() {
   ]);
 
   const [openReset, setOpenReset] = useState(false);
+  const [openUpload, setOpenUpload] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    const dataParam = searchParams.get("data");
-    if (dataParam) {
-      try {
-        const decodedData = JSON.parse(decodeURIComponent(dataParam));
-        setFlashCardData(decodedData);
-      } catch (error) {
-        console.error("Error parsing flashcard data:", error);
-      }
-    }
-  }, [searchParams]);
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const hasContent =
+        title ||
+        description ||
+        flashCardData.some((card) => card.question || card.answer);
 
+      if (hasContent) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [title, description, flashCardData]);
+
+  // Delete
   const handleDelete = (id: string) => {
     if (!flashCardData || flashCardData.length <= 0) return;
 
@@ -99,8 +114,9 @@ export default function page() {
 
     try {
       const { data: newCard, error } = await insertFlashcard(card);
-      toast.success("Flashcard created successfully!");
+      if (error) throw error;
 
+      toast.success("Flashcard created successfully!");
       const slug = `${newCard.id}-${slugify(newCard.title)}`;
       router.push(`/dashboard/flashcards/${slug}`);
     } catch (error) {
@@ -109,7 +125,96 @@ export default function page() {
     }
   };
 
-  const { user, loading, session } = useAuth();
+  const parseFlashcardText = (text: string) => {
+    return text
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.includes("-"))
+      .map((line, index) => {
+        const [question, answer] = line.split("-").map((part) => part.trim());
+        return {
+          id: Date.now() + index,
+          question,
+          answer,
+        };
+      });
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileUpload({
+        target: { files },
+      } as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".txt")) {
+      toast.error("Please upload a .txt file");
+      return;
+    }
+
+    try {
+      const text = await file.text();
+      const cards = parseFlashcardText(text);
+
+      if (cards.length > 0) {
+        // Update state first
+        setFlashCardData(cards);
+
+        toast.success("Flashcards loaded successfully!");
+        setOpenUpload(false);
+      } else {
+        toast.warning("No valid flashcards found in the file");
+      }
+    } catch (error) {
+      toast.error("Error reading file");
+      console.error(error);
+    }
+  };
+
+  const handleReset = () => {
+    setTitle("");
+    setDescription("");
+    setFlashCardData([
+      {
+        id: 1,
+        question: "",
+        answer: "",
+      },
+      {
+        id: 2,
+        question: "",
+        answer: "",
+      },
+    ]);
+    setOpenReset(false);
+  };
 
   return (
     <div className="px-2 max-w-[1100px] mx-auto mb-14 md:px-0 w-full">
@@ -133,21 +238,7 @@ export default function page() {
             </Button>
             <Button
               onClick={() => {
-                setTitle("");
-                setDescription("");
-                setFlashCardData([
-                  {
-                    id: 1,
-                    question: "",
-                    answer: "",
-                  },
-                  {
-                    id: 2,
-                    question: "",
-                    answer: "",
-                  },
-                ]);
-                setOpenReset(false);
+                handleReset();
               }}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
@@ -157,15 +248,87 @@ export default function page() {
         </DialogContent>
       </Dialog>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => router.back()}
-        className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
-      >
-        <ArrowLeft className="h-5 w-5" /> Back
-      </Button>
+      <Dialog open={openUpload} onOpenChange={setOpenUpload}>
+        <DialogContent className="max-w-[800px] mx-2">
+          <DialogHeader>
+            <DialogTitle className="text-lg text-center">
+              Upload Flashcard
+            </DialogTitle>
+            <DialogDescription>
+              <div className=" text-sm text-gray-400 mb-4">
+                <p className="text-white text-left">File format should be:</p>
+                <p className="font-mono bg-gray-900 p-2 rounded mt-1">
+                  question - answer
+                </p>
+                <p className="mt-2 text-white text-left ">Example:</p>
+                <div className="font-mono bg-gray-900 p-2 rounded text-left">
+                  <p>What is the capital of France? - Paris</p>
+                  <p>Largest planet in our solar system? - Jupiter</p>
+                </div>
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+          <div
+            className={cn(
+              "border-2 border-dashed rounded-lg p-3 text-center transition-colors",
+              isDragging
+                ? "border-blue-400 bg-blue-900/20"
+                : "border-blue-300/60",
+              !user && "blur-xs"
+            )}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <div className="p-3 flex flex-col items-center justify-center gap-2">
+              <FileUp className="h-8 w-8 text-gray-400" />
+              {isDragging ? (
+                <p className="font-medium text-blue-400">Drop your file here</p>
+              ) : (
+                <>
+                  <p className="font-medium">Drag and drop your file here</p>
+                  <p className="text-gray-500">or</p>
+                </>
+              )}
 
+              <label className="mt-2 px-4 py-2 bg-blue-900/30 text-blue-400 rounded-md cursor-pointer hover:bg-blue-900/50 transition-colors">
+                Select File
+                <input
+                  type="file"
+                  accept=".txt"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
+              <p className="text-xs text-gray-500 mt-2">
+                Supports .txt files only
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="flex items-center justify-between ">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.back()}
+          className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+        >
+          <ArrowLeft className="h-5 w-5" /> Back
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setOpenUpload(true)}
+          className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+        >
+          <FileUp className="h-5 w-5" />
+          Upload
+        </Button>
+      </div>
       <h1 className="text-center font-semibold text-lg md:text-xl mb-8 md:mb-10">
         Create Flashcard
       </h1>

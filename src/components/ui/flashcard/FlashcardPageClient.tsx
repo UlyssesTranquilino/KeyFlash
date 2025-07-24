@@ -78,6 +78,28 @@ import { Switch } from "@/components/ui/switch";
 import SkeletonFlashcard from "./SkeletonFlashcard";
 import { SimpleResults } from "./ResultsComponent";
 import { deleteFlashcard } from "../../../../utils/flashcard/flashcard";
+import { AnimatePresence } from "framer-motion";
+
+// Utility functions for localStorage
+const loadSettings = () => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("flashcardSettings");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return null;
+      }
+    }
+  }
+  return null;
+};
+
+const saveSettings = (settings: any) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("flashcardSettings", JSON.stringify(settings));
+  }
+};
 
 const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
@@ -96,7 +118,10 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   // Flashcard Carousel
   const [count, setCount] = useState(0);
-  const [isQuizMode, setIsQuizMode] = useState(false);
+  const [isQuizMode, setIsQuizMode] = useState(() => {
+    const saved = loadSettings();
+    return saved?.isQuizMode ?? false; // Default to false if not set
+  });
   const [isQuizModeConfirm, setIsQuizModeConfirm] = useState(false);
   const { blurAnswer, setBlurAnswer, openEditFlashcard, setOpenEditFlashcard } =
     useFlashcard();
@@ -135,7 +160,11 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [wpm, setWpm] = useState(0);
 
-  const [isTypingMode, setIsTypingMode] = useState(true);
+  const [isTypingMode, setIsTypingMode] = useState(() => {
+    const saved = loadSettings();
+    return saved?.isTypingMode ?? true;
+  });
+
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isShuffled, setIsShuffled] = useState(false);
 
@@ -218,33 +247,90 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const highlightedText = useMemo(() => {
     if (!currentText) return null;
 
-    return currentText.split("").map((char: any, index: any) => {
-      const userChar = userInput[index];
-      const isTyped = index < userInput.length;
-      const isCorrect = userChar === char;
-      const isCursor = index === userInput.length;
+    const words = currentText.split(" ");
+    let charIndex = 0;
 
-      const className = isTyped
-        ? isCorrect
-          ? "text-white"
-          : "text-red-600/75 bg-red-900/30"
-        : "text-gray-500";
+    return words.map((word, wordIndex) => {
+      const wordSpans = word.split("").map((char, charIndexInWord) => {
+        const globalCharIndex = charIndex + charIndexInWord;
+        const userChar = userInput[globalCharIndex];
+        const isTyped = globalCharIndex < userInput.length;
+        const isCorrect = userChar === char;
+        const isCursor = globalCharIndex === userInput.length;
 
-      const displayChar = char === " " ? "\u00A0" : char;
+        const className = isTyped
+          ? isCorrect
+            ? "text-white"
+            : "text-red-600/75 bg-red-900/30"
+          : "text-gray-500";
+
+        return (
+          <span key={`${wordIndex}-${charIndexInWord}`} className="relative">
+            {isCursor && (
+              <span
+                className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 ${
+                  isIdle ? "animate-pulse" : ""
+                }`}
+                style={{
+                  animation: isIdle ? "pulse 1s ease-in-out infinite" : "none",
+                }}
+              />
+            )}
+            <span className={className}>{char}</span>
+          </span>
+        );
+      });
+
+      // Handle space between words
+      charIndex += word.length;
+      const spaceIndex = charIndex;
+      const hasSpace = wordIndex < words.length - 1;
+
+      if (hasSpace) {
+        const userSpaceChar = userInput[spaceIndex];
+        const isSpaceTyped = spaceIndex < userInput.length;
+        const isSpaceCorrect = userSpaceChar === " ";
+        const isSpaceCursor = spaceIndex === userInput.length;
+
+        charIndex += 1; // Account for the space
+
+        const spaceElement = (
+          <span key={`space-${wordIndex}`} className="relative">
+            {isSpaceCursor && (
+              <span
+                className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 ${
+                  isIdle ? "animate-pulse" : ""
+                }`}
+                style={{
+                  animation: isIdle ? "pulse 1s ease-in-out infinite" : "none",
+                }}
+              />
+            )}
+            <span
+              className={
+                isSpaceTyped
+                  ? isSpaceCorrect
+                    ? "text-white"
+                    : "text-red-600/75 bg-red-900/30"
+                  : "text-gray-500"
+              }
+            >
+              {"\u00A0"}
+            </span>
+          </span>
+        );
+
+        return (
+          <span key={wordIndex} className="inline-block whitespace-nowrap">
+            {wordSpans}
+            {spaceElement}
+          </span>
+        );
+      }
 
       return (
-        <span key={index} className="relative">
-          {isCursor && (
-            <span
-              className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 ${
-                isIdle ? "animate-pulse" : ""
-              }`}
-              style={{
-                animation: isIdle ? "pulse 1s ease-in-out infinite" : "none",
-              }}
-            />
-          )}
-          <span className={className}>{displayChar}</span>
+        <span key={wordIndex} className="inline-block whitespace-nowrap">
+          {wordSpans}
         </span>
       );
     });
@@ -482,7 +568,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           setQuestionCompleted(false);
           setCardCompleted(false);
         }, 0);
-        router.refresh();
+        // router.refresh();
       }
     } catch (err) {
       toast.error("An unexpected error occurred");
@@ -518,9 +604,88 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     setShowResetConfirm(false);
   };
 
+  // Handle Flip Card
+  const handleFlipCard = useCallback(() => {
+    if (!isTypingMode) {
+      const newPhase = currentPhase === "question" ? "answer" : "question";
+      setCurrentPhase(newPhase);
+
+      // Auto-focus after flip animation
+      setTimeout(() => {
+        if (newPhase === "question") {
+          inputRef.current?.focus();
+        } else if (blurAnswer) {
+          answerInputRef.current?.focus();
+        } else {
+          inputRef.current?.focus();
+        }
+      }, 300); // Match this with flip animation duration
+    }
+  }, [isTypingMode, currentPhase, blurAnswer]);
+
+  // Flip card on space key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle space key when not in typing mode
+      if (!isTypingMode && e.key === " ") {
+        e.preventDefault(); // Prevent default spacebar behavior (scrolling)
+        setCurrentPhase((prev) =>
+          prev === "question" ? "answer" : "question"
+        );
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isTypingMode]); // Only re-run when isTypingMode changes
+
+  // Auto focus on input field
+  useEffect(() => {
+    if (isTypingMode) {
+      if (currentPhase === "question") {
+        inputRef.current?.focus();
+      } else if (currentPhase === "answer" && !blurAnswer) {
+        inputRef.current?.focus();
+      } else if (currentPhase === "answer" && blurAnswer) {
+        answerInputRef.current?.focus();
+      }
+    }
+  }, [currentPhase, isTypingMode, blurAnswer]);
+
+  // Save settings whenever they change
+  useEffect(() => {
+    saveSettings({
+      isTypingMode,
+      showWpm,
+      isQuizMode,
+    });
+  }, [isTypingMode, showWpm, isQuizMode]);
+
+  // If useWpm doesn't handle its own persistence, you might need this:
+  useEffect(() => {
+    saveSettings({
+      isTypingMode,
+      showWpm,
+      isQuizMode,
+    });
+  }, [showWpm]);
+
+  // Load settings
+  useEffect(() => {
+    const saved = localStorage.getItem("flashcardSettings");
+    if (saved) {
+      const { isTypingMode, showWpm, isQuizMode } = JSON.parse(saved);
+      setIsTypingMode(isTypingMode);
+      setShowWpm(showWpm);
+      setIsQuizMode(isQuizMode);
+    }
+  }, []);
+
   return (
     <div
-      className={`max-w-[1100px]  w-full mx-auto px-1 sm:px-5 md:px-0 mb-20 relative overflow-hidden  ${
+      className={`max-w-[1100px] pt-3 w-full mx-auto px-1 sm:px-5 md:px-5 mb-20 relative overflow-hidden  ${
         isFullScreen ? "fixed inset-0 top-1/5  z-50 p-0 m-0 " : ""
       }`}
     >
@@ -930,173 +1095,324 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   <CarouselItem
                     key={index}
                     className={`max-w-[1100px] rounded-2xl bg-gray-900/70 relative overflow-hidden ${
-                      isFullScreen ? "h-100" : "h-100"
+                      isFullScreen ? "h-100" : "h-100 md:h-110"
                     }`}
                   >
-                    <div className="flex flex-col items-center justify-center h-full p-8">
-                      <div className="absolute top-6 right-0 w-full items-center flex justify-between px-3">
-                        {/* Phase indicator */}
-                        <div className="flex items-center gap-3">
-                          <div
-                            onClick={() => setCurrentPhase("question")}
-                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
-                              currentPhase === "question"
-                                ? "bg-blue-600/20 text-blue-400"
-                                : questionCompleted
-                                ? "bg-green-600/20 text-green-400"
-                                : "bg-gray-600/20 text-gray-400"
-                            }`}
-                          >
-                            {questionCompleted && (
-                              <CheckCircle className="w-4 h-4" />
-                            )}
-                            <span className="text-xs">Question</span>
-                          </div>
-
-                          <div
-                            onClick={() => setCurrentPhase("answer")}
-                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
-                              currentPhase === "answer"
-                                ? "bg-blue-600/20 text-blue-400"
-                                : cardCompleted
-                                ? "bg-green-600/20 text-green-400"
-                                : "bg-gray-600/20 text-gray-400"
-                            }`}
-                          >
-                            {cardCompleted && (
-                              <CheckCircle className="w-4 h-4" />
-                            )}
-                            <span className="text-xs">Answer</span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => setBlurAnswer(!blurAnswer)}
-                                className={cn(
-                                  "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
-                                  blurAnswer
-                                    ? "text-blue-400"
-                                    : "text-gray-400 hover:text-white"
-                                )}
-                              >
-                                {!blurAnswer ? (
-                                  <Eye className="scale-78" />
-                                ) : (
-                                  <EyeClosed className="scale-78" />
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>
-                                {!blurAnswer ? "Hide Answer" : "Show Answer"}
-                              </p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </div>
-
-                      {/* Current phase label */}
-                      <h2 className="text-sm md:text-base text-gray-400 mb-4 mt-10 ">
-                        {isTypingMode &&
-                          (currentPhase === "question"
-                            ? "Type the question:"
-                            : blurAnswer
-                            ? "Type your answer and press Enter:"
-                            : "Type the answer:")}
-                      </h2>
-
-                      {/* Text to type */}
-                      <div
-                        ref={textContainerRef}
-                        className="text-center flex items-center justify-center w-full max-w-[600px]"
+                    <div
+                      className="flex flex-col items-center justify-center h-full p-2 md:p-4"
+                      onClick={
+                        () => handleFlipCard() // Flip card on click
+                      }
+                      style={{ perspective: "1000px" }}
+                      tabIndex={0}
+                    >
+                      <motion.div
+                        className="w-full h-full relative"
+                        animate={{
+                          rotateY: currentPhase === "question" ? 0 : 180,
+                        }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                        }}
+                        style={{
+                          transformStyle: "preserve-3d",
+                        }}
                       >
-                        {currentPhase === "answer" &&
-                        blurAnswer &&
-                        !showAnswer ? (
-                          // Show input field for answer when blurAnswer is on
-                          <div className="w-full">
-                            <input
-                              value={userAnswer}
-                              ref={answerInputRef}
-                              type="text"
-                              className="w-full bg-gray-900 border border-gray-700 rounded-md p-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-400"
-                              placeholder="Type your answer here..."
-                              onKeyDown={handleAnswerSubmit}
-                              onChange={(e) => setUserAnswer(e.target.value)}
-                              autoFocus
-                            />
+                        {/* Front of the card (question) */}
+                        <motion.div
+                          className="absolute inset-0 flex flex-col items-center justify-center p-8 backface-hidden"
+                          style={{
+                            backfaceVisibility: "hidden",
+                            display:
+                              currentPhase === "question" ? "flex" : "none",
+                          }}
+                        >
+                          <div className="absolute top-6 right-0 w-full items-center flex justify-between px-3">
+                            <div className="flex items-center gap-3">
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentPhase("question");
+                                }}
+                                className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                                  currentPhase === "question"
+                                    ? "bg-blue-600/20 text-blue-400"
+                                    : questionCompleted
+                                    ? "bg-green-600/20 text-green-400"
+                                    : "bg-gray-600/20 text-gray-400"
+                                }`}
+                              >
+                                {questionCompleted && (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                                <span className="text-xs">Question</span>
+                              </div>
+
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentPhase("answer");
+                                }}
+                                className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                                  currentPhase === "answer"
+                                    ? "bg-blue-600/20 text-blue-400"
+                                    : cardCompleted
+                                    ? "bg-green-600/20 text-green-400"
+                                    : "bg-gray-600/20 text-gray-400"
+                                }`}
+                              >
+                                {cardCompleted && (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                                <span className="text-xs">Answer</span>
+                              </div>
+                            </div>
+                            {isTypingMode && (
+                              <div>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setBlurAnswer(!blurAnswer);
+                                      }}
+                                      className={cn(
+                                        "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                                        blurAnswer
+                                          ? "text-blue-400"
+                                          : "text-gray-400 hover:text-white"
+                                      )}
+                                    >
+                                      {!blurAnswer ? (
+                                        <Eye className="scale-78" />
+                                      ) : (
+                                        <EyeClosed className="scale-78" />
+                                      )}
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>
+                                      {!blurAnswer
+                                        ? "Hide Answer"
+                                        : "Show Answer"}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                            )}
                           </div>
-                        ) : (
-                          // Show normal typing interface for other cases
-                          <motion.div
-                            key={`${index}-${currentPhase}`}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre transition-all duration-300`}
-                            onClick={handleTextClick}
-                            onMouseDown={(e) => e.preventDefault()}
+
+                          <h2 className="text-sm md:text-base text-center text-gray-400 mb-4 mt-10">
+                            {isTypingMode ? "Type the question:" : "Question:"}
+                          </h2>
+
+                          <div
+                            ref={textContainerRef}
+                            className="text-center flex items-center justify-center w-full max-w-[600px]"
                           >
-                            {isTypingMode ? (
-                              <div className="flex flex-wrap justify-center text-center mx-auto">
-                                {highlightedText}
+                            <motion.div
+                              key={`${index}-question`}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre transition-all duration-300`}
+                              onClick={handleTextClick}
+                              onMouseDown={(e) => e.preventDefault()}
+                            >
+                              {isTypingMode ? (
+                                <div className="flex flex-wrap justify-center text-center mx-auto">
+                                  {highlightedText}
+                                </div>
+                              ) : (
+                                <p className="whitespace-pre-line">
+                                  {currentTerm?.question}
+                                </p>
+                              )}
+                            </motion.div>
+                          </div>
+                        </motion.div>
+
+                        {/* Back of the card (answer) */}
+                        <motion.div
+                          className="absolute inset-0 flex flex-col items-center justify-center p-8 backface-hidden"
+                          style={{
+                            backfaceVisibility: "hidden",
+                            transform: "rotateY(180deg)",
+                            display:
+                              currentPhase === "answer" ? "flex" : "none",
+                          }}
+                        >
+                          <div className="absolute top-3 right-0 w-full items-center flex justify-between px-3">
+                            <div className="flex items-center gap-3">
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentPhase("question");
+                                }}
+                                className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                                  currentPhase === "question"
+                                    ? "bg-blue-600/20 text-blue-400"
+                                    : questionCompleted
+                                    ? "bg-green-600/20 text-green-400"
+                                    : "bg-gray-600/20 text-gray-400"
+                                }`}
+                              >
+                                {questionCompleted && (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                                <span className="text-xs">Question</span>
+                              </div>
+
+                              <div
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCurrentPhase("answer");
+                                }}
+                                className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer ${
+                                  currentPhase === "answer"
+                                    ? "bg-blue-600/20 text-blue-400"
+                                    : cardCompleted
+                                    ? "bg-green-600/20 text-green-400"
+                                    : "bg-gray-600/20 text-gray-400"
+                                }`}
+                              >
+                                {cardCompleted && (
+                                  <CheckCircle className="w-4 h-4" />
+                                )}
+                                <span className="text-xs">Answer</span>
+                              </div>
+                            </div>
+
+                            {isTypingMode && (
+                              <div>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setBlurAnswer(!blurAnswer);
+                                      }}
+                                      className={cn(
+                                        "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                                        blurAnswer
+                                          ? "text-blue-400"
+                                          : "text-gray-400 hover:text-white"
+                                      )}
+                                    >
+                                      {!blurAnswer ? (
+                                        <Eye className="scale-78" />
+                                      ) : (
+                                        <EyeClosed className="scale-78" />
+                                      )}
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>
+                                      {!blurAnswer
+                                        ? "Hide Answer"
+                                        : "Show Answer"}
+                                    </p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </div>
+                            )}
+                          </div>
+
+                          <h2 className="text-sm md:text-base text-gray-400 mb-4 mt-10">
+                            {isTypingMode
+                              ? blurAnswer
+                                ? "Type your answer and press Enter:"
+                                : "Type the answer:"
+                              : "Answer:"}
+                          </h2>
+
+                          <div
+                            ref={textContainerRef}
+                            className="text-center flex items-center justify-center w-full max-w-[600px]"
+                          >
+                            {blurAnswer && !showAnswer && isTypingMode ? (
+                              <div className="w-full">
+                                <input
+                                  value={userAnswer}
+                                  ref={answerInputRef}
+                                  type="text"
+                                  className="w-full bg-gray-900 border border-gray-700 rounded-md p-2 text-white focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  placeholder="Type your answer here..."
+                                  onKeyDown={handleAnswerSubmit}
+                                  onChange={(e) =>
+                                    setUserAnswer(e.target.value)
+                                  }
+                                  autoFocus
+                                />
                               </div>
                             ) : (
-                              <p className="whitespace-pre-line">
-                                {" "}
-                                {currentText}
-                              </p>
+                              <motion.div
+                                key={`${index}-answer`}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre transition-all duration-300`}
+                                onClick={handleTextClick}
+                                onMouseDown={(e) => e.preventDefault()}
+                              >
+                                {isTypingMode ? (
+                                  <div className="flex flex-wrap justify-center text-center mx-auto">
+                                    {highlightedText}
+                                  </div>
+                                ) : (
+                                  <p className="whitespace-pre-line">
+                                    {currentTerm?.answer}
+                                  </p>
+                                )}
+                              </motion.div>
                             )}
-                          </motion.div>
-                        )}
-                      </div>
-
-                      {/* Show correct answer if blurAnswer is on and user pressed Enter */}
-                      {currentPhase === "answer" &&
-                        blurAnswer &&
-                        showAnswer && (
-                          <div className="mt-4 p-4 bg-gray-800 rounded-md w-full">
-                            <p className="text-gray-400 mb-2">
-                              Correct answer:
-                            </p>
-                            <p className="text-white text-xl">
-                              {currentTerm?.answer}
-                            </p>
                           </div>
-                        )}
 
-                      {/* Card completion indicator */}
-                      {cardCompleted && correct && (
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="text-green-400 text-center mt-6"
-                        >
-                          <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-                          <span className="text-sm">
-                            {blurAnswer ? "Correct Answer!" : "Card completed!"}
-                          </span>
-                        </motion.div>
-                      )}
+                          {blurAnswer && showAnswer && (
+                            <div className="mt-4 p-4 bg-gray-800 rounded-md w-full">
+                              <p className="text-gray-400 mb-2">
+                                Correct answer:
+                              </p>
+                              <p className="text-white text-xl">
+                                {currentTerm?.answer}
+                              </p>
+                            </div>
+                          )}
 
-                      {cardCompleted && !correct && (
-                        <motion.div
-                          initial={{ scale: 0.8, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="text-center mt-6"
-                        >
-                          <CircleX className="text-red-400 w-8 h-8 mx-auto mb-2" />
-                          <span className="text-red-400 text-sm">
-                            Wrong Answer!
-                          </span>
-                          <div className="mt-1">
-                            Correct Answer: {currentTerm?.answer}
-                          </div>
+                          {cardCompleted && correct && (
+                            <motion.div
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="text-green-400 text-center mt-6"
+                            >
+                              <CheckCircle className="w-8 h-8 mx-auto mb-2" />
+                              <span className="text-sm">
+                                {blurAnswer
+                                  ? "Correct Answer!"
+                                  : "Card completed!"}
+                              </span>
+                            </motion.div>
+                          )}
+
+                          {cardCompleted && !correct && (
+                            <motion.div
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className="text-center mt-6"
+                            >
+                              <CircleX className="text-red-400 w-8 h-8 mx-auto mb-2" />
+                              <span className="text-red-400 text-sm">
+                                Wrong Answer!
+                              </span>
+                              <div className="mt-1">
+                                Correct Answer: {currentTerm?.answer}
+                              </div>
+                            </motion.div>
+                          )}
                         </motion.div>
-                      )}
+                      </motion.div>
                     </div>
                   </CarouselItem>
                 ))}
@@ -1111,8 +1427,10 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                           id="code-toggle"
                           checked={isQuizMode}
                           onCheckedChange={() => {
-                            if (!isQuizMode) setIsQuizMode(true);
-                            else setIsQuizModeConfirm(true);
+                            if (!isQuizMode) {
+                              setIsQuizMode(true);
+                              setIsTypingMode(true);
+                            } else setIsQuizModeConfirm(true);
                           }}
                           className={cn(
                             "scale-80",
