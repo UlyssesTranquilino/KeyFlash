@@ -28,7 +28,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className=" grid  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full h-45 gap-5 border-white px-5">
+        <div className="mb-30 lg:mb-8 grid  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full h-45 gap-5 border-white px-5">
           <Link
             href="/typing/custom"
             className="relative group transition-all duration-300 ease-in-out"
@@ -43,7 +43,8 @@ export default function Home() {
                 Practice Typing
               </h1>
               <p className="text-xs md:text-sm w-60">
-                Build speed and accuracy with random words or quotes.
+                Build speed and accuracy with random words, quotes, or code
+                snippets.
               </p>
             </div>
             <div className="absolute -top-5 -right-3 -z-1 size-65 rounded-full bg-radial-[at_50%_50%] from-blue-500/70 to-black to-70%"></div>
@@ -53,17 +54,43 @@ export default function Home() {
             href="/typing/code"
             className="relative group transition-all duration-300 ease-in-out"
           >
-            <div className="cursor-pointer p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30 transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
-              <CodeXml
-                size={55}
-                strokeWidth={1.3}
-                className="text-[#007CFF] -ml-2 scale-90 md:scale-100"
-              />
-              <h1 className="text-md md:text-lg my-3 font-medium">
-                Type and Learn Code
+            <div className="cursor-pointer pt-8 p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30 transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 4 150 150"
+                width="29"
+                height="29"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="5"
+                className=" text-[#007CFF] scale-250 md:scale-260 "
+              >
+                <rect
+                  x="30"
+                  y="40"
+                  width="60"
+                  height="80"
+                  rx="10"
+                  transform="rotate(16 120 220)"
+                  stroke="currentColor"
+                />
+
+                <rect
+                  x="45"
+                  y="25"
+                  width="60"
+                  height="80"
+                  rx="10"
+                  stroke="currentColor"
+                  fill="#08132D"
+                />
+              </svg>
+              <h1 className="pt-2 text-md md:text-lg my-3 font-medium">
+                Flashcard Typing Mode
               </h1>
               <p className="text-xs md:text-sm w-60">
-                Practice typing real code snippets by language and topic.
+                Practice by typing answers to your own flashcards — great for
+                memorizing terms, code, or concepts.
               </p>
             </div>
             <div className="absolute -top-3 sm:-top-10 -right-4 -z-1 size-60 rounded-full bg-radial-[at_50%_50%] from-blue-500/70 to-black to-80%"></div>
@@ -83,8 +110,7 @@ export default function Home() {
                 Paste or Upload Text
               </h1>
               <p className="text-xs md:text-sm w-60">
-                Convert your PDF, DOCX, or PPT files into interactive typing
-                content.
+                Convert your .TXT files into interactive typing content.
               </p>
             </div>
             <div className="absolute -top-10 -left-10 -z-1 size-70 rounded-full bg-radial-[at_50%_50%] from-blue-500/70 to-black to-80%"></div>
