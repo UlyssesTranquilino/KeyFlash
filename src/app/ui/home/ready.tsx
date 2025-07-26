@@ -7,7 +7,7 @@ export default function Ready() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
-    <div className="mt-60 w-full sm:mt-70 flex flex-col items-center justify-items-center">
+    <div className="mt-60 w-full sm:mt-70 flex flex-col items-center justify-items-center pb-50">
       <div className="w-full px-4 gap-5">
         <div className="w-full  flex items-center justify-center l bg-radial from-blue-600/50 from-10% to-black rounded-full">
           <Image

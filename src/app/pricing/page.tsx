@@ -4,8 +4,11 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Check, X } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const PricingPage = () => {
+  const { user } = useAuth();
+
   return (
     <div className="py-5 md:py-8 relative overflow-hidden">
       <div className="flex flex-col items-center justify-center text-center gap-2 mb-3 md:mb-5">
@@ -61,10 +64,24 @@ const PricingPage = () => {
             </li>
           </ul>
 
-          <div className="mt-6 text-sm text-gray-400">
+          {user ? (
+            <Link href="/dashboard">
+              <button className="cursor-pointer mt-6 w-full outline  outline-gray-600 hover:bg-gray-900 text-white py-2 rounded-md transition">
+                Go to Dashboard
+              </button>
+            </Link>
+          ) : (
+            <Link href="/signup">
+              <button className="cursor-pointer mt-6 w-full outline  outline-gray-600 hover:bg-gray-900 text-white py-2 rounded-md transition">
+                Create an Account
+              </button>
+            </Link>
+          )}
+
+          <p className="mt-3 text-xs text-gray-400 text-center">
             Saving flashcards, custom texts, and code snippets requires an
             account.
-          </div>
+          </p>
         </div>
 
         <div className="rounded-2xl border border-blue-700 p-6 bg-gradient-to-b from-blue-900/60 to-black shadow-xl">
@@ -116,7 +133,7 @@ const PricingPage = () => {
               Early Access to New Features
             </li>
           </ul>
-          <button className="cursor-pointer mt-6 w-full outline-1 outline-blue-600 bg-blue-600/60 hover:bg-blue-600/70 text-white py-2 rounded-md transition">
+          <button className="cursor-pointer mt-6 w-full outline-1 outline-blue-600 bg-blue-600/60 hover:bg-blue-600/80 text-white py-2 rounded-md transition">
             Upgrade to Pro
           </button>
 
