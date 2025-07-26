@@ -129,24 +129,6 @@ export default function Home() {
 
         <Ready />
       </main>
-
-      <footer className="mt-20 sm:mt-40 w-full border-t border-white/10 py-8 px-4 text-sm text-center text-white/80">
-        <div className="flex flex-col sm:flex-row items-center justify-between max-w-6xl mx-auto gap-4">
-          <p>© 2025 KeyFlash. All rights reserved.</p>
-
-          <div className="flex gap-6 text-white/60 text-sm">
-            <a href="#about" className="hover:text-white transition">
-              About
-            </a>
-            <a href="#contact" className="hover:text-white transition">
-              Contact
-            </a>
-            <a href="#privacy" className="hover:text-white transition">
-              Privacy
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

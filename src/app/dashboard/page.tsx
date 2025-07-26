@@ -265,6 +265,13 @@ export default function HomePage() {
     }
   };
 
+  const handleCreate = (type: string) => {
+    console.log("user: ", user);
+    href = "/dashboard/flashcards/create";
+    href = "/dashboard/texts/create";
+    href = "/dashboard/codes/create";
+  };
+
   return (
     <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
       <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
@@ -284,7 +291,7 @@ export default function HomePage() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
         <Link
-          href="/dashboard/typing/random"
+          href="/dashboard/random/typing"
           className="cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden h-23 lg:h-30 flex items-center justify-center text-center p-5 w-full rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
         >
           <div className="absolute -top-55 -right-10 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
@@ -338,21 +345,26 @@ export default function HomePage() {
 
           <PopoverContent className="bg-gray-950 w-36 md:w-45 border-gray-800">
             <div className="flex flex-col items-center gap-3">
-              <Link href="/dashboard/flashcards/create" className="w-full">
-                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
-                  Flashcard
-                </Button>
-              </Link>
-              <Link href="/dashboard/texts/create" className="w-full">
-                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
-                  Text
-                </Button>
-              </Link>
-              <Link href="/dashboard/codes/create" className="w-full">
-                <Button className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300">
-                  Code
-                </Button>
-              </Link>
+              <Button
+                onClick={() => handleCreate("flashcard")}
+                className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300"
+              >
+                Flashcard
+              </Button>
+
+              <Button
+                onClick={() => handleCreate("text")}
+                className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300"
+              >
+                Text
+              </Button>
+
+              <Button
+                onClick={() => handleCreate("code")}
+                className="max-w-50 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-colors duration-300"
+              >
+                Code
+              </Button>
             </div>
           </PopoverContent>
         </Popover>

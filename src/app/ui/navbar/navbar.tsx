@@ -72,15 +72,7 @@ export default function Navbar() {
           >
             Home
           </Link>
-          <Link
-            href="/contact"
-            className={cn(
-              "text-sm text-gray-300 hover:text-white",
-              pathname == "/contact" && "text-white"
-            )}
-          >
-            Contact
-          </Link>
+
           <Link
             href="/pricing"
             className={cn(
@@ -99,11 +91,20 @@ export default function Navbar() {
           >
             Support
           </Link>
+          {/* <Link
+            href="/contact"
+            className={cn(
+              "text-sm text-gray-300 hover:text-white",
+              pathname == "/contact" && "text-white"
+            )}
+          >
+            Contact
+          </Link> */}
         </div>
       </div>
 
       <div className="flex items-center gap-3 sm:px-3">
-        {user ? (
+        {!user ? (
           <Link
             href="/signin"
             className="text-xs lg:text-sm bg-blue-600/10 hover:bg-blue-600/20 border-1 border-blue-500/30 hover:border-blue-400/40 p-[6px] px-3 lg:px-4 rounded-sm"
@@ -178,16 +179,7 @@ export default function Navbar() {
                 >
                   Home
                 </Link>
-                <Link
-                  href="/contact"
-                  className={cn(
-                    " text-gray-300 hover:text-white p-2 px-6 hover:bg-gray-900/40",
-                    pathname == "/contact" &&
-                      "text-white bg-blue-600/10 hover:bg-blue-600/10"
-                  )}
-                >
-                  Contact
-                </Link>
+
                 <Link
                   href="/pricing"
                   className={cn(
@@ -208,18 +200,31 @@ export default function Navbar() {
                 >
                   Support
                 </Link>
+                {/* <Link
+                  href="/contact"
+                  className={cn(
+                    " text-gray-300 hover:text-white p-2 px-6 hover:bg-gray-900/40",
+                    pathname == "/contact" &&
+                      "text-white bg-blue-600/10 hover:bg-blue-600/10"
+                  )}
+                >
+                  Contact
+                </Link> */}
               </div>
               <div className="grid flex-1 auto-rows-min gap-6 px-4"></div>
               <SheetFooter>
                 <Link
                   href="/dashboard"
-                  className="text-center  bg-blue-600/10 hover:bg-blue-600/20 border-1 border-blue-500/30 hover:border-blue-400/40 p-[6px] px-3 rounded-sm"
+                  className="text-center py-[12px]  bg-blue-600/10 hover:bg-blue-600/20 border-1 border-blue-500/30 hover:border-blue-400/40 p-[6px] px-3 rounded-sm"
                 >
                   Dashboard
                 </Link>
 
                 <SheetClose asChild>
-                  <Button variant="outline" className="cursor-pointer">
+                  <Button
+                    variant="outline"
+                    className="cursor-pointer mt-2 h-12"
+                  >
                     Close
                   </Button>
                 </SheetClose>
