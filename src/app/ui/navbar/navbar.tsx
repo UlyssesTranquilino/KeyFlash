@@ -119,42 +119,42 @@ export default function Navbar() {
             Dashboard
           </Link>
         )}
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Avatar className="w-7 h-7">
-              <AvatarImage src={profile} alt="Hello" />
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-40 mx-3" align="start">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                {" "}
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <Link href="/feedback">
-              <DropdownMenuItem>
-                <Send />
-                Feedback
-              </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              {" "}
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+        {user && 
+            <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="w-7 h-7">
+                      <AvatarImage src={profile} alt="Hello" />
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-40 mx-3" align="start">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <BadgeCheck />
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        {" "}
+                        <Sparkles />
+                        Upgrade to Pro
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <Link href="/feedback">
+                      <DropdownMenuItem>
+                        <Send />
+                        Feedback
+                      </DropdownMenuItem>
+                    </Link>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      {" "}
+                      <LogOut />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+            </DropdownMenu>
+        }
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger asChild>

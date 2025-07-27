@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { createContext, useContext, useEffect, useState, useMemo } from "react";
 import { createClient } from "../../../utils/supabase/client";
@@ -23,70 +23,9 @@ export function AuthProvider({
 }) {
   const [session, setSession] = useState<Session | null>(serverSession || null);
   const [user, setUser] = useState<User | null>(serverSession?.user || null);
-  const [loading, setLoading] = useState(!serverSession); // If serverSession exists, no initial loading
+  const [loading, setLoading] = useState(!serverSession);
 
   const supabase = useMemo(() => createClient(), []);
-  const router = useRouter();
-
-  useEffect(() => {
-    let ignore = false;
-
-    // If a server session was provided, user and session are already set.
-    // We only need to fetch the session if it wasn't provided by the server (e.g., direct client-side navigation or first load where server didn't get a session).
-
-    if (!serverSession) {
-      const getInitialSession = async () => {
-        if (ignore) return;
-
-        setLoading(true);
-
-        // Secure user fetch
-        const { data: userData, error: userError } =
-          await supabase.auth.getUser();
-        const { data: sessionData, error: sessionError } =
-          await supabase.auth.getSession();
-
-        if (!ignore) {
-          if (userError || sessionError) {
-            console.error(
-              "Error getting initial session/user:",
-              userError || sessionError
-            );
-            setUser(null);
-            setSession(null);
-          } else {
-            setUser(userData.user ?? null);
-            setSession(sessionData.session ?? null);
-          }
-
-          setLoading(false);
-        }
-      };
-
-      getInitialSession();
-    } else {
-      // If serverSession was provided, ensure loading is set to false right away
-      setLoading(false);
-    }
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      if (ignore) return;
-
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-
-      // Refresh server-side props when auth changes
-      if (["SIGNED_IN", "SIGNED_OUT"].includes(event)) {
-        router.refresh();
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase, router, serverSession]);
 
   const signOut = async () => {
     setLoading(true);
@@ -96,21 +35,72 @@ export function AuthProvider({
     if (error) {
       console.error("Sign out error:", error);
     }
-    router.push("/signin");
+
+    // Delay routing to ensure we're in a mounted context
+    if (typeof window !== 'undefined') {
+      window.location.href = "/signin";
+    }
   };
 
+  useEffect(() => {
+    let ignore = false;
+    const router = useRouter(); 
+
+    const setupAuth = async () => {
+      if (!serverSession) {
+        setLoading(true);
+
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser();
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
+
+        if (!ignore) {
+          if (userError || sessionError) {
+            console.error("Error getting initial session/user:", userError || sessionError);
+            setUser(null);
+            setSession(null);
+          } else {
+            setUser(userData.user ?? null);
+            setSession(sessionData.session ?? null);
+          }
+
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+
+      // Auth listener
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+        if (ignore) return;
+
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setLoading(false);
+
+        if (["SIGNED_IN", "SIGNED_OUT"].includes(event)) {
+          router.refresh();
+        }
+      });
+
+      return () => subscription.unsubscribe();
+    };
+
+    setupAuth();
+
+    return () => {
+      ignore = true;
+    };
+  }, [supabase, serverSession]);
+
   const value = useMemo(
-    () => ({
-      user,
-      session,
-      loading,
-      signOut,
-    }),
+    () => ({ user, session, loading, signOut }),
     [user, session, loading]
   );
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

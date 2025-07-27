@@ -267,9 +267,21 @@ export default function HomePage() {
 
   const handleCreate = (type: string) => {
     console.log("user: ", user);
-    href = "/dashboard/flashcards/create";
-    href = "/dashboard/texts/create";
-    href = "/dashboard/codes/create";
+
+    return;
+    if (type === "flashcard")
+    {
+      router.push("/dashboard/flashcards/create")
+    }
+    else if (type === "text")
+    {
+      router.push("/dashboard/texts/create")
+    }
+    else if (type === "code") 
+    {
+      router.push("/dashboard/codes/create")
+    }
+
   };
 
   return (
