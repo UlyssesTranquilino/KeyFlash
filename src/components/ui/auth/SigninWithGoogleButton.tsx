@@ -8,7 +8,7 @@ const SigninWithGoogleButton = () => {
     <Button
       type="button"
       variant="outline"
-      className="w-full"
+      className="w-full cursor-pointer"
       onClick={() => {
         signInWithGoogle();
       }}

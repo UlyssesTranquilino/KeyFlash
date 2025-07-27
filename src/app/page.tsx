@@ -82,7 +82,7 @@ export default function Home() {
                   height="80"
                   rx="10"
                   stroke="currentColor"
-                  fill="#08132D"
+                  fill="black"
                 />
               </svg>
               <h1 className="pt-2 text-md md:text-lg my-3 font-medium">

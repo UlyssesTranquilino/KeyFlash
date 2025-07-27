@@ -78,7 +78,7 @@ export async function getCode(codeId: string) {
 export async function insertCode(codeData: codeDataType) {
   try {
     const supabase = createClient();
-    console.log(codeData);
+
     const {
       data: { user },
     } = await supabase.auth.getUser();

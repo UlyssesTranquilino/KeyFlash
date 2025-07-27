@@ -480,9 +480,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           setTimeout(() => {
             if (current < flashcard.terms.length - 1) {
               api?.scrollNext();
-            } else {
-              console.log("All cards completed!");
-            }
+            } 
           }, 1000);
         }
       }

@@ -281,7 +281,7 @@ const StandardTyping = ({ text }) => {
     setLoading(false);
 
     setWpm(0);
-    console.log("Refetch WPM: ", wpm);
+   
   }, [setTextData, resetTest]);
 
   const handleReType = useCallback(

@@ -18,8 +18,7 @@ export async function getRandomQuote() {
 
   for (let i = 0; i < 100; i++) {
     try {
-      console.log(`Fetching quote ${i + 1}...`);
-      const { data } = await axios.get<
+     const { data } = await axios.get<
         [{ quote: string; author: string; category?: string }]
       >("https://api.api-ninjas.com/v1/quotes", {
         headers: { "X-Api-Key": process.env.NEXT_PUBLIC_NINJAS_KEY! },
@@ -44,13 +43,10 @@ export async function getRandomQuote() {
 
 export const insertQuotes = async () => {
   const quotes = await getRandomQuote();
-  console.log("Inserting quotes:", quotes);
 
   const { data, error } = await supabase.from("quotes").insert(quotes);
 
   if (error) {
     console.error("Error inserting quotes:", error);
-  } else {
-    console.log("Quotes inserted successfully:", data);
-  }
+  } 
 };

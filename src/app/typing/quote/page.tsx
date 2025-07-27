@@ -223,7 +223,7 @@ const QuoteType = ({ sessionType = "multiple" }) => {
     setLoading(false);
 
     setWpm(0);
-    console.log("Refetch WPM: ", wpm);
+
   }, [setQuote, resetTest]);
 
   const handleReType = useCallback(

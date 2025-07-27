@@ -76,7 +76,7 @@ export default function Signup() {
           </div>
           <div className="text-center text-sm">
             Already have an account?{" "}
-            <Link href="/signin" className="underline underline-offset-4">
+            <Link href="/signin" className="cursor-pointer underline underline-offset-4">
               Signin
             </Link>
           </div>

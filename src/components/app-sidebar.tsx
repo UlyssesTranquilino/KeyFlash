@@ -40,12 +40,13 @@ import { useAuth } from "@/app/context/AuthContext";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useAuth();
 
+
   // This is sample data.
   const data = {
     user: {
-      name: user?.identities[0].identity_data.name,
-      email: user?.identities[0].identity_data.email,
-      avatar: user?.identities[0].identity_data.avatar_url,
+      name: user?.name,
+      email: user?.email,
+      avatar: user?.avatar,
     },
     teams: [
       {
@@ -76,7 +77,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
       {
-        title: "Home",
+        title: "Dashboard",
         url: "/dashboard",
         icon: Home,
         isActive: true,
@@ -147,21 +148,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
 
     navSecondary: [
-      {
-        title: "Settings",
-        url: "#",
-        icon: Settings2,
-      },
+      // {
+      //   title: "Settings",
+      //   url: "#",
+      //   icon: Settings2,
+      // },
       {
         title: "Support",
         url: "/support",
         icon: LifeBuoy,
       },
-      {
-        title: "Feedback",
-        url: "#",
-        icon: Send,
-      },
+      // {
+      //   title: "Feedback",
+      //   url: "#",
+      //   icon: Send,
+      // },
     ],
   };
   return (
