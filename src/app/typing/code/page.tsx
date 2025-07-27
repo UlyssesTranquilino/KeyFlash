@@ -226,8 +226,7 @@ const CodeType = () => {
       const value = e.target.value;
       const currentTime = Date.now();
 
-      console.log("Input changed:", JSON.stringify(value));
-
+    
       // Set idle state immediately
       setIsIdle(false);
 
@@ -334,13 +333,6 @@ const CodeType = () => {
 
         const nextCharIndex = userInput.length;
 
-        console.log(
-          "Enter pressed, next char should be:",
-          JSON.stringify(codeContent[nextCharIndex] || "END"),
-          "at index:",
-          nextCharIndex
-        );
-
         if (
           (nextCharIndex < codeContent.length &&
             codeContent[nextCharIndex] === "\n") ||
@@ -358,12 +350,6 @@ const CodeType = () => {
             newIndex++;
           }
 
-          console.log(
-            "After Enter, new input:",
-            JSON.stringify(newInput),
-            "new index:",
-            newIndex
-          );
 
           // Update state with the new input and cursor position
           setUserInput(newInput);

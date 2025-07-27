@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
       // Successful confirmation - redirect to home with success message
       return NextResponse.redirect(
-        `${origin}/home?message=Email confirmed successfully`
+        `${origin}/dashboard?message=Email confirmed successfully`
       );
     } catch (error) {
       console.error("Unexpected error during email confirmation:", error);

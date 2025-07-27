@@ -266,14 +266,25 @@ export default function HomePage() {
   };
 
   const handleCreate = (type: string) => {
-    console.log("user: ", user);
-    href = "/dashboard/flashcards/create";
-    href = "/dashboard/texts/create";
-    href = "/dashboard/codes/create";
+
+    // return;
+    if (type === "flashcard")
+    {
+      router.push("/dashboard/flashcards/create")
+    }
+    else if (type === "text")
+    {
+      router.push("/dashboard/texts/create")
+    }
+    else if (type === "code") 
+    {
+      router.push("/dashboard/codes/create")
+    }
+
   };
 
   return (
-    <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
+    <div className="pb-30 container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
       <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
@@ -281,7 +292,7 @@ export default function HomePage() {
       <div className="max-w-4xl ">
         <header className="mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-white  ">
-            Welcome, {user.user_metadata?.full_name || user.email}!
+            Welcome, {user.name|| user.email}!
           </h1>
           {/* <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
             Current Streak: 3🔥
@@ -582,7 +593,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-6">
                     <Link
-                      href="/dashboard/text/create"
+                      href="/dashboard/texts/create"
                       className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg
@@ -679,7 +690,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-6">
                     <Link
-                      href="/dashboard/code/create"
+                      href="/dashboard/codes/create"
                       className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg

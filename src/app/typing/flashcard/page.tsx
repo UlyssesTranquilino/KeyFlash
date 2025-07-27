@@ -369,9 +369,7 @@ const TypingFlashcards = () => {
           setTimeout(() => {
             if (current < sampleTerms.length - 1) {
               api?.scrollNext();
-            } else {
-              console.log("All cards completed!");
-            }
+            } 
           }, 1000);
         }
       }

@@ -50,10 +50,14 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const { user, signOut } = useAuth();
   const { setTheme } = useTheme();
-  const profile = user?.identities?.[0]?.identity_data?.avatar_url;
+  const profile = user?.identities?.[1] ? user?.identities?.[1]?.identity_data?.avatar_url : user?.identities?.[0]?.identity_data?.avatar_url;
+
   const [isDarkMode, setIsDarkMode] = useState(true);
   const pathname = usePathname();
 
+  const handleLogout = () => {
+    signOut();
+  }
   return (
     <nav className="my-3 pl-3 sm:m-3  sm:px-5 sm:py-2 md:px-10 flex justify-between items-center w-full">
       <div className="flex items-center justify-start gap-10">
@@ -119,42 +123,45 @@ export default function Navbar() {
             Dashboard
           </Link>
         )}
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Avatar className="w-7 h-7">
-              <AvatarImage src={profile} alt="Hello" />
-            </Avatar>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-40 mx-3" align="start">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                {" "}
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <Link href="/feedback">
-              <DropdownMenuItem>
-                <Send />
-                Feedback
-              </DropdownMenuItem>
-            </Link>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              {" "}
-              <LogOut />
-              Log out
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+        {user && 
+            <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="w-7 h-7 cursor-pointer">
+                      {profile ?       <AvatarImage src={profile} alt="Hello" />
+                      : (<div className="h-14 w-14 rounded-full bg-blue-950 text-center text-sm pt-1">
+                        {user?.identities?.[0]?.identity_data?.name[0].toUpperCase()}
+                      </div>)}
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-40 mx-3" align="start">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem>
+                        <BadgeCheck />
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        {" "}
+                        <Sparkles />
+                        Upgrade to Pro
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    {/* <Link href="/feedback">
+                      <DropdownMenuItem>
+                        <Send />
+                        Feedback
+                      </DropdownMenuItem>
+                    </Link> */}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      {" "}
+                      <LogOut />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+            </DropdownMenu>
+        }
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger asChild>

@@ -5,6 +5,9 @@ import Navbar from "@/app/ui/navbar/navbar";
 
 export default function ConditionalNavbar() {
   const pathname = usePathname();
+
+  if (!pathname) return null; 
+
   if (pathname.startsWith("/dashboard")) return null;
 
   return <Navbar />;

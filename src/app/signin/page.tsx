@@ -11,7 +11,7 @@ import SigninWithGoogleButton from "@/components/ui/auth/SigninWithGoogleButton"
 
 export default function Signin() {
   return (
-    <div className="mx-auto max-w-[1150px]  flex items-center justify-center overflow-hidden relative -mt-5 md:-mt-10">
+    <div className="mb-30 mx-auto max-w-[1150px]  flex items-center justify-center overflow-hidden relative -mt-5 md:-mt-10">
       <div className="absolute top-20 right-10 sm:right-10 md:right-50 -z-10 h-126 w-60 sm:w-80 rotate-45 bg-gradient-to-br from-blue-500 via-transparent to-black/0 blur-3xl"></div>
       <div className="absolute -bottom-60 left-10 sm:right-10 -z-10 h-126 w-76 sm:w-90 rotate-45 bg-gradient-to-br from-blue-600/60 via-transparent to-black/0 blur-3xl"></div>
 
@@ -53,7 +53,7 @@ export default function Signin() {
                 className="input-glow"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full cursor-pointer">
               Login
             </Button>
             <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">

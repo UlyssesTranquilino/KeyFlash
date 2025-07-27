@@ -192,7 +192,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="h-screen container relative max-w-[1350px] px-2 md:px-5 mx-auto  overflow-hidden -mt-2">
+    <div className=" container relative max-w-[1350px] px-2 md:px-5 mx-auto  overflow-hidden -mt-2">
       <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
