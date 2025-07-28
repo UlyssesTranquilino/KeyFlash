@@ -8,6 +8,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -37,12 +38,13 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const {signOut} = useAuth();
+  const {signOut, user: dataUser} = useAuth();
 
   const handleLogOut = () => {
     signOut();
   }
   
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -50,7 +52,7 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
@@ -81,23 +83,37 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+            {!dataUser?.isPro && 
+            <>         
+              <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                        <DropdownMenuItem className="cursor-pointer">
+                          <Sparkles />
+                          Upgrade to Pro
+                        </DropdownMenuItem>
+                </DropdownMenuGroup>
+            </>}
+
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer">
                 <BadgeCheck />
                 View Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+
+
+                          {!dataUser?.isPro && <>                    
+                          <Link
+                        href="/pricing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+
+                      ><DropdownMenuItem className="cursor-pointer">
                 <CreditCard />
-                Billing
+                Pricing
               </DropdownMenuItem>
+              </Link> 
+                      </>}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogOut}>

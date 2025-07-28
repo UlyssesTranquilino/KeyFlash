@@ -43,7 +43,7 @@ const CreateText = () => {
       toast.success("Text created successfully!");
 
       const slug = `${data.id}-${slugify(title)}`;
-      router.push(`/text/${slug}`);
+      router.push(`/dashboard/texts/${slug}`);
     } catch (err) {
       toast.error("An unexpected error occurred");
     }
@@ -104,7 +104,7 @@ const CreateText = () => {
 
       <Button
         onClick={handleCreateText}
-        className=" text-blue-400 bg-blue-950/30 hover:bg-blue-950/70  mt-5 max-w-50 mx-auto px-4"
+        className="cursor-pointer text-blue-400 bg-blue-950/30 hover:bg-blue-950/70  mt-5 max-w-50 mx-auto px-4"
       >
         Create Text
       </Button>

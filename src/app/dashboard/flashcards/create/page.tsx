@@ -451,13 +451,13 @@ export default function page() {
           onClick={() => {
             setOpenReset(true);
           }}
-          className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
+          className="cursor-pointer bg-gray-900/20 hover:bg-gray-800 text-gray-200"
         >
           Reset
         </Button>
         <Button
           onClick={handleCreateFlashcard}
-          className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
+          className="cursor-pointer text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
         >
           Create FLashcard
         </Button>

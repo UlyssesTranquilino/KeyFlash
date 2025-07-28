@@ -23,30 +23,27 @@ interface TransformedUser {
   avatar: string | null;
   isPro: boolean;
   createdAt: Date;
+  nickname: string | null;
 }
 
 export function transformUser(user: AuthUser | null, profile?: ProfileUser | null): TransformedUser | null {
   if (!user) return null;
 
-
-
-  // Fallback name resolution
   const name = profile?.nickname || 
                user.user_metadata?.name || 
                (user.email ? user.email.split('@')[0] : 'User');
 
-  // Avatar resolution with null if no avatar exists
   const avatar = profile?.avatar_url || 
                  user.user_metadata?.avatar_url || 
                  user.user_metadata?.picture || 
                  null;
 
-  // Date handling
   const createdAt = new Date(
     profile?.created_at || 
     user.created_at || 
     new Date().toISOString()
   );
+
 
   return {
     id: user.id,
@@ -54,6 +51,7 @@ export function transformUser(user: AuthUser | null, profile?: ProfileUser | nul
     name,
     avatar,
     isPro: profile?.is_pro || false,
-    createdAt
+    createdAt,
+    nickname: profile?.nickname || null,
   };
 }

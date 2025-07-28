@@ -181,98 +181,57 @@ const StandardTyping = ({ text }) => {
 
   // Highlighting Text
   const highlightedText = useMemo(() => {
-    if (!textData) return null;
-
-    const lines = textData.split("\n");
-    const userInputChars = userInput.split("");
-    let charIndex = 0;
-
-    return lines.map((line, lineIndex) => {
-      // Add a space at the end of the line (except last line)
-      if (lineIndex < lines.length - 1) {
-        line += "\n";
+  if (!textData) return null;
+  
+  const result = [];
+  let charIndex = 0;
+  const userInputChars = userInput.split('');
+  
+  // Process text in chunks to avoid excessive DOM nodes
+  const chunkSize = 100; // Adjust based on performance testing
+  for (let i = 0; i < textData.length; i += chunkSize) {
+    const chunk = textData.slice(i, i + chunkSize);
+    const chunkElements = [];
+    
+    for (let j = 0; j < chunk.length; j++) {
+      const currentCharIndex = charIndex++;
+      const char = chunk[j];
+      const isCursor = currentCharIndex === userInput.length;
+      const displayChar = char === ' ' ? '\u00A0' : char;
+      
+      let className = 'text-gray-500';
+      if (currentCharIndex < userInput.length) {
+        className = userInputChars[currentCharIndex] === char 
+          ? 'text-white' 
+          : 'text-red-600/75 bg-red-900/30';
       }
-
-      const words = line.split(" ");
-      const lineElements = [];
-
-      words.forEach((word, wordIndex) => {
-        const wordChars = word.split("");
-
-        // Word characters
-        const wordSpans = wordChars.map((char) => {
-          const currentCharIndex = charIndex++;
-          const isCursor = currentCharIndex === userInput.length;
-          const displayChar = char === " " ? "\u00A0" : char;
-
-          let className = "text-gray-500";
-          if (currentCharIndex < userInput.length) {
-            className =
-              userInput[currentCharIndex] === char
-                ? "text-white"
-                : "text-red-600/75 bg-red-900/30";
-          }
-
-          return (
-            <span key={currentCharIndex} className="relative">
-              {isCursor && (
-                <span
-                  ref={cursorRef}
-                  className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                    isIdle ? "animate-pulse" : ""
-                  }`}
-                />
-              )}
-              <span className={className}>{displayChar}</span>
-            </span>
-          );
-        });
-
-        // Space after word (if not last)
-        if (wordIndex < words.length - 1) {
-          const spaceIndex = charIndex++;
-          wordSpans.push(
-            <span className="relative" key={`space-${spaceIndex}`}>
-              {spaceIndex === userInput.length && (
-                <span
-                  ref={cursorRef}
-                  className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                    isIdle ? "animate-pulse" : ""
-                  }`}
-                />
-              )}
-              <span
-                className={
-                  spaceIndex < userInput.length
-                    ? userInput[spaceIndex] === " "
-                      ? "text-white"
-                      : "text-red-600/75 bg-red-900/30"
-                    : "text-gray-500"
-                }
-              >
-                &nbsp;
-              </span>
-            </span>
-          );
-        }
-
-        lineElements.push(
-          <span
-            key={`${lineIndex}-${wordIndex}`}
-            className="inline-block mr-1.5"
-          >
-            {wordSpans}
-          </span>
-        );
-      });
-
-      return (
-        <div key={lineIndex} className="w-full">
-          {lineElements}
-        </div>
+      
+      chunkElements.push(
+        <span key={currentCharIndex} className="relative">
+          {isCursor && (
+            <span
+              ref={cursorRef}
+              className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                isIdle ? 'animate-pulse' : ''
+              }`}
+            />
+          )}
+          <span className={className}>{displayChar}</span>
+        </span>
       );
-    });
-  }, [textData, userInput, isIdle]);
+    }
+    
+    result.push(
+      <span key={`chunk-${i}`} className="inline-block">
+        {chunkElements}
+      </span>
+    );
+  }
+  
+  return <div className="whitespace-pre-wrap break-words font-mono text-left">{result}</div>;
+}, [textData, userInput, isIdle]);
+
+
 
   const handleRefetch = useCallback(async () => {
     setLoading(true);
@@ -295,75 +254,65 @@ const StandardTyping = ({ text }) => {
   );
 
   // Optimized input change handler
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      const currentTime = Date.now();
+const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  const currentTime = Date.now();
 
-      // ❌ Block typing if 5 or more consecutive mistakes and trying to type further
-      if (
-        consecutiveMistakes >= MAX_CONSECUTIVE_MISTAKES &&
-        value.length > userInput.length
-      ) {
-        return;
-      }
+  // Skip processing if no change
+  if (value === userInput) return;
 
-      setIsIdle(false);
+  // Block typing if too many mistakes
+  if (consecutiveMistakes >= MAX_CONSECUTIVE_MISTAKES && value.length > userInput.length) {
+    return;
+  }
 
-      if (!startTime) {
-        setStartTime(currentTime);
-      }
+  setIsIdle(false);
 
-      setUserInput(value);
-      setCurrentIndex(value.length);
+  if (!startTime) {
+    setStartTime(currentTime);
+  }
 
-      startTransition(() => {
-        if (textData) {
-          let correct = 0;
-          const minLength = Math.min(value.length, textData.length);
+  // Calculate correct characters more efficiently
+  let correct = 0;
+  const minLength = Math.min(value.length, textData.length);
+  
+  // Only check the new characters (optimization)
+  const startCheck = Math.max(0, userInput.length - 1);
+  for (let i = startCheck; i < minLength; i++) {
+    if (value[i] === textData[i]) {
+      correct = i + 1;
+    } else {
+      break;
+    }
+  }
 
-          for (let i = 0; i < minLength; i++) {
-            if (value[i] === textData[i]) {
-              correct++;
-            } else {
-              break;
-            }
-          }
+  const newMistakes = value.length - correct;
+  
+  // Batch state updates
+  setUserInput(value);
+  setCurrentIndex(value.length);
+  setCorrectChars(correct);
+  setIncorrectChars(newMistakes);
+  setMistakes(newMistakes);
 
-          const newMistakes = value.length - correct;
-          setCorrectChars(correct);
-          setIncorrectChars(newMistakes);
-          setMistakes(newMistakes);
+  // Update consecutive mistakes
+  if (value.length > userInput.length && value[value.length - 1] !== textData[value.length - 1]) {
+    setConsecutiveMistakes(prev => prev + 1);
+  } else {
+    setConsecutiveMistakes(0);
+  }
 
-          // ✅ Set consecutive mistakes
-          if (
-            value.length > userInput.length && // Only when adding characters
-            value[value.length - 1] !== textData[value.length - 1]
-          ) {
-            setConsecutiveMistakes((prev) => prev + 1);
-          } else {
-            setConsecutiveMistakes(0);
-          }
+  if (value.length === textData.length) {
+    setEndTime(currentTime);
+    setCompleted(true);
+  }
 
-          if (value.length === textData.length) {
-            setEndTime(currentTime);
-            setCompleted(true);
-          }
-        }
+  if (startTime && value.length > 0) {
+    debouncedWpmUpdate(value.length, startTime);
+  }
+}, [textData, startTime, debouncedWpmUpdate, consecutiveMistakes, userInput]);
 
-        if (startTime && value.length > 0) {
-          debouncedWpmUpdate(value.length, startTime);
-        }
-      });
-    },
-    [
-      textData,
-      startTime,
-      debouncedWpmUpdate,
-      consecutiveMistakes,
-      userInput.length,
-    ]
-  );
+
 
   const deletePreviousWord = useCallback(() => {
     let deleteTo = currentIndex - 1;

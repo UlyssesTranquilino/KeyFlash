@@ -9,7 +9,10 @@ import {
   Code,
   CircleUserRound,
   Type,
+  Zap,
+  Crown,
   ChevronRight,
+  Sparkles
 } from "lucide-react";
 import {
   Popover,
@@ -24,6 +27,18 @@ import { getAllCodes } from "../../../utils/code/codeUtils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 export default function HomePage() {
   const router = useRouter();
@@ -32,6 +47,8 @@ export default function HomePage() {
   const [texts, setTexts] = useState<any[]>([]);
   const [codes, setCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [openProDialog, setOpenProDialog] = useState(false)
 
   if (!user) {
     return (
@@ -109,13 +126,14 @@ export default function HomePage() {
         <div className="max-w-4xl ">
           <header className="mb-8">
             <h1 className="text-xl sm:text-2xl font-bold text-white  ">
-              Welcome, {user.user_metadata?.full_name || user.email}!
+              Welcome, {user.nickname || user.name}!
             </h1>
             {/* <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
               Current Streak: 3🔥
             </p> */}
           </header>
         </div>
+
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
           <Link
@@ -187,6 +205,8 @@ export default function HomePage() {
             </PopoverContent>
           </Popover>
         </div>
+
+
 
         <div className="mt-12">
           <div className="flex justify-between items-center mb-2">
@@ -270,14 +290,29 @@ export default function HomePage() {
     // return;
     if (type === "flashcard")
     {
+      if (flashcards.length >=5 && !user.isPro)
+      {
+        setOpenProDialog(true)
+        return
+      }
       router.push("/dashboard/flashcards/create")
     }
     else if (type === "text")
     {
+      if (texts.length >=5 && !user.isPro)
+      {
+        setOpenProDialog(true)
+        return
+      }
       router.push("/dashboard/texts/create")
     }
     else if (type === "code") 
     {
+      if (codes.length >=5 && !user.isPro)
+      {
+        setOpenProDialog(true)
+        return
+      }
       router.push("/dashboard/codes/create")
     }
 
@@ -285,14 +320,84 @@ export default function HomePage() {
 
   return (
     <div className="pb-30 container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
-      <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+   
+      <Dialog open={openProDialog} onOpenChange={setOpenProDialog}>
+        <DialogContent className="sm:max-w-[450px]   border border-blue-700 p-6 bg-gradient-to-b from-blue-900 to-black shadow-xl">
+          <DialogHeader>
+            <div className="flex items-center justify-center gap-3 mb-1">
+              <Sparkles className="text-blue-400" />
+              <DialogTitle className="text-white text-xl">Unlock Pro Features</DialogTitle>
+            </div>
+            <DialogDescription className="text-gray-300">
+              You've reached the free tier limit. Upgrade to Pro for unlimited creation!
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            {/* Feature comparison */}
+            <div className="grid grid-cols-3 gap-2 text-sm">
+              <div></div>
+              <div className="text-center font-medium text-gray-300">Free</div>
+              <div className="text-center font-medium text-blue-400">Pro</div>
+              
+              <div className="text-left">Flashcards</div>
+              <div className="text-center">5 max</div>
+              <div className="text-center text-green-400">Unlimited</div>
+              
+              <div className="text-left">Custom Texts</div>
+              <div className="text-center">5 max</div>
+              <div className="text-center text-green-400">Unlimited</div>
+              
+              <div className="text-left">Code Snippets</div>
+              <div className="text-center">5 max</div>
+              <div className="text-center text-green-400">Unlimited</div>
+              
+              <div className="text-left">Ad-Free</div>
+              <div className="text-center text-red-400">No</div>
+              <div className="text-center text-green-400">Yes</div>
+            </div>
+
+            {/* Special offer highlight */}
+            <div className="mt-4 p-3 bg-blue-900/30 rounded-lg border border-blue-700/50">
+              <div className="flex items-center gap-2">
+                <Zap className="text-yellow-400 size-4" />
+                <span className="font-medium text-white">Early Access Deal</span>
+              </div>
+              <p className="text-sm text-blue-200 mt-1">
+                Get lifetime access for just $9.99. Price will increase soon!
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-3">
+            <DialogClose asChild>
+              <Button variant="outline" className="cursor-pointer border-gray-600 hover:bg-gray-800">
+                Maybe Later
+              </Button>
+            </DialogClose>
+            <Button 
+              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => {
+                // Handle upgrade logic
+                window.location.href = '/pricing';
+              }}
+            >
+              <Crown className="mr-2 size-4" />
+              Upgrade to Pro
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+       <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
       <div className="max-w-4xl ">
         <header className="mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-white  ">
-            Welcome, {user.name|| user.email}!
+            Welcome, {user.nickname || user.name}!
           </h1>
           {/* <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
             Current Streak: 3🔥
@@ -394,7 +499,7 @@ export default function HomePage() {
             <Button
               size="icon"
               onClick={() => router.push("/dashboard/flashcards")}
-              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+              className="cursor-pointer rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
             >
               Show All <ChevronRight className="h-5 w-5" />
             </Button>
@@ -531,8 +636,8 @@ export default function HomePage() {
           {texts.length > 4 && (
             <Button
               size="icon"
-              onClick={() => router.push("/dashboard/flashcards")}
-              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+              onClick={() => router.push("/dashboard/texts")}
+              className="cursor-pointer rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
             >
               Show All <ChevronRight className="h-5 w-5" />
             </Button>
@@ -628,8 +733,8 @@ export default function HomePage() {
           {codes.length > 4 && (
             <Button
               size="icon"
-              onClick={() => router.push("/code")}
-              className="rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
+              onClick={() => router.push("/dashboard/codes")}
+              className="cursor-pointer rounded-md p-1 w-24 bg-transparent hover:bg-gray-900/80 hover:text-gray-200 text-gray-400 px-2"
             >
               Show All <ChevronRight className="h-5 w-5" />
             </Button>

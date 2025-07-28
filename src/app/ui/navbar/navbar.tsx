@@ -50,7 +50,7 @@ import { usePathname } from "next/navigation";
 export default function Navbar() {
   const { user, signOut } = useAuth();
   const { setTheme } = useTheme();
-  const profile = user?.identities?.[1] ? user?.identities?.[1]?.identity_data?.avatar_url : user?.identities?.[0]?.identity_data?.avatar_url;
+  const profile = user?.avatar ?? "";
 
   const [isDarkMode, setIsDarkMode] = useState(true);
   const pathname = usePathname();
