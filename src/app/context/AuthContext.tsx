@@ -15,6 +15,7 @@ interface Profile {
 }
 
 interface TransformedUser {
+  nickname: string;
   id: string;
   email: string;
   name: string;
