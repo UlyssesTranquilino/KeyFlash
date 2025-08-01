@@ -150,7 +150,7 @@ const StandardTyping = ({ text }) => {
           setWpm(Math.round(words / timeElapsed));
         });
       }, 100),
-    []
+    [],
   );
 
   // Reset Test
@@ -181,57 +181,60 @@ const StandardTyping = ({ text }) => {
 
   // Highlighting Text
   const highlightedText = useMemo(() => {
-  if (!textData) return null;
-  
-  const result = [];
-  let charIndex = 0;
-  const userInputChars = userInput.split('');
-  
-  // Process text in chunks to avoid excessive DOM nodes
-  const chunkSize = 100; // Adjust based on performance testing
-  for (let i = 0; i < textData.length; i += chunkSize) {
-    const chunk = textData.slice(i, i + chunkSize);
-    const chunkElements = [];
-    
-    for (let j = 0; j < chunk.length; j++) {
-      const currentCharIndex = charIndex++;
-      const char = chunk[j];
-      const isCursor = currentCharIndex === userInput.length;
-      const displayChar = char === ' ' ? '\u00A0' : char;
-      
-      let className = 'text-gray-500';
-      if (currentCharIndex < userInput.length) {
-        className = userInputChars[currentCharIndex] === char 
-          ? 'text-white' 
-          : 'text-red-600/75 bg-red-900/30';
+    if (!textData) return null;
+
+    const result = [];
+    let charIndex = 0;
+    const userInputChars = userInput.split("");
+
+    // Process text in chunks to avoid excessive DOM nodes
+    const chunkSize = 100; // Adjust based on performance testing
+    for (let i = 0; i < textData.length; i += chunkSize) {
+      const chunk = textData.slice(i, i + chunkSize);
+      const chunkElements = [];
+
+      for (let j = 0; j < chunk.length; j++) {
+        const currentCharIndex = charIndex++;
+        const char = chunk[j];
+        const isCursor = currentCharIndex === userInput.length;
+        const displayChar = char === " " ? "\u00A0" : char;
+
+        let className = "text-gray-500";
+        if (currentCharIndex < userInput.length) {
+          className =
+            userInputChars[currentCharIndex] === char
+              ? "text-white"
+              : "text-red-600/75 bg-red-900/30";
+        }
+
+        chunkElements.push(
+          <span key={currentCharIndex} className="relative">
+            {isCursor && (
+              <span
+                ref={cursorRef}
+                className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                  isIdle ? "animate-pulse" : ""
+                }`}
+              />
+            )}
+            <span className={className}>{displayChar}</span>
+          </span>,
+        );
       }
-      
-      chunkElements.push(
-        <span key={currentCharIndex} className="relative">
-          {isCursor && (
-            <span
-              ref={cursorRef}
-              className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                isIdle ? 'animate-pulse' : ''
-              }`}
-            />
-          )}
-          <span className={className}>{displayChar}</span>
-        </span>
+
+      result.push(
+        <span key={`chunk-${i}`} className="inline-block">
+          {chunkElements}
+        </span>,
       );
     }
-    
-    result.push(
-      <span key={`chunk-${i}`} className="inline-block">
-        {chunkElements}
-      </span>
+
+    return (
+      <div className="whitespace-pre-wrap break-words font-mono text-left">
+        {result}
+      </div>
     );
-  }
-  
-  return <div className="whitespace-pre-wrap break-words font-mono text-left">{result}</div>;
-}, [textData, userInput, isIdle]);
-
-
+  }, [textData, userInput, isIdle]);
 
   const handleRefetch = useCallback(async () => {
     setLoading(true);
@@ -240,7 +243,6 @@ const StandardTyping = ({ text }) => {
     setLoading(false);
 
     setWpm(0);
-   
   }, [setTextData, resetTest]);
 
   const handleReType = useCallback(
@@ -250,69 +252,76 @@ const StandardTyping = ({ text }) => {
 
       setWpm(0);
     },
-    [setTextData, resetTest]
+    [setTextData, resetTest],
   );
 
   // Optimized input change handler
-const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-  const value = e.target.value;
-  const currentTime = Date.now();
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      const currentTime = Date.now();
 
-  // Skip processing if no change
-  if (value === userInput) return;
+      // Skip processing if no change
+      if (value === userInput) return;
 
-  // Block typing if too many mistakes
-  if (consecutiveMistakes >= MAX_CONSECUTIVE_MISTAKES && value.length > userInput.length) {
-    return;
-  }
+      // Block typing if too many mistakes
+      if (
+        consecutiveMistakes >= MAX_CONSECUTIVE_MISTAKES &&
+        value.length > userInput.length
+      ) {
+        return;
+      }
 
-  setIsIdle(false);
+      setIsIdle(false);
 
-  if (!startTime) {
-    setStartTime(currentTime);
-  }
+      if (!startTime) {
+        setStartTime(currentTime);
+      }
 
-  // Calculate correct characters more efficiently
-  let correct = 0;
-  const minLength = Math.min(value.length, textData.length);
-  
-  // Only check the new characters (optimization)
-  const startCheck = Math.max(0, userInput.length - 1);
-  for (let i = startCheck; i < minLength; i++) {
-    if (value[i] === textData[i]) {
-      correct = i + 1;
-    } else {
-      break;
-    }
-  }
+      // Calculate correct characters more efficiently
+      let correct = 0;
+      const minLength = Math.min(value.length, textData.length);
 
-  const newMistakes = value.length - correct;
-  
-  // Batch state updates
-  setUserInput(value);
-  setCurrentIndex(value.length);
-  setCorrectChars(correct);
-  setIncorrectChars(newMistakes);
-  setMistakes(newMistakes);
+      // Only check the new characters (optimization)
+      const startCheck = Math.max(0, userInput.length - 1);
+      for (let i = startCheck; i < minLength; i++) {
+        if (value[i] === textData[i]) {
+          correct = i + 1;
+        } else {
+          break;
+        }
+      }
 
-  // Update consecutive mistakes
-  if (value.length > userInput.length && value[value.length - 1] !== textData[value.length - 1]) {
-    setConsecutiveMistakes(prev => prev + 1);
-  } else {
-    setConsecutiveMistakes(0);
-  }
+      const newMistakes = value.length - correct;
 
-  if (value.length === textData.length) {
-    setEndTime(currentTime);
-    setCompleted(true);
-  }
+      // Batch state updates
+      setUserInput(value);
+      setCurrentIndex(value.length);
+      setCorrectChars(correct);
+      setIncorrectChars(newMistakes);
+      setMistakes(newMistakes);
 
-  if (startTime && value.length > 0) {
-    debouncedWpmUpdate(value.length, startTime);
-  }
-}, [textData, startTime, debouncedWpmUpdate, consecutiveMistakes, userInput]);
+      // Update consecutive mistakes
+      if (
+        value.length > userInput.length &&
+        value[value.length - 1] !== textData[value.length - 1]
+      ) {
+        setConsecutiveMistakes((prev) => prev + 1);
+      } else {
+        setConsecutiveMistakes(0);
+      }
 
+      if (value.length === textData.length) {
+        setEndTime(currentTime);
+        setCompleted(true);
+      }
 
+      if (startTime && value.length > 0) {
+        debouncedWpmUpdate(value.length, startTime);
+      }
+    },
+    [textData, startTime, debouncedWpmUpdate, consecutiveMistakes, userInput],
+  );
 
   const deletePreviousWord = useCallback(() => {
     let deleteTo = currentIndex - 1;
@@ -329,7 +338,7 @@ const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) =
         deletePreviousWord();
       }
     },
-    [deletePreviousWord]
+    [deletePreviousWord],
   );
 
   const handleTextClick = useCallback(() => {

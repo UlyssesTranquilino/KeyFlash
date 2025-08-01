@@ -17,6 +17,8 @@ type flashcardDataType = {
   created_at: Date;
 };
 
+const LIMIT_COUNT = 5;
+
 export async function getAllFlashcards(userId: string) {
   try {
     const supabase = createClient();
@@ -163,6 +165,59 @@ export async function deleteFlashcard(flashcardId: string) {
     return { data, error: null };
   } catch (error) {
     console.error("Unexpected error deleting flashcard:", error);
+    return { error: "Unexpected error occurred" };
+  }
+}
+
+export async function getFlashcardsCount() {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: "User not authenticated" };
+    }
+
+    // 🔁 Fetch user's profile to double-check is_pro status
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("is_pro")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError) {
+      console.error("Error fetching profile:", profileError);
+      return { error: "Could not verify Pro status" };
+    }
+
+    // ✅ If user is Pro, skip count check
+    if (profile.is_pro) {
+      return { count: 0, isLimit: false };
+    }
+
+    const { count, error: countError } = await supabase
+      .from("flashcards")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if (countError) {
+      console.error("Count error:", countError);
+      return { error: "Could not check flashcard limit" };
+    }
+
+    if (count >= LIMIT_COUNT) {
+      return {
+        count,
+        isLimit: true,
+        error: "You’ve reached your flashcard limit. Upgrade to continue.",
+      };
+    }
+
+    return { count, isLimit: false };
+  } catch (error) {
+    console.error("Unexpected error counting flashcards:", error);
     return { error: "Unexpected error occurred" };
   }
 }

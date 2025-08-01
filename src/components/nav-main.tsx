@@ -1,8 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { ChevronRight, Code, Text, type LucideIcon } from "lucide-react";
-
+import React, { useState, useEffect } from "react";
+import {
+  ChevronRight,
+  Code,
+  Sparkles,
+  Zap,
+  Crown,
+  Text,
+  type LucideIcon,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,8 +28,10 @@ import {
 } from "@/components/ui/sidebar";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -29,6 +39,11 @@ import {
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { getAllFlashcards } from "../../utils/flashcard/flashcard";
+import { getAllTexts } from "../../utils/text/textUtils";
+import { getAllCodes } from "../../utils/code/codeUtils";
+import { useAuth } from "@/app/context/AuthContext";
+import UpgradeToProDialog from "./ui/UpgradeToProDialog";
 
 export function NavMain({
   items,
@@ -44,8 +59,79 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [openCreate, setOpenCreate] = useState(false);
+  const { user, session } = useAuth();
+  const [flashcards, setFlashcards] = useState<any[]>([]);
+  const [texts, setTexts] = useState<any[]>([]);
+  const [codes, setCodes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openProDialog, setOpenProDialog] = useState(false);
+
+  // Initial quote and text fetch
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      const data = await getAllFlashcards(user?.id);
+
+      if (Array.isArray(data)) {
+        setFlashcards(data);
+      } else {
+        setFlashcards([]);
+      }
+    };
+
+    const fetchTexts = async () => {
+      const data = await getAllTexts();
+
+      if (Array.isArray(data)) {
+        setTexts(data);
+      } else {
+        setTexts([]);
+      }
+    };
+
+    const fetchCodes = async () => {
+      const { data } = await getAllCodes();
+
+      if (Array.isArray(data)) {
+        setCodes(data);
+      } else {
+        setCodes([]);
+      }
+      setLoading(false);
+    };
+
+    setLoading(true);
+    fetchFlashcards();
+    fetchTexts();
+    fetchCodes();
+  }, []);
+
+  const handleCreate = (type: string) => {
+    if (type === "flashcard") {
+      if (flashcards.length >= 5 && !user.isPro) {
+        setOpenProDialog(true);
+        return;
+      }
+      setOpenCreate(false);
+      router.push("/dashboard/flashcards/create");
+    } else if (type === "text") {
+      if (texts.length >= 5 && !user.isPro) {
+        setOpenProDialog(true);
+        return;
+      }
+      setOpenCreate(false);
+      router.push("/dashboard/texts/create");
+    } else if (type === "code") {
+      if (codes.length >= 5 && !user.isPro) {
+        setOpenProDialog(true);
+        return;
+      }
+      setOpenCreate(false);
+      router.push("/dashboard/codes/create");
+    }
+  };
 
   return (
     <SidebarGroup>
@@ -61,9 +147,8 @@ export function NavMain({
             </DialogDescription>
 
             <div className="flex flex-col sm:flex-row flex-wrap justify-around w-full items-center gap-3  h-full">
-              <Link
-                href="/dashboard/flashcards/create/"
-                onClick={() => setOpenCreate(false)}
+              <div
+                onClick={() => handleCreate("flashcard")}
                 className="w-full sm:w-2/7 cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden flex items-center justify-center text-center p-5 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
               >
                 <div className="absolute -top-15 -left-15 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
@@ -102,10 +187,9 @@ export function NavMain({
                     Flashcard
                   </p>
                 </div>
-              </Link>
-              <Link
-                href="/dashboard/texts/create/"
-                onClick={() => setOpenCreate(false)}
+              </div>
+              <div
+                onClick={() => handleCreate("text")}
                 className="w-full sm:w-2/7 cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden  flex items-center justify-center text-center p-5 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
               >
                 <div className="absolute -top-15 -left-15 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
@@ -115,10 +199,9 @@ export function NavMain({
                     Text
                   </p>
                 </div>
-              </Link>
-              <Link
-                href="/dashboard/codes/create/"
-                onClick={() => setOpenCreate(false)}
+              </div>
+              <div
+                onClick={() => handleCreate("code")}
                 className="w-full sm:w-2/7 cursor-pointer bg-black hover:border-blue-400/60 duration-300 ease-in-out hover:border-1 shadow-xs shadow-blue-700/90 relative overflow-hidden  flex items-center justify-center text-center p-5 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm transition-all group"
               >
                 {" "}
@@ -129,7 +212,7 @@ export function NavMain({
                     Code
                   </p>
                 </div>
-              </Link>
+              </div>
             </div>
           </DialogHeader>
           {/* <div className="flex justify-end gap-3 mt-4">
@@ -143,6 +226,11 @@ export function NavMain({
           </div> */}
         </DialogContent>
       </Dialog>
+
+      <UpgradeToProDialog
+        openProDialog={openProDialog}
+        setOpenProDialog={setOpenProDialog}
+      />
 
       <SidebarGroupLabel>Workspace</SidebarGroupLabel>
       <SidebarMenu>
