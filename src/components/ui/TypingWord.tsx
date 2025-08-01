@@ -1,44 +1,43 @@
+// TypingWord.tsx
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, Fragment } from "react";
+import { Character } from "./Character";
 
-const TypingWord = memo(
-  ({
-    word,
-    startIndex,
-    userInput,
-  }: {
-    word: string;
-    startIndex: number;
-    userInput: string;
-  }) => {
-    const chars = word.split("");
-    const elements = [];
+const TypingWord = memo(({ word, typedInput, isCurrent }) => {
+  const chars = word.split("");
+  const typedChars = typedInput.split("");
+  const wordRef = React.useRef(null);
 
-    for (let i = 0; i < chars.length; i++) {
-      const charIndex = startIndex + i;
-      const userChar = userInput[charIndex];
-      const isTyped = charIndex < userInput.length;
-      const isCorrect = userChar === chars[i];
-      const isCursor = charIndex === userInput.length;
-
-      let className = isTyped
-        ? isCorrect
-          ? "text-white"
-          : "text-red-600/75 bg-red-900/30"
-        : "text-gray-500";
-
-      elements.push(
-        <span key={charIndex} className="relative">
-          {isCursor && (
-            <span className="absolute left-0 top-1 w-0.5 h-6 bg-blue-400 animate-pulse" />
-          )}
-          <span className={className}>{chars[i]}</span>
-        </span>,
-      );
-    }
-    return <span className="inline-block mr-1.5">{elements}</span>;
-  },
-);
+  return (
+    <span ref={wordRef} className="typing-word inline-block mr-2 relative">
+      <span className="typed-word">
+        {typedChars.map((char, charIndex) => (
+          <Character
+            key={charIndex}
+            char={char}
+            expectedChar={chars[charIndex]}
+            isCurrent={isCurrent && charIndex === typedInput.length - 1}
+          />
+        ))}
+      </span>
+      {chars.slice(typedChars.length).map((char, charIndex) => (
+        <span key={typedChars.length + charIndex} className={`text-gray-500`}>
+          {char}
+        </span>
+      ))}
+      {/* Placeholder for overflowed characters */}
+      {typedChars.length > chars.length &&
+        typedChars.slice(chars.length).map((char, charIndex) => (
+          <span
+            key={`extra-${charIndex}`}
+            className="text-red-600/75 bg-red-900/30"
+          >
+            {char}
+          </span>
+        ))}
+    </span>
+  );
+});
 
 export default TypingWord;

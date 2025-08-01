@@ -8,14 +8,26 @@ import {
   useMemo,
   startTransition,
 } from "react";
+
 import { motion } from "framer-motion";
 import { useWpm } from "@/app/context/WpmContext";
+
+// Icons
 import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
+
+// Fonts
 import { spaceMono } from "@/app/ui/fonts";
+
+// Context
 import { useTimer } from "@/app/context/TimerContext";
+
+// Components
 import Results from "@/components/ui/typing/Results";
+
+// Utils
 import { getRandomWords } from "../../../../utils/typing/getRandomWords";
 
+// Debounce utility
 const debounce = (func: any, wait: any) => {
   let timeout: any;
   return function executedFunction(...args: any) {
@@ -41,6 +53,7 @@ const Words = ({ sessionType = "multiple" }) => {
 
   const [userInput, setUserInput] = useState("");
   const [isFocused, setIsFocused] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [wpm, setWpm] = useState(0);
   const [isIdle, setIsIdle] = useState(true);
@@ -58,9 +71,6 @@ const Words = ({ sessionType = "multiple" }) => {
   const [testId, setTestId] = useState(Date.now());
   const [isHoveringNewTexts, setIsHoveringNewTexts] = useState(false);
   const [isClickingOnText, setIsClickingOnText] = useState(false);
-
-  // Track the current word boundary
-  const [currentWordBoundary, setCurrentWordBoundary] = useState(0);
 
   // Auto-focus when not focused
   useEffect(() => {
@@ -232,6 +242,7 @@ const Words = ({ sessionType = "multiple" }) => {
 
   const resetTest = useCallback(() => {
     setUserInput("");
+    setCurrentIndex(0);
     setStartTime(null);
     setWpm(0);
     setIsIdle(true);
@@ -239,7 +250,6 @@ const Words = ({ sessionType = "multiple" }) => {
     setCorrectChars(0);
     setIncorrectChars(0);
     setMistakes(0);
-    setCurrentWordBoundary(0);
     setTestId(Date.now());
     if (inputRef.current) {
       inputRef.current.focus();
@@ -253,21 +263,16 @@ const Words = ({ sessionType = "multiple" }) => {
   const loadNextRandomWords = useCallback(async () => {
     setRandomWords(generateWords());
     setUserInput("");
+    setCurrentIndex(0);
     setCompleted(false);
-    setCurrentWordBoundary(0);
     setStartTime(Date.now());
   }, [generateWords]);
 
-  // Optimized input change handler with forward-only typing
+  // Optimized input change handler
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       const currentTime = Date.now();
-
-      // Only allow typing forward (no backspacing past current word boundary)
-      if (value.length < currentWordBoundary) {
-        return;
-      }
 
       // Set idle state immediately
       setIsIdle(false);
@@ -282,11 +287,7 @@ const Words = ({ sessionType = "multiple" }) => {
 
       // Update input immediately (high priority)
       setUserInput(value);
-
-      // Update word boundary when space is pressed (end of current word)
-      if (value.endsWith(" ")) {
-        setCurrentWordBoundary(value.length);
-      }
+      setCurrentIndex(value.length);
 
       // Batch non-critical updates
       startTransition(() => {
@@ -308,7 +309,10 @@ const Words = ({ sessionType = "multiple" }) => {
           setMistakes(value.length - correctFromStart);
 
           // Check completion
-          if (value.length === randomWords.length) {
+          if (
+            value.length === randomWords.length
+            // correctFromStart === randomWords.length
+          ) {
             setEndTime(currentTime);
             setCompleted(true);
 
@@ -334,18 +338,27 @@ const Words = ({ sessionType = "multiple" }) => {
       remaining,
       loadNextRandomWords,
       debouncedWpmUpdate,
-      currentWordBoundary,
     ]
   );
 
+  const deletePreviousWord = useCallback(() => {
+    let deleteTo = currentIndex - 1;
+    while (deleteTo > 0 && userInput[deleteTo - 1] !== " ") {
+      deleteTo--;
+    }
+    const newInput = userInput.substring(0, deleteTo);
+    setUserInput(newInput);
+    setCurrentIndex(deleteTo);
+  }, [currentIndex, userInput]);
+
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      // Prevent backspace beyond current word boundary
-      if (e.key === "Backspace" && userInput.length <= currentWordBoundary) {
+      if (e.key === "Backspace" && e.ctrlKey) {
         e.preventDefault();
+        deletePreviousWord();
       }
     },
-    [userInput, currentWordBoundary]
+    [deletePreviousWord]
   );
 
   const handleTextClick = useCallback(() => {
@@ -459,7 +472,7 @@ const Words = ({ sessionType = "multiple" }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.7rem] text-center ${
+              className={`px-5 md:px-6 lg:px-0 relative text-xl lg:text-[1.7rem] text-center ${
                 spaceMono.className
               } leading-8 mb-8 h-auto cursor-text overflow-y-auto px-2 
                 transition-opacity duration-100 ease-in-out 
