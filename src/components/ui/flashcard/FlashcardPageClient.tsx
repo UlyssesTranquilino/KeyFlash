@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { spaceMono } from "@/app/ui/fonts";
+import { Virtuoso } from "react-virtuoso";
 import {
   ArrowLeft,
   RotateCcw,
@@ -73,7 +74,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useFlashcard } from "@/app/context/FlashcardContext";
 import { useWpm } from "@/app/context/WpmContext";
-import { flushSync } from "react-dom";
+
 import { Switch } from "@/components/ui/switch";
 import SkeletonFlashcard from "./SkeletonFlashcard";
 import { SimpleResults } from "./ResultsComponent";
@@ -126,7 +127,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const { blurAnswer, setBlurAnswer, openEditFlashcard, setOpenEditFlashcard } =
     useFlashcard();
   const [currentPhase, setCurrentPhase] = useState<"question" | "answer">(
-    "question"
+    "question",
   );
   const [questionCompleted, setQuestionCompleted] = useState(false);
   const [cardCompleted, setCardCompleted] = useState(false);
@@ -480,7 +481,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           setTimeout(() => {
             if (current < flashcard.terms.length - 1) {
               api?.scrollNext();
-            } 
+            }
           }, 1000);
         }
       }
@@ -493,7 +494,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       current,
       api,
       flashcard.terms.length,
-    ]
+    ],
   );
 
   const deletePreviousWord = useCallback(() => {
@@ -513,7 +514,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
         deletePreviousWord();
       }
     },
-    [deletePreviousWord]
+    [deletePreviousWord],
   );
 
   const handleInputFocus = useCallback(() => {
@@ -529,12 +530,12 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   const handleEditFlashcard = async (e: any) => {
     const hasEmptyFields = copyFlashcardData.terms.some(
-      (card: any) => !card.question?.trim() || !card.answer?.trim()
+      (card: any) => !card.question?.trim() || !card.answer?.trim(),
     );
 
     if (hasEmptyFields || !copyFlashcardData.title) {
       toast.warning(
-        "Please make sure all flashcards have both a question and an answer."
+        "Please make sure all flashcards have both a question and an answer.",
       );
       return;
     }
@@ -628,7 +629,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       if (!isTypingMode && e.key === " ") {
         e.preventDefault(); // Prevent default spacebar behavior (scrolling)
         setCurrentPhase((prev) =>
-          prev === "question" ? "answer" : "question"
+          prev === "question" ? "answer" : "question",
         );
       }
     };
@@ -1019,7 +1020,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                     variant="ghost"
                     className={cn(
                       "text-gray-400 hover:text-white",
-                      showWpm && "text-blue-400 hover:text-blue-400"
+                      showWpm && "text-blue-400 hover:text-blue-400",
                     )}
                   >
                     WPM
@@ -1138,8 +1139,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                   currentPhase === "question"
                                     ? "bg-blue-600/20 text-blue-400"
                                     : questionCompleted
-                                    ? "bg-green-600/20 text-green-400"
-                                    : "bg-gray-600/20 text-gray-400"
+                                      ? "bg-green-600/20 text-green-400"
+                                      : "bg-gray-600/20 text-gray-400"
                                 }`}
                               >
                                 {questionCompleted && (
@@ -1157,8 +1158,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                   currentPhase === "answer"
                                     ? "bg-blue-600/20 text-blue-400"
                                     : cardCompleted
-                                    ? "bg-green-600/20 text-green-400"
-                                    : "bg-gray-600/20 text-gray-400"
+                                      ? "bg-green-600/20 text-green-400"
+                                      : "bg-gray-600/20 text-gray-400"
                                 }`}
                               >
                                 {cardCompleted && (
@@ -1180,7 +1181,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                         "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                                         blurAnswer
                                           ? "text-blue-400"
-                                          : "text-gray-400 hover:text-white"
+                                          : "text-gray-400 hover:text-white",
                                       )}
                                     >
                                       {!blurAnswer ? (
@@ -1253,8 +1254,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                   currentPhase === "question"
                                     ? "bg-blue-600/20 text-blue-400"
                                     : questionCompleted
-                                    ? "bg-green-600/20 text-green-400"
-                                    : "bg-gray-600/20 text-gray-400"
+                                      ? "bg-green-600/20 text-green-400"
+                                      : "bg-gray-600/20 text-gray-400"
                                 }`}
                               >
                                 {questionCompleted && (
@@ -1272,8 +1273,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                   currentPhase === "answer"
                                     ? "bg-blue-600/20 text-blue-400"
                                     : cardCompleted
-                                    ? "bg-green-600/20 text-green-400"
-                                    : "bg-gray-600/20 text-gray-400"
+                                      ? "bg-green-600/20 text-green-400"
+                                      : "bg-gray-600/20 text-gray-400"
                                 }`}
                               >
                                 {cardCompleted && (
@@ -1296,7 +1297,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                         "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                                         blurAnswer
                                           ? "text-blue-400"
-                                          : "text-gray-400 hover:text-white"
+                                          : "text-gray-400 hover:text-white",
                                       )}
                                     >
                                       {!blurAnswer ? (
@@ -1434,7 +1435,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                             "scale-80",
                             "data-[state=checked]:bg-blue-400",
                             "data-[state=checked]:border-blue-400",
-                            "data-[state=checked]:ring-blue-400"
+                            "data-[state=checked]:ring-blue-400",
                           )}
                         />
                         <Label
@@ -1455,7 +1456,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                       <button
                         className={cn(
                           "flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
-                          isTypingMode ? "text-blue-400" : "text-gray-400"
+                          isTypingMode ? "text-blue-400" : "text-gray-400",
                         )}
                         onClick={() => setIsTypingMode(!isTypingMode)}
                       >
@@ -1475,7 +1476,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                       <button
                         className={cn(
                           "flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
-                          isShuffled ? "text-blue-400" : "text-gray-400"
+                          isShuffled ? "text-blue-400" : "text-gray-400",
                         )}
                         onClick={
                           isShuffled ? unshuffleFlashcards : shuffleFlashcards
@@ -1596,22 +1597,28 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 <h1>Question</h1>
                 <h1>Answer</h1>
               </div>
-              {flashcard?.terms?.map((card: any, index: number) => (
-                <div
-                  key={card.id}
-                  className="flex flex-col relative bg-gray-900/30"
-                >
-                  <div className="flex items-center justify-around gap-3 sm:gap-5">
-                    <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
-                      {card.question}
+              <Virtuoso
+                style={{ height: "400px" }}
+                totalCount={flashcard?.terms?.length || 0}
+                itemContent={(index) => {
+                  const card = flashcard?.terms[index];
+                  return (
+                    <div
+                      key={card.id}
+                      className="flex flex-col relative bg-gray-900/30 mb-3"
+                    >
+                      <div className="flex items-center justify-around gap-3 sm:gap-5">
+                        <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
+                          {card.question}
+                        </div>
+                        <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
+                          {card.answer}
+                        </div>
+                      </div>
                     </div>
-
-                    <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
-                      {card.answer}
-                    </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                }}
+              />
             </div>
           )}
         </div>

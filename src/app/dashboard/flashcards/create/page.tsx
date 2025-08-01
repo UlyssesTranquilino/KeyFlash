@@ -25,8 +25,12 @@ import {
 
 // Utils
 
-import { insertFlashcard } from "../../../../../utils/flashcard/flashcard";
+import {
+  getFlashcardsCount,
+  insertFlashcard,
+} from "../../../../../utils/flashcard/flashcard";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import UpgradeToProDialog from "@/components/ui/UpgradeToProDialog";
 
 export default function page() {
   const searchParams = useSearchParams();
@@ -50,6 +54,8 @@ export default function page() {
   const [openReset, setOpenReset] = useState(false);
   const [openUpload, setOpenUpload] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+
+  const [openProDialog, setOpenProDialog] = useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -95,7 +101,7 @@ export default function page() {
     );
 
     if (hasEmptyFields || !title) {
-      toast.warning("Please input all requried fields");
+      toast.warning("Please input all required fields");
       return;
     }
 
@@ -104,10 +110,17 @@ export default function page() {
       return;
     }
 
-    let card = {
-      user_id: user?.id,
-      title: title,
-      description: description,
+    const { count, isLimit, error: countError } = await getFlashcardsCount();
+
+    if (countError || isLimit) {
+      setOpenProDialog(true);
+      return;
+    }
+
+    const card = {
+      user_id: user.id,
+      title,
+      description,
       terms: flashCardData,
       created_at: new Date(),
     };
@@ -218,6 +231,11 @@ export default function page() {
 
   return (
     <div className="px-2 max-w-[1100px] mx-auto mb-14 md:px-0 w-full">
+      <UpgradeToProDialog
+        openProDialog={openProDialog}
+        setOpenProDialog={setOpenProDialog}
+      />
+
       <Toaster position="top-center" />
       <Dialog open={openReset} onOpenChange={setOpenReset}>
         <DialogContent className="max-w-[400px]">
@@ -314,7 +332,7 @@ export default function page() {
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+          className="cursor-pointer rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
         >
           <ArrowLeft className="h-5 w-5" /> Back
         </Button>
@@ -323,7 +341,7 @@ export default function page() {
           variant="ghost"
           size="icon"
           onClick={() => setOpenUpload(true)}
-          className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+          className="cursor-pointer rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
         >
           <FileUp className="h-5 w-5" />
           Upload
@@ -337,8 +355,8 @@ export default function page() {
         <div className="flex flex-col gap-3">
           <Label htmlFor="email">Title</Label>
           <Input
-            id="email"
-            type="email"
+            id="text"
+            type="text"
             placeholder=""
             required
             className="input-glow !bg-gray-900 !border-0"

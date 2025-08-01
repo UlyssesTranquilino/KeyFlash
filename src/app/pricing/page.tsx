@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Check, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const PricingPage = () => {
   const { user } = useAuth();
+  const router = useRouter();
 
   return (
     <div className="py-5 md:py-8 relative overflow-hidden">
@@ -25,7 +27,7 @@ const PricingPage = () => {
 
           <div className="flex flex-col gap-3 h-26">
             <h1 className="font-semibold text-3xl ">0$</h1>
-            <p className="text-sm text-gray-50 bg-gray-800/30 rounded-md sm:w-75 p-2 ">
+            <p className="text-sm text-gray-50 bg-gray-800/30 rounded-md sm:w-70 md:w-75 p-2 ">
               Best for learning casually at your own pace.
             </p>
           </div>
@@ -133,7 +135,10 @@ const PricingPage = () => {
               Early Access to New Features
             </li>
           </ul>
-          <button className="cursor-pointer mt-6 w-full outline-1 outline-blue-600 bg-blue-600/60 hover:bg-blue-600/80 text-white py-2 rounded-md transition">
+          <button
+            onClick={() => router.push("/payment")}
+            className="cursor-pointer mt-6 w-full outline-1 outline-blue-600 bg-blue-600/60 hover:bg-blue-600/80 text-white py-2 rounded-md transition"
+          >
             Upgrade to Pro
           </button>
 

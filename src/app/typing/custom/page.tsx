@@ -55,15 +55,6 @@ const Story = () => {
     return "";
   });
 
-  // Only open popup if no text exists
-  useEffect(() => {
-    if (text.length === 0) {
-      setOpenAddText(true);
-    } else {
-      setOpenAddText(false);
-    }
-  }, [text, setOpenAddText]);
-
   // Save to localStorage whenever text changes
   useEffect(() => {
     localStorage.setItem("savedText", text);
@@ -111,7 +102,7 @@ const Story = () => {
   };
 
   return (
-    <div className="relative flex flex-col">
+    <div className="h-screen relative flex flex-col">
       {/* Custom Settings */}
       <div>
         <Dialog open={openAddText} onOpenChange={setOpenAddText}>
@@ -170,10 +161,10 @@ const Story = () => {
                     <span
                       className={cn(
                         "text-gray-500",
-                        text.length > 500 && "text-red-400"
+                        text.length > 350 && "text-red-400"
                       )}
                     >
-                      Max 500 characters
+                      Max 350 characters
                     </span>
                   </div>
                   <div className="flex items-center space-x-2 text-blue-300">
@@ -240,10 +231,10 @@ const Story = () => {
                             <span
                               className={cn(
                                 "text-gray-500",
-                                text.length > 500 && "text-red-400"
+                                text.length > 350 && "text-red-400"
                               )}
                             >
-                              Max 500 characters
+                              Max 350 characters
                             </span>
                           </div>
                           <div className="flex items-center space-x-2 text-blue-300">
@@ -296,7 +287,7 @@ const Story = () => {
               </Button>
               <Button
                 onClick={handleSubmit}
-                disabled={text.length === 0 || text.length > 500}
+                disabled={text.length === 0 || text.length > 350}
                 className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
               >
                 Add Text

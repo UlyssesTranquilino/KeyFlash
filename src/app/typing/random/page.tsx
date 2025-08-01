@@ -406,7 +406,7 @@ const Words = ({ sessionType = "multiple" }) => {
   }, [isFocused, isRunning]);
 
   return (
-    <div className="relative min-h-[50vh] flex flex-col items-center -mt-5 sm:mt-17">
+    <div className="relative min-h-[50vh] h-screen flex flex-col items-center -mt-5 sm:mt-17">
       {(!completed && (time === -1 || (remaining ?? 0) > 0)) ||
       ((time ?? 0) > 0 && (remaining ?? 0) > 0) ? (
         <div className="mt-12 sm:mt-0 flex flex-col relative">
@@ -446,8 +446,8 @@ const Words = ({ sessionType = "multiple" }) => {
                   ? remaining
                   : ""
                 : (time ?? 0) > 0
-                ? time
-                : ""}
+                  ? time
+                  : ""}
             </div>
 
             {isCapsLockOn && (
@@ -472,7 +472,7 @@ const Words = ({ sessionType = "multiple" }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.7rem] text-center ${
+              className={`px-5 md:px-6 lg:px-0 relative text-xl lg:text-[1.7rem] text-center ${
                 spaceMono.className
               } leading-8 mb-8 h-auto cursor-text overflow-y-auto px-2 
                 transition-opacity duration-100 ease-in-out 

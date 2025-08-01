@@ -57,7 +57,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     signOut();
-  }
+  };
   return (
     <nav className="my-3 pl-3 sm:m-3  sm:px-5 sm:py-2 md:px-10 flex justify-between items-center w-full">
       <div className="flex items-center justify-start gap-10">
@@ -123,45 +123,48 @@ export default function Navbar() {
             Dashboard
           </Link>
         )}
-        {user && 
-            <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Avatar className="w-7 h-7 cursor-pointer">
-                      {profile ?       <AvatarImage src={profile} alt="Hello" />
-                      : (<div className="h-14 w-14 rounded-full bg-blue-950 text-center text-sm pt-1">
-                        {user?.identities?.[0]?.identity_data?.name[0].toUpperCase()}
-                      </div>)}
-                    </Avatar>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-40 mx-3" align="start">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem>
-                        <BadgeCheck />
-                        Profile
-                      </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        {" "}
-                        <Sparkles />
-                        Upgrade to Pro
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    {/* <Link href="/feedback">
+        {user && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="w-7 h-7 cursor-pointer">
+                {profile ? (
+                  <AvatarImage src={profile} alt="Hello" />
+                ) : (
+                  <div className="h-14 w-14 rounded-full bg-blue-950 text-center text-sm pt-1">
+                    {user?.identities?.[0]?.identity_data?.name[0].toUpperCase()}
+                  </div>
+                )}
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-40 mx-3" align="start">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem>
+                  <BadgeCheck />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  {" "}
+                  <Sparkles />
+                  Upgrade to Pro
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+              <DropdownMenuSeparator />
+              {/* <Link href="/feedback">
                       <DropdownMenuItem>
                         <Send />
                         Feedback
                       </DropdownMenuItem>
                     </Link> */}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      {" "}
-                      <LogOut />
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-            </DropdownMenu>
-        }
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                {" "}
+                <LogOut />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -220,12 +223,14 @@ export default function Navbar() {
               </div>
               <div className="grid flex-1 auto-rows-min gap-6 px-4"></div>
               <SheetFooter>
-                <Link
-                  href="/dashboard"
-                  className="text-center py-[12px]  bg-blue-600/10 hover:bg-blue-600/20 border-1 border-blue-500/30 hover:border-blue-400/40 p-[6px] px-3 rounded-sm"
-                >
-                  Dashboard
-                </Link>
+                {user && (
+                  <Link
+                    href="/dashboard"
+                    className="text-center py-[12px]  bg-blue-600/10 hover:bg-blue-600/20 border-1 border-blue-500/30 hover:border-blue-400/40 p-[6px] px-3 rounded-sm"
+                  >
+                    Dashboard
+                  </Link>
+                )}
 
                 <SheetClose asChild>
                   <Button

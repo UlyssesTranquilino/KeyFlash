@@ -9,7 +9,7 @@ import { useWpm } from "@/app/context/WpmContext";
 // Memoize debounce utility
 const debounce = <T extends (...args: any[]) => void>(
   func: T,
-  wait: number
+  wait: number,
 ) => {
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
@@ -96,7 +96,7 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
         const words = inputLength > 0 ? Math.max(1, inputLength / 5) : 0;
         setWpm(Math.round(words / timeElapsed));
       }, 100),
-    []
+    [],
   );
 
   // Precompute line lengths for absolute index calculation
@@ -232,7 +232,7 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
         debouncedWpmUpdate(value.length, startTime);
       }
     },
-    [text, startTime, debouncedWpmUpdate]
+    [text, startTime, debouncedWpmUpdate],
   );
 
   // Delete Previous Word
@@ -292,7 +292,7 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
         }
       }
     },
-    [deletePreviousWord, userInput, text, handleInputChange]
+    [deletePreviousWord, userInput, text, handleInputChange],
   );
 
   const handleInputFocus = useCallback(() => setIsFocused(true), []);

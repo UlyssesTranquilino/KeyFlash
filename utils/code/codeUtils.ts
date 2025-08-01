@@ -15,6 +15,8 @@ type codeDataType = {
   created_at: Date;
 };
 
+const LIMIT_COUNT = 5;
+
 export async function getAllCodes() {
   try {
     const supabase = createClient();
@@ -84,10 +86,39 @@ export async function insertCode(codeData: codeDataType) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      console.error("User not authenticated");
       return { error: "User not authenticated" };
     }
 
+    // 🔍 Check if user is Pro
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("is_pro")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return { error: "Unable to verify subscription status" };
+    }
+
+    const isPro = profile.is_pro;
+
+    // 🚫 Limit enforcement
+    if (!isPro) {
+      const { count, error: countError } = await supabase
+        .from("codes")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      if (countError) {
+        return { error: "Could not check code limit" };
+      }
+
+      if (count >= LIMIT_COUNT) {
+        return { error: "Code limit reached. Upgrade to Pro to add more." };
+      }
+    }
+
+    // ✅ Insert code
     const { data, error } = await supabase
       .from("codes")
       .insert([
@@ -107,7 +138,6 @@ export async function insertCode(codeData: codeDataType) {
       .single();
 
     if (error) {
-      console.error("Database error:", error);
       return { error: error.message };
     }
 
@@ -184,6 +214,42 @@ export async function deleteCode(codeId: string) {
     return { data, error: null };
   } catch (error) {
     console.error("Unexpected error deleting code:", error);
+    return { error: "Unexpected error occurred" };
+  }
+}
+
+export async function getCodesCount() {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return { error: "User not authenticated" };
+    }
+
+    const { count, error: countError } = await supabase
+      .from("codes")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if (countError) {
+      console.error("Count error:", countError);
+      return { error: "Could not check code limit" };
+    }
+
+    if (count >= LIMIT_COUNT) {
+      return {
+        count,
+        isLimit: true,
+        error: "You’ve reached your code limit. Upgrade to continue.",
+      };
+    }
+
+    return { count, isLimit: false };
+  } catch (error) {
+    console.error("Unexpected error counting texts: ", error);
     return { error: "Unexpected error occurred" };
   }
 }

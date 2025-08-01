@@ -178,7 +178,7 @@ export default function TypingTabs() {
       <div
         className={cn(
           "py-2 sm:py-0  overflow-hidden gap-3 w-full typing-tabs md:max-w-180  lg:p-3 sm:gap-5 p-1 sm:p-3 sm:h-13 md:pr-6 lg:pr-6 rounded-md px-5 bg-blue-950/30 flex items-center min-w-75",
-          !isCodeTab ? "md:max-w-100" : ""
+          !isCodeTab ? "md:max-w-100" : "",
         )}
       >
         <div className="typing-modes ">
@@ -192,10 +192,10 @@ export default function TypingTabs() {
                     key={tab.label}
                     onClick={() => handleTabClick(tab.path)}
                     className={cn(
-                      "flex items-center gap-2 text-sm transition",
+                      "cursor-pointer flex items-center gap-2 text-sm transition",
                       active
                         ? "text-blue-400"
-                        : "text-gray-400 hover:text-white"
+                        : "text-gray-400 hover:text-white",
                     )}
                   >
                     <span className="w-5 h-5">
@@ -226,8 +226,8 @@ export default function TypingTabs() {
               <button
                 onClick={() => setShowWpm(!showWpm)}
                 className={cn(
-                  "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
-                  showWpm ? "text-blue-400" : "text-gray-400 hover:text-white"
+                  "cursor-pointer flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                  showWpm ? "text-blue-400" : "text-gray-400 hover:text-white",
                 )}
               >
                 WPM
@@ -247,7 +247,7 @@ export default function TypingTabs() {
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        className="justify-between flex items-center"
+                        className="cursor-pointer justify-between flex items-center"
                       >
                         {time > 0 ? time : <Infinity />}
                         <Timer className="text-gray-400 ml-2" />
@@ -321,7 +321,7 @@ export default function TypingTabs() {
                             value={lang.value}
                             onSelect={(current) => {
                               setLanguage(
-                                current === selectedLang ? "" : current
+                                current === selectedLang ? "" : current,
                               );
                               setOpenLang(false);
                             }}
@@ -332,7 +332,7 @@ export default function TypingTabs() {
                                 "ml-auto",
                                 selectedLang === lang.value
                                   ? "opacity-100"
-                                  : "opacity-0"
+                                  : "opacity-0",
                               )}
                             />
                           </CommandItem>
@@ -368,7 +368,7 @@ export default function TypingTabs() {
                             value={topic.value}
                             onSelect={(current) => {
                               setTopic(
-                                current === selectedTopic ? "" : current
+                                current === selectedTopic ? "" : current,
                               );
                               setOpenTopic(false);
                             }}
@@ -379,7 +379,7 @@ export default function TypingTabs() {
                                 "ml-auto",
                                 selectedTopic === topic.value
                                   ? "opacity-100"
-                                  : "opacity-0"
+                                  : "opacity-0",
                               )}
                             />
                           </CommandItem>
@@ -407,7 +407,7 @@ export default function TypingTabs() {
                     "flex items-center gap-2 text-sm transition px-2",
                     isLowercase
                       ? "text-blue-400"
-                      : "text-gray-400 hover:text-white"
+                      : "text-gray-400 hover:text-white",
                   )}
                 >
                   <AArrowDown />
@@ -428,7 +428,7 @@ export default function TypingTabs() {
                     "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                     openAddText
                       ? "text-blue-400"
-                      : "text-gray-400 hover:text-white"
+                      : "text-gray-400 hover:text-white",
                   )}
                 >
                   <Pencil className="scale-78" /> Edit
@@ -473,7 +473,7 @@ export default function TypingTabs() {
                       "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                       openEditFlashcard
                         ? "text-blue-400"
-                        : "text-gray-400 hover:text-white"
+                        : "text-gray-400 hover:text-white",
                     )}
                   >
                     <Pencil className="scale-78" /> Edit

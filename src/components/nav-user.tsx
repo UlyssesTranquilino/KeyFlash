@@ -38,12 +38,11 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
-  const {signOut, user: dataUser} = useAuth();
+  const { signOut, user: dataUser } = useAuth();
 
   const handleLogOut = () => {
     signOut();
-  }
-  
+  };
 
   return (
     <SidebarMenu>
@@ -83,16 +82,23 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            {!dataUser?.isPro && 
-            <>         
-              <DropdownMenuSeparator />
+            {!dataUser?.isPro && (
+              <>
+                <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                        <DropdownMenuItem className="cursor-pointer">
-                          <Sparkles />
-                          Upgrade to Pro
-                        </DropdownMenuItem>
+                  <Link
+                    href="/payment"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Sparkles />
+                      Upgrade to Pro
+                    </DropdownMenuItem>
+                  </Link>
                 </DropdownMenuGroup>
-            </>}
+              </>
+            )}
 
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
@@ -101,19 +107,20 @@ export function NavUser({
                 View Profile
               </DropdownMenuItem>
 
-
-                          {!dataUser?.isPro && <>                    
-                          <Link
-                        href="/pricing"
-                        target="_blank"
-                        rel="noopener noreferrer"
-
-                      ><DropdownMenuItem className="cursor-pointer">
-                <CreditCard />
-                Pricing
-              </DropdownMenuItem>
-              </Link> 
-                      </>}
+              {!dataUser?.isPro && (
+                <>
+                  <Link
+                    href="/pricing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <DropdownMenuItem className="cursor-pointer">
+                      <CreditCard />
+                      Pricing
+                    </DropdownMenuItem>
+                  </Link>
+                </>
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogOut}>

@@ -12,14 +12,14 @@ const Footer = () => {
       <footer
         className={cn(
           "w-full  border-t border-white/10 py-8 px-4 text-sm text-center text-white/80",
-          isDashboardRoute && "bg-black/60 md:px-20"
+          isDashboardRoute && "bg-black/60 md:px-20",
         )}
       >
         <div className="flex flex-col sm:flex-row items-center justify-between max-w-6xl mx-auto gap-4 ">
           <div
             className={cn(
               "flex flex-col items-center  sm:items-start lg:flex-row  gap-4 lg:gap-6 w-full",
-              isDashboardRoute && ""
+              isDashboardRoute && "",
             )}
           >
             <p className="text-white/80 hover:text-white transition-colors duration-200">
