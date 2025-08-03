@@ -406,7 +406,7 @@ const Words = ({ sessionType = "multiple" }) => {
   }, [isFocused, isRunning]);
 
   return (
-    <div className="relative min-h-[50vh] h-screen flex flex-col items-center -mt-5 sm:mt-17">
+    <div className="relative  flex flex-col items-center -mt-5 sm:mt-17">
       {(!completed && (time === -1 || (remaining ?? 0) > 0)) ||
       ((time ?? 0) > 0 && (remaining ?? 0) > 0) ? (
         <div className="mt-12 sm:mt-0 flex flex-col relative">

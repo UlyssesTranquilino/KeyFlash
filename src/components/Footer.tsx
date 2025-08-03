@@ -8,7 +8,7 @@ const Footer = () => {
   const isDashboardRoute = pathname.startsWith("/dashboard");
 
   return (
-    <div className="">
+    <div className="absolute bottom-0 mx-auto w-full">
       <footer
         className={cn(
           "w-full  border-t border-white/10 py-8 px-4 text-sm text-center text-white/80",
