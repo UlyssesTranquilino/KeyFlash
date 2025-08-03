@@ -2,14 +2,14 @@ import { useTestMode } from "@/context/TestModeContext";
 import React from "react";
 
 const UpperMenu = ({ countDown }: { countDown: number }) => {
-  const { setTestTime } = useTestMode();
+  const { setTestSeconds } = useTestMode();
 
   const updateTime = (e: any) => {
-    setTestTime(Number(e.target.id));
+    setTestSeconds(Number(e.target.id));
   };
 
   return (
-    <div className="upper-menu justify-between">
+    <div className="upper-menu justify-between text-white">
       <div className="counter">{countDown}</div>
 
       <div className="modes">

@@ -4,8 +4,12 @@ import { createContext, useState, useContext, ReactNode } from "react";
 
 // 1. Define the context value type
 type TestModeContextType = {
-  testTime: number;
-  setTestTime: React.Dispatch<React.SetStateAction<number>>;
+  testMode: string;
+  setTestMode: React.Dispatch<React.SetStateAction<string>>;
+  testSeconds: number;
+  setTestSeconds: React.Dispatch<React.SetStateAction<number>>;
+  testWords: number;
+  setTestWords: React.Dispatch<React.SetStateAction<number>>;
 };
 
 // 2. Create the context with an explicit type (initially undefined)
@@ -19,11 +23,17 @@ export const TestModeContextProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [testTime, setTestTime] = useState<number>(15);
+  const [testMode, setTestMode] = useState("time"); // time or word
+  const [testSeconds, setTestSeconds] = useState(15);
+  const [testWords, setTestWords] = useState(10); // 10 or 20 or 30
 
   const values: TestModeContextType = {
-    testTime,
-    setTestTime,
+    testSeconds,
+    setTestSeconds,
+    testWords,
+    setTestWords,
+    testMode,
+    setTestMode,
   };
 
   return (

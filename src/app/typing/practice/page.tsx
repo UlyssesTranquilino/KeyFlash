@@ -12,6 +12,7 @@ import "../../../css/typing.css";
 import { spaceMono } from "@/app/ui/fonts";
 import UpperMenu from "@/components/practice/UpperMenu";
 import { useTestMode } from "@/context/TestModeContext";
+import Stats from "@/components/practice/Stats";
 
 export function getRandomWords(length: number): string[] {
   const result = generate({ exactly: length });
@@ -20,6 +21,43 @@ export function getRandomWords(length: number): string[] {
 
 const Page = () => {
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Time
+  const { testSeconds, testWords, testMode } = useTestMode();
+  const [countDown, setCountDown] = useState(() => {
+    if (testMode === "word") {
+      return 180;
+    }
+
+    return testSeconds;
+  });
+  const [testTime, setTestTime] = useState(() => {
+    if (testMode === "word") {
+      return 180;
+    }
+
+    return testSeconds;
+  });
+  // Time Start End and Graph
+  const [testStart, setTestStart] = useState(false);
+  const [testEnd, setTestEnd] = useState(false);
+  const [graphData, setGraphData] = useState<number[][]>([]);
+  const [intervalId, setIntervalId] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  // Correct and Incorrect Characters
+  const [correctChars, setCorrectChars] = useState(0);
+  const [correctWords, setCorrectWords] = useState(0);
+  const [incorrectChars, setIncorrectChar] = useState(0);
+  const [extraChars, setExtraChars] = useState(0);
+
+  const [initialRender, setInitialRender] = useState(false);
+  const [wordsArray, setWordsArray] = useState(() => {
+    if (testMode === "word") {
+      return getRandomWords(testWords);
+    }
+    return getRandomWords(300);
+  });
 
   // Auto focus input element on load and add cursor on the first word
   useEffect(() => {
@@ -36,26 +74,108 @@ const Page = () => {
     }
   };
 
-  const [wordsArray, setWordsArray] = useState(() => getRandomWords(200));
+  // Create span refs
+  const emptySpans = () => {
+    return Array(wordsArray.length)
+      .fill(0)
+      .map((i) => createRef<HTMLSpanElement>());
+  };
 
+  const [wordsSpanRef, setWordsSpanRef] = useState(emptySpans());
   const [currWordIndex, setCurrWordIndex] = useState(0);
   const [currCharIndex, setCurrCharIndex] = useState(0);
 
-  // Create span refs
-  const wordsSpanRef = useMemo(() => {
-    return Array(wordsArray.length)
-      .fill(0)
-      .map(() => createRef<HTMLSpanElement>());
-  }, [wordsArray]);
+  // Start Timer
+  const startTimer = () => {
+    const invervalId = setInterval(timer, 1000);
+    setIntervalId(intervalId);
 
-  const { testTime } = useTestMode();
+    function timer() {
+      setCountDown((prevCountDown) => {
+        setCorrectChars((correctChars) => {
+          setGraphData((data) => {
+            return [
+              ...data,
+              [
+                testTime - prevCountDown,
+                Math.round(
+                  correctChars / 5 / ((testTime - prevCountDown + 1) / 60)
+                ),
+              ],
+            ];
+          });
+          return correctChars;
+        });
+
+        if (prevCountDown === 1) {
+          setTestEnd(true);
+          clearInterval(invervalId);
+          return 0;
+        }
+
+        return prevCountDown - 1;
+      });
+    }
+  };
+
+  const resetTest = () => {
+    setCurrCharIndex(0);
+    setCurrWordIndex(0);
+    setTestStart(false);
+    setTestEnd(false);
+    clearInterval(intervalId);
+
+    if (testMode === "word") {
+      setWordsArray(getRandomWords(testWords));
+      setWordsSpanRef(emptySpans());
+      setCountDown(180);
+      setTestTime(180);
+    } else {
+      setWordsArray(getRandomWords(300));
+      setWordsSpanRef(emptySpans());
+      setCountDown(testSeconds);
+      setTestTime(testSeconds);
+    }
+    setGraphData([]);
+    setCorrectChars(0);
+    setCorrectWords(0);
+    setExtraChars(0);
+    setIncorrectChar(0);
+    resetWordSpanRefClassname();
+    focusInput();
+  };
+
+  // Remove extra characters
+  const resetWordSpanRefClassname = () => {
+    wordsSpanRef.map((i) => {
+      if (!i.current) return;
+      Array.from(i.current.childNodes).map((j) => {
+        if ((j as HTMLElement).className.includes("extra")) {
+          (j as HTMLElement).remove();
+        }
+        (j as HTMLElement).className = "char";
+      });
+    });
+    if (
+      wordsSpanRef[0].current &&
+      wordsSpanRef[0].current.childNodes[0] instanceof HTMLElement
+    ) {
+      (wordsSpanRef[0].current.childNodes[0] as HTMLElement).className =
+        "char current";
+    }
+  };
 
   // Handle User Input
   const handleUserInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const allCurrChars = wordsSpanRef[currWordIndex].current?.childNodes ?? [];
 
-    // Space
-    if (e.keyCode === 32) {
+    if (!testStart) {
+      startTimer();
+      setTestStart(true);
+    }
+
+    // Space to next word
+    if (e.keyCode === 32 && currCharIndex === allCurrChars.length) {
       // Logic for space
 
       if (allCurrChars.length <= currCharIndex) {
@@ -68,6 +188,21 @@ const Page = () => {
         (allCurrChars[currCharIndex] as HTMLElement).classList.remove(
           "current"
         );
+      }
+
+      //scrollinig line condition
+      if (
+        wordsSpanRef[currWordIndex + 1]?.current &&
+        wordsSpanRef[currWordIndex]?.current &&
+        wordsSpanRef[currWordIndex + 1].current !== null &&
+        wordsSpanRef[currWordIndex].current !== null
+      ) {
+        if (
+          wordsSpanRef[currWordIndex + 1].current!.offsetLeft <
+          wordsSpanRef[currWordIndex].current!.offsetLeft
+        ) {
+          wordsSpanRef[currWordIndex].current!.scrollIntoView();
+        }
       }
 
       const nextWordNode =
@@ -147,23 +282,54 @@ const Page = () => {
     setCurrCharIndex(currCharIndex + 1);
   };
 
+  // Calculate WPM
+  const calculateWPM = () => {
+    return Math.round(
+      correctChars / 5 / ((graphData[graphData.length - 1][0] + 1) / 60)
+    );
+  };
+
+  // Calculate Accuracy
+  const calculateAccuracy = () => {
+    return Math.round((correctWords / currWordIndex) * 100);
+  };
+
+  useLayoutEffect(() => {
+    if (initialRender) {
+      resetTest();
+    } else {
+      setInitialRender(true);
+    }
+  }, [testSeconds, testWords, testMode]);
   // 3:41:57
   return (
     <div
       className={`h-screen font-mono ${spaceMono.className} text-gray-500 pt-20`}
     >
-      <UpperMenu countDown={testTime} />
-      <div className="type-box" onClick={focusInput}>
-        <div className="words">
-          {wordsArray.map((word, index) => (
-            <span key={index} className="word" ref={wordsSpanRef[index]}>
-              {word.split("").map((char, index) => (
-                <span key={char + index}>{char}</span>
-              ))}
-            </span>
-          ))}
+      <UpperMenu countDown={countDown} />
+      {testEnd ? (
+        <Stats
+          wpm={calculateWPM()}
+          accuracy={calculateAccuracy()}
+          correctChars={correctChars}
+          incorrectChars={incorrectChars}
+          extraChars={extraChars}
+          graphData={graphData}
+          resetTest={resetTest}
+        />
+      ) : (
+        <div className="type-box" onClick={focusInput}>
+          <div className="words">
+            {wordsArray.map((word, index) => (
+              <span key={index} className="word" ref={wordsSpanRef[index]}>
+                {word.split("").map((char, index) => (
+                  <span key={char + index}>{char}</span>
+                ))}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <input
         type="text"
