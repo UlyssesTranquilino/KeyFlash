@@ -243,12 +243,15 @@ export default function HomePage() {
 
       <div className="max-w-4xl ">
         <header className="mb-8">
-          <h1 className="text-xl sm:text-2xl font-bold text-white  ">
+          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
             Welcome, {user.nickname || user.name}!
+            {user.isPro && (
+              <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-cyan-600/20 to-cyan-800/20 text-cyan-400 px-2 py-1 rounded-full border border-cyan-700/50">
+                <Crown className="fill-cyan-400/30" size={14} />
+                PRO
+              </span>
+            )}
           </h1>
-          {/* <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
-            Current Streak: 3🔥
-          </p> */}
         </header>
       </div>
 

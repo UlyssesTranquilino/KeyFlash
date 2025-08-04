@@ -56,8 +56,8 @@ const CreateText = () => {
       return;
     }
 
-    if (text.length > 350) {
-      toast.warning("Text exceeds 350 character limit.");
+    if (text.length > 500) {
+      toast.warning("Text exceeds 500 character limit.");
       return;
     }
 
@@ -241,8 +241,8 @@ const CreateText = () => {
 
         <div className="text-gray-500 text-sm sm:text-base">
           {text.length} characters –
-          <span className={cn("", text.length > 350 && "text-red-400")}>
-            Max 350 characters
+          <span className={cn("", text.length > 500 && "text-red-400")}>
+            Max 500 characters
           </span>
         </div>
       </div>

@@ -30,6 +30,8 @@ const debounce = (func: any, wait: any) => {
   };
 };
 
+const MAX_CONSECUTIVE_MISTAKES = 5;
+
 const QuoteType = ({ sessionType = "multiple" }) => {
   // Contexts
   const { quote, setQuote, lowerCaseQuote, startCaseQuote, isLowercase } =
@@ -57,6 +59,8 @@ const QuoteType = ({ sessionType = "multiple" }) => {
   const [loading, setLoading] = useState(false);
   const [isHoveringNewQuote, setIsHoveringNewQuote] = useState(false);
   const [isClickingOnText, setIsClickingOnText] = useState(false);
+
+  const [consecutiveMistakes, setConsecutiveMistakes] = useState(0);
 
   // Auto-focus when not focused
   useEffect(() => {
@@ -106,6 +110,13 @@ const QuoteType = ({ sessionType = "multiple" }) => {
     fetchQuotes();
   }, []);
 
+  useEffect(() => {
+    // This ensures our cursor position is always valid
+    if (currentIndex > userInput.length) {
+      setCurrentIndex(userInput.length);
+    }
+  }, [userInput, currentIndex]);
+
   // Debounced WPM calculation
   const debouncedWpmUpdate = useMemo(
     () =>
@@ -134,6 +145,7 @@ const QuoteType = ({ sessionType = "multiple" }) => {
     setMistakes(0);
     setEndTime(null); // Add this
     setTestId(Date.now());
+    setConsecutiveMistakes(0);
     inputRef.current?.focus();
   }, [debouncedWpmUpdate]);
 
@@ -223,7 +235,6 @@ const QuoteType = ({ sessionType = "multiple" }) => {
     setLoading(false);
 
     setWpm(0);
-
   }, [setQuote, resetTest]);
 
   const handleReType = useCallback(
@@ -253,6 +264,21 @@ const QuoteType = ({ sessionType = "multiple" }) => {
       const value = e.target.value;
       const currentTime = Date.now();
 
+      if (value === userInput) return;
+
+      // Always allow deletion even with many mistakes
+      if (value.length < userInput.length) {
+        setUserInput(value);
+        setCurrentIndex(value.length);
+        setConsecutiveMistakes(0); // Reset on deletion
+        return;
+      }
+
+      // Block typing if too many mistakes
+      if (consecutiveMistakes >= MAX_CONSECUTIVE_MISTAKES) {
+        return;
+      }
+
       // Set idle state immediately
       setIsIdle(false);
 
@@ -272,17 +298,34 @@ const QuoteType = ({ sessionType = "multiple" }) => {
           let correct = 0;
           const minLength = Math.min(value.length, quote.content.length);
 
-          for (let i = 0; i < minLength; i++) {
+          // Only check the new characters (optimization)
+          const startCheck = Math.max(0, userInput.length - 1);
+          for (let i = startCheck; i < minLength; i++) {
             if (value[i] === quote.content[i]) {
-              correct++;
+              correct = i + 1;
             } else {
               break;
             }
           }
 
+          const newMistakes = value.length - correct;
+
+          // Batch state updates
+          setUserInput(value);
+          setCurrentIndex(value.length);
           setCorrectChars(correct);
           setIncorrectChars(value.length - correct);
           setMistakes(value.length - correct);
+
+          // Update consecutive mistakes
+          if (
+            value.length > userInput.length &&
+            value[value.length - 1] !== quote.content[value.length - 1]
+          ) {
+            setConsecutiveMistakes((prev) => prev + 1);
+          } else {
+            setConsecutiveMistakes(0);
+          }
 
           // Check completion
           if (value.length === quote.content.length) {
@@ -297,15 +340,22 @@ const QuoteType = ({ sessionType = "multiple" }) => {
         }
       });
     },
-    [quote, startTime, debouncedWpmUpdate]
+    [quote, startTime, debouncedWpmUpdate, consecutiveMistakes, userInput]
   );
 
   const deletePreviousWord = useCallback(() => {
     let deleteTo = currentIndex - 1;
-    while (deleteTo > 0 && userInput[deleteTo - 1] !== " ") deleteTo--;
+    // Find the start of the previous word
+    while (deleteTo > 0 && userInput[deleteTo - 1] !== " ") {
+      deleteTo--;
+    }
+    // Ensure we don't go negative
+    deleteTo = Math.max(0, deleteTo);
+
     const newInput = userInput.substring(0, deleteTo);
     setUserInput(newInput);
     setCurrentIndex(deleteTo);
+    setConsecutiveMistakes(0); // Reset consecutive mistakes when deleting
   }, [currentIndex, userInput]);
 
   const handleKeyDown = useCallback(
@@ -313,6 +363,11 @@ const QuoteType = ({ sessionType = "multiple" }) => {
       if (e.key === "Backspace" && e.ctrlKey) {
         e.preventDefault();
         deletePreviousWord();
+      }
+
+      // Ensure the input stays focused
+      if (e.ctrlKey || e.key === "Backspace") {
+        e.stopPropagation();
       }
     },
     [deletePreviousWord]

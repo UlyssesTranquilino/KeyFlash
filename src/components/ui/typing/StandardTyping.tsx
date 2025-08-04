@@ -61,6 +61,12 @@ const StandardTyping = ({ text }) => {
 
   const [consecutiveMistakes, setConsecutiveMistakes] = useState(0);
 
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [currentLine, setCurrentLine] = useState(0);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wordsRef = useRef<HTMLDivElement>(null);
+
   // Auto-scroll to cursor
   const scrollToCursor = useCallback(() => {
     if (cursorRef.current && textDisplayRef.current) {
@@ -153,11 +159,69 @@ const StandardTyping = ({ text }) => {
     [],
   );
 
+  // Calculate line height and container dimensions
+  const LINE_HEIGHT = 48; // Adjust based on your text size (text-xl with leading-8 ≈ 48px)
+  const VISIBLE_LINES = 6;
+  const CONTAINER_HEIGHT = LINE_HEIGHT * VISIBLE_LINES;
+
+  // Function to calculate which line a character position is on
+  const calculateLineForPosition = useCallback(
+    (position: number) => {
+      if (!wordsRef.current || !textData) return 0;
+
+      // Create a temporary element to measure text layout
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.visibility = "hidden";
+      tempDiv.style.whiteSpace = "pre-wrap";
+      tempDiv.style.wordWrap = "break-word";
+      tempDiv.style.fontSize = window.getComputedStyle(
+        wordsRef.current,
+      ).fontSize;
+      tempDiv.style.fontFamily = window.getComputedStyle(
+        wordsRef.current,
+      ).fontFamily;
+      tempDiv.style.width = window.getComputedStyle(wordsRef.current).width;
+      tempDiv.style.lineHeight = `${LINE_HEIGHT}px`;
+
+      document.body.appendChild(tempDiv);
+
+      // Add text up to the current position
+      const textUpToPosition = textData.substring(0, position);
+      tempDiv.textContent = textUpToPosition;
+
+      const height = tempDiv.offsetHeight;
+      const lineNumber = Math.floor(height / LINE_HEIGHT);
+
+      document.body.removeChild(tempDiv);
+
+      return lineNumber;
+    },
+    [, LINE_HEIGHT],
+  );
+
+  // Update scroll position based on current typing position
+  const updateScrollPosition = useCallback(() => {
+    const currentLine = calculateLineForPosition(userInput.length);
+
+    // Start scrolling when we reach line 2 (0-indexed), so line 3 becomes the top line
+    if (currentLine >= 2) {
+      const shouldScrollToLine = currentLine - 1; // Keep cursor on second visible line
+      const newScrollOffset = shouldScrollToLine * LINE_HEIGHT;
+      setScrollOffset(newScrollOffset);
+    } else {
+      setScrollOffset(0);
+    }
+
+    setCurrentLine(currentLine);
+  }, [userInput.length, calculateLineForPosition, LINE_HEIGHT]);
+
   // Reset Test
   const resetTest = useCallback(() => {
     // Clear any pending debounce
     if (debouncedWpmUpdate.cancel) debouncedWpmUpdate.cancel();
 
+    setScrollOffset(0);
     setUserInput("");
     setCurrentIndex(0);
     setStartTime(null);
@@ -249,7 +313,7 @@ const StandardTyping = ({ text }) => {
     (text: string) => {
       setTextData(text);
       resetTest();
-
+      setScrollOffset(0);
       setWpm(0);
     },
     [setTextData, resetTest],
@@ -418,8 +482,16 @@ const StandardTyping = ({ text }) => {
  ${!isFocused ? "blur-sm opacity-60" : "blur-0 opacty-100"}`}
               onClick={handleTextClick}
               onMouseDown={(e) => e.preventDefault()} // Prevent text selection interfering with focus
+              style={{ height: `${CONTAINER_HEIGHT}px` }}
             >
-              <div className="whitespace-pre-wrap break-words font-mono text-left">
+              <div
+                ref={wordsRef}
+                className="whitespace-pre-wrap break-words font-mono text-left"
+                style={{
+                  transform: `translateY(-${scrollOffset}px)`,
+                  lineHeight: `${LINE_HEIGHT}px`,
+                }}
+              >
                 {highlightedText}
               </div>
             </motion.div>
