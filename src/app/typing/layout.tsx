@@ -19,12 +19,12 @@ export default function TypingLayout({
           <CodeContextProvider>
             <TimerProvider>
               <QuoteProvider>
-                <div className=" text-foreground ">
+                <div className=" text-foreground min-h-screen">
                   {/* Top Tabs */}
                   <TypingTabs />
 
                   {/* Page Content */}
-                  <div className="max-w-[1000px] mx-auto mt-6 px-4">
+                  <div className="max-w-[1000px]  mx-auto mt-6 px-4">
                     {children}
                   </div>
                 </div>
