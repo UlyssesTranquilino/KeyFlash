@@ -369,7 +369,7 @@ const TypingFlashcards = () => {
           setTimeout(() => {
             if (current < sampleTerms.length - 1) {
               api?.scrollNext();
-            } 
+            }
           }, 1000);
         }
       }
@@ -1144,8 +1144,8 @@ const TypingFlashcards = () => {
                             currentPhase === "question"
                               ? "bg-blue-600/20 text-blue-400"
                               : questionCompleted
-                              ? "bg-green-600/20 text-green-400"
-                              : "bg-gray-600/20 text-gray-400"
+                                ? "bg-green-600/20 text-green-400"
+                                : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {questionCompleted && (
@@ -1163,8 +1163,8 @@ const TypingFlashcards = () => {
                             currentPhase === "answer"
                               ? "bg-blue-600/20 text-blue-400"
                               : cardCompleted
-                              ? "bg-green-600/20 text-green-400"
-                              : "bg-gray-600/20 text-gray-400"
+                                ? "bg-green-600/20 text-green-400"
+                                : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {cardCompleted && <CheckCircle className="w-4 h-4" />}
@@ -1254,8 +1254,8 @@ const TypingFlashcards = () => {
                             currentPhase === "question"
                               ? "bg-blue-600/20 text-blue-400"
                               : questionCompleted
-                              ? "bg-green-600/20 text-green-400"
-                              : "bg-gray-600/20 text-gray-400"
+                                ? "bg-green-600/20 text-green-400"
+                                : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {questionCompleted && (
@@ -1273,8 +1273,8 @@ const TypingFlashcards = () => {
                             currentPhase === "answer"
                               ? "bg-blue-600/20 text-blue-400"
                               : cardCompleted
-                              ? "bg-green-600/20 text-green-400"
-                              : "bg-gray-600/20 text-gray-400"
+                                ? "bg-green-600/20 text-green-400"
+                                : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {cardCompleted && <CheckCircle className="w-4 h-4" />}

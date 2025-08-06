@@ -1,6 +1,5 @@
 "use client";
 
-import { createClient } from "../../../../utils/supabase/server";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import {
@@ -16,40 +15,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { spaceMono } from "@/app/ui/fonts";
 import { Virtuoso } from "react-virtuoso";
-import {
-  ArrowLeft,
-  RotateCcw,
-  TriangleAlert,
-  MousePointer,
-  Pointer,
-  CheckCircle,
-  Eye,
-  EyeClosed,
-  Type,
-  FileUp,
-  Trash,
-  Ban,
-  CircleX,
-  Check,
-  X,
-  Rewind,
-  Pencil,
-  Keyboard,
-  Shuffle,
-  Maximize,
-  Minimize,
-  Trash2,
-  EllipsisVertical,
-  Home,
-} from "lucide-react";
+import { CheckCircle, Eye, EyeClosed, Trash, CircleX } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -73,13 +41,15 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useFlashcard } from "@/app/context/FlashcardContext";
-import { useWpm } from "@/app/context/WpmContext";
+// import { useWpm } from "@/app/context/WpmContext";
 
-import { Switch } from "@/components/ui/switch";
 import SkeletonFlashcard from "./SkeletonFlashcard";
 import { SimpleResults } from "./ResultsComponent";
 import { deleteFlashcard } from "../../../../utils/flashcard/flashcard";
-import { AnimatePresence } from "framer-motion";
+import { FlashcardControls } from "./FlashcardControl";
+import { useFlashcardState } from "../../../../utils/flashcard/seFlashcardState";
+import { useFlashcardSettings } from "../../../../utils/flashcard/useFlashcardSettings";
+import { FlashcardHeader } from "./FlashcardHeader";
 
 // Utility functions for localStorage
 const loadSettings = () => {
@@ -105,7 +75,7 @@ const saveSettings = (settings: any) => {
 const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
   const { user } = useAuth();
-  const { showWpm, setShowWpm } = useWpm();
+  // const { showWpm, setShowWpm } = useWpm();
   const id = slug.split("-")[0];
   const [api, setApi] = useState<CarouselApi>();
   const [flashcard, setFlashcard] = useState<any>({
@@ -119,24 +89,46 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   // Flashcard Carousel
   const [count, setCount] = useState(0);
-  const [isQuizMode, setIsQuizMode] = useState(() => {
-    const saved = loadSettings();
-    return saved?.isQuizMode ?? false; // Default to false if not set
-  });
-  const [isQuizModeConfirm, setIsQuizModeConfirm] = useState(false);
-  const { blurAnswer, setBlurAnswer, openEditFlashcard, setOpenEditFlashcard } =
-    useFlashcard();
-  const [currentPhase, setCurrentPhase] = useState<"question" | "answer">(
-    "question",
-  );
-  const [questionCompleted, setQuestionCompleted] = useState(false);
-  const [cardCompleted, setCardCompleted] = useState(false);
-  const [showAnswer, setShowAnswer] = useState(false);
 
-  // Typing states
-  const [userInput, setUserInput] = useState("");
+  const {
+    isTypingMode,
+    setIsTypingMode,
+    isQuizMode,
+    setIsQuizMode,
+    blurAnswer,
+    setBlurAnswer,
+  } = useFlashcardSettings();
+
+  const {
+    currentPhase,
+    setCurrentPhase,
+    questionCompleted,
+    setQuestionCompleted,
+    cardCompleted,
+    setCardCompleted,
+    showAnswer,
+    setShowAnswer,
+    userInput,
+    setUserInput,
+    userAnswer,
+    setUserAnswer,
+    currentIndex,
+    setCurrentIndex,
+    correctCount,
+    setCorrectCount,
+    wrongCount,
+    setWrongCount,
+    allComplete,
+    setAllComplete,
+    isShuffled,
+    setIsShuffled,
+    resetCurrentCard,
+  } = useFlashcardState(flashcard.terms);
+
+  const [isQuizModeConfirm, setIsQuizModeConfirm] = useState(false);
+  const { openEditFlashcard, setOpenEditFlashcard } = useFlashcard();
+
   const [isFocused, setIsFocused] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isIdle, setIsIdle] = useState(true);
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [isClickingOnText, setIsClickingOnText] = useState(false);
@@ -149,25 +141,13 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   // Stat
   const [correct, setCorrect] = useState(false);
-  const [correctCount, setCorrectCount] = useState<number>(0);
-  const [wrongCount, setWrongCount] = useState<number>(0);
-  const [userAnswer, setUserAnswer] = useState("");
   const [current, setCurrent] = useState(0);
   const [currentTerm, setCurrentTerm] = useState<any>();
   const currentText =
     currentPhase === "question" ? currentTerm?.question : currentTerm?.answer;
   const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const [allComplete, setAllComplete] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [wpm, setWpm] = useState(0);
-
-  const [isTypingMode, setIsTypingMode] = useState(() => {
-    const saved = loadSettings();
-    return saved?.isTypingMode ?? true;
-  });
-
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [isShuffled, setIsShuffled] = useState(false);
+  // const [wpm, setWpm] = useState(0);
 
   // Edit
   const [editMode, setEditMode] = useState(false);
@@ -175,6 +155,58 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const [description, setDescription] = useState("");
 
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+
+  const [answerTimeout, setAnswerTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const timeoutRef = answerTimeout;
+    return () => {
+      if (timeoutRef) clearTimeout(timeoutRef);
+    };
+  }, [answerTimeout]);
+
+  // Handle space press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        isTypingMode &&
+        currentPhase === "answer" &&
+        cardCompleted &&
+        e.key === " "
+      ) {
+        e.preventDefault();
+
+        if (answerTimeout) {
+          clearTimeout(answerTimeout);
+          setAnswerTimeout(null);
+        }
+
+        if (current < flashcard.terms.length - 1) {
+          api?.scrollNext();
+        } else {
+          setAllComplete(true);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      if (answerTimeout) {
+        clearTimeout(answerTimeout);
+      }
+    };
+  }, [
+    isTypingMode,
+    currentPhase,
+    cardCompleted,
+    current,
+    api,
+    flashcard.terms.length,
+    answerTimeout,
+  ]);
 
   useEffect(() => {
     const fetchFlashcard = async () => {
@@ -234,7 +266,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
         } else {
           setAllComplete(true);
         }
-      }, 800);
+      }, 5000);
     }
   };
 
@@ -245,114 +277,45 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   }, []);
 
   // Fixed highlighted text function
+  // Optimize highlightedText calculation
   const highlightedText = useMemo(() => {
-    if (!currentText) return null;
+    if (!currentText || !isTypingMode) return null;
 
-    const words = currentText.split(" ");
-    let charIndex = 0;
-
-    return words.map((word, wordIndex) => {
-      const wordSpans = word.split("").map((char, charIndexInWord) => {
-        const globalCharIndex = charIndex + charIndexInWord;
-        const userChar = userInput[globalCharIndex];
-        const isTyped = globalCharIndex < userInput.length;
-        const isCorrect = userChar === char;
-        const isCursor = globalCharIndex === userInput.length;
-
-        const className = isTyped
-          ? isCorrect
-            ? "text-white"
-            : "text-red-600/75 bg-red-900/30"
-          : "text-gray-500";
-
-        return (
-          <span key={`${wordIndex}-${charIndexInWord}`} className="relative">
-            {isCursor && (
-              <span
-                className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 ${
-                  isIdle ? "animate-pulse" : ""
-                }`}
-                style={{
-                  animation: isIdle ? "pulse 1s ease-in-out infinite" : "none",
-                }}
-              />
-            )}
-            <span className={className}>{char}</span>
-          </span>
-        );
-      });
-
-      // Handle space between words
-      charIndex += word.length;
-      const spaceIndex = charIndex;
-      const hasSpace = wordIndex < words.length - 1;
-
-      if (hasSpace) {
-        const userSpaceChar = userInput[spaceIndex];
-        const isSpaceTyped = spaceIndex < userInput.length;
-        const isSpaceCorrect = userSpaceChar === " ";
-        const isSpaceCursor = spaceIndex === userInput.length;
-
-        charIndex += 1; // Account for the space
-
-        const spaceElement = (
-          <span key={`space-${wordIndex}`} className="relative">
-            {isSpaceCursor && (
-              <span
-                className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 ${
-                  isIdle ? "animate-pulse" : ""
-                }`}
-                style={{
-                  animation: isIdle ? "pulse 1s ease-in-out infinite" : "none",
-                }}
-              />
-            )}
-            <span
-              className={
-                isSpaceTyped
-                  ? isSpaceCorrect
-                    ? "text-white"
-                    : "text-red-600/75 bg-red-900/30"
-                  : "text-gray-500"
-              }
-            >
-              {"\u00A0"}
-            </span>
-          </span>
-        );
-
-        return (
-          <span key={wordIndex} className="inline-block whitespace-nowrap">
-            {wordSpans}
-            {spaceElement}
-          </span>
-        );
-      }
-
-      return (
-        <span key={wordIndex} className="inline-block whitespace-nowrap">
-          {wordSpans}
-        </span>
-      );
-    });
-  }, [currentText, userInput, isIdle]);
-
-  const resetCurrentCard = useCallback(() => {
-    setUserInput("");
-    setUserAnswer("");
-    setCurrentIndex(0);
-    setCurrentPhase("question");
-    setQuestionCompleted(false);
-    setCardCompleted(false);
-    setStartTime(null);
-    setWpm(0);
-    setShowAnswer(false);
-    setCorrect(false); // Add this to reset the correct state
-    setBlurAnswer(true);
-    if (inputRef.current) {
-      inputRef.current.focus();
+    // Simple optimization - return plain text if not in typing mode
+    if (!isTypingMode) {
+      return <span className="text-white">{currentText}</span>;
     }
-  }, [setBlurAnswer]);
+
+    // Use simpler DOM structure
+    return (
+      <span className="whitespace-pre-wrap">
+        {currentText.split("").map((char, index) => {
+          const isTyped = index < userInput.length;
+          const isCorrect = isTyped ? userInput[index] === char : false;
+          const isCursor = index === userInput.length;
+
+          return (
+            <span
+              key={index}
+              className={cn(
+                isTyped
+                  ? isCorrect
+                    ? "text-white"
+                    : "text-red-600 bg-red-900/30"
+                  : "text-gray-500",
+                "relative",
+              )}
+            >
+              {char}
+              {isCursor && (
+                <span className="absolute left-0 top-0.5 h-5 w-0.5 bg-blue-400 animate-pulse" />
+              )}
+            </span>
+          );
+        })}
+      </span>
+    );
+  }, [currentText, userInput, isTypingMode]);
 
   const shuffleFlashcards = useCallback(() => {
     // Create a deep copy of the terms array
@@ -427,11 +390,11 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   // Typing
   // WPM calculation
-  const updateWpm = useCallback((inputLength: number, start: number) => {
-    const timeElapsed = (Date.now() - start) / 60000;
-    const words = inputLength > 0 ? Math.max(1, inputLength / 5) : 0;
-    setWpm(Math.round(words / timeElapsed));
-  }, []);
+  // const updateWpm = useCallback((inputLength: number, start: number) => {
+  //   const timeElapsed = (Date.now() - start) / 60000;
+  //   const words = inputLength > 0 ? Math.max(1, inputLength / 5) : 0;
+  //   setWpm(Math.round(words / timeElapsed));
+  // }, []);
 
   // Input change handler
   const handleInputChange = useCallback(
@@ -441,7 +404,6 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
       setIsIdle(false);
 
-      // Start timer on first input
       if (!startTime) {
         setStartTime(currentTime);
       }
@@ -449,12 +411,10 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       setUserInput(value);
       setCurrentIndex(value.length);
 
-      // Update WPM
-      if (startTime && value.length > 0) {
-        updateWpm(value.length, startTime);
-      }
+      // if (startTime && value.length > 0) {
+      //   updateWpm(value.length, startTime);
+      // }
 
-      // Check completion
       if (
         (currentText && value === currentText) ||
         value.length >= currentText.length
@@ -463,11 +423,10 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           setQuestionCompleted(true);
           setTimeout(() => {
             setCurrentPhase("answer");
-            // Only reset input and related states, not the phase
             setUserInput("");
             setCurrentIndex(0);
             setStartTime(null);
-            setWpm(0);
+            // setWpm(0);
             if (inputRef.current) {
               inputRef.current.focus();
             }
@@ -477,12 +436,21 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           setCardCompleted(true);
           setCorrectCount((prev) => prev + 1);
 
-          // Only allow navigation in quiz mode if card is completed
-          setTimeout(() => {
+          // Clear existing timeout
+          if (answerTimeout) {
+            clearTimeout(answerTimeout);
+          }
+
+          // Set new timeout
+          const timeout = setTimeout(() => {
             if (current < flashcard.terms.length - 1) {
               api?.scrollNext();
+            } else {
+              setAllComplete(true);
             }
-          }, 1000);
+          }, 5000); // 10 seconds
+
+          setAnswerTimeout(timeout);
         }
       }
     },
@@ -490,10 +458,11 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       currentText,
       currentPhase,
       startTime,
-      updateWpm,
+      // updateWpm,
       current,
       api,
       flashcard.terms.length,
+      answerTimeout,
     ],
   );
 
@@ -657,19 +626,19 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   useEffect(() => {
     saveSettings({
       isTypingMode,
-      showWpm,
+      // showWpm,
       isQuizMode,
     });
-  }, [isTypingMode, showWpm, isQuizMode]);
+  }, [isTypingMode, isQuizMode]); //showWpm,
 
   // If useWpm doesn't handle its own persistence, you might need this:
-  useEffect(() => {
-    saveSettings({
-      isTypingMode,
-      showWpm,
-      isQuizMode,
-    });
-  }, [showWpm]);
+  // useEffect(() => {
+  //   saveSettings({
+  //     isTypingMode,
+  //     // showWpm,
+  //     isQuizMode,
+  //   });
+  // }, [showWpm]);
 
   // Load settings
   useEffect(() => {
@@ -677,16 +646,14 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     if (saved) {
       const { isTypingMode, showWpm, isQuizMode } = JSON.parse(saved);
       setIsTypingMode(isTypingMode);
-      setShowWpm(showWpm);
+      // setShowWpm(showWpm);
       setIsQuizMode(isQuizMode);
     }
   }, []);
 
   return (
     <div
-      className={`max-w-[1100px] pt-3 w-full mx-auto px-1 sm:px-5 md:px-5 mb-20 relative overflow-hidden  ${
-        isFullScreen ? "fixed inset-0 top-1/5  z-50 p-0 m-0 " : ""
-      }`}
+      className={`max-w-[1100px] pt-3 w-full mx-auto px-1 sm:px-5 md:px-5 mb-20 relative overflow-hidden `}
     >
       <div className="-z-3 absolute top-0 md:top-20 md:right-20 right-0 w-[400px] h-[400px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
@@ -705,6 +672,13 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
       {!loading ? (
         <div className="relative -mt-3 sm:-mt-5">
+          <FlashcardHeader
+            title={title}
+            description={description}
+            onEdit={() => setOpenEditFlashcard(true)}
+            onDelete={() => setOpenConfirmDelete(true)}
+          />
+
           <div className="absolute bottom-70 -right-3 -z-2 size-155 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-70%" />
 
           <Dialog open={openConfirmDelete} onOpenChange={setOpenConfirmDelete}>
@@ -768,7 +742,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                     setQuestionCompleted(false);
                     setCardCompleted(false);
                     setStartTime(null);
-                    setWpm(0);
+                    // setWpm(0);
                     setShowAnswer(false);
                     setCorrect(false);
                     setBlurAnswer(true);
@@ -986,84 +960,9 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
             </DialogContent>
           </Dialog>
 
-          {!isFullScreen && (
-            <div className=" x-auto flex flex-col mb-10">
-              <div className="flex gap-1 mb-10  mt-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => router.back()}
-                  className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
-                >
-                  <ArrowLeft className="h-5 w-5" /> Back
-                </Button>
-                {/* <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => router.back()}
-                  className="rounded-md p-2  mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
-                >
-                  <Home className="h-5 w-5" /> Home
-                </Button> */}
-              </div>
-              <div className="flex justify-between items-center gap-3 w-full">
-                <div className="flex items-center">
-                  <h1 className="font-semibold text-lg">{flashcard.title}</h1>
-                </div>
-
-                <div className="flex gap-2 ">
-                  <Button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowWpm(!showWpm);
-                    }}
-                    variant="ghost"
-                    className={cn(
-                      "text-gray-400 hover:text-white",
-                      showWpm && "text-blue-400 hover:text-blue-400",
-                    )}
-                  >
-                    WPM
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="text-gray-400 hover:text-white"
-                      >
-                        <EllipsisVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-40 bg-gray-900 border-gray-700">
-                      <DropdownMenuItem
-                        onClick={(e: any) => {
-                          e.preventDefault();
-                          setOpenEditFlashcard(true);
-                        }}
-                        className="cursor-pointer focus:bg-gray-800"
-                      >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        <span>Edit</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => setOpenConfirmDelete(true)}
-                        className="cursor-pointer focus:bg-gray-800 text-red-400 "
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Delete</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
-              <p className="text-gray-300 max-w-170">{flashcard.description}</p>
-            </div>
-          )}
-
-          <div className={`${isFullScreen ? "h-screen " : "h-[100vh] pt-3"}`}>
+          <div className={`h-[100vh] pt-3`}>
             <div className="mb-6  flex items-center justify-between max-w-[1000px] mx-auto">
-              {showWpm ? (
+              {/* {showWpm ? (
                 <motion.div
                   initial={{ y: 20, opacity: 0, scale: 0.95 }}
                   animate={{ y: 0, opacity: 1, scale: 1 }}
@@ -1075,7 +974,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 </motion.div>
               ) : (
                 <div className="h-0" />
-              )}
+              )} */}
             </div>
 
             <Carousel
@@ -1093,9 +992,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 {flashcard?.terms.map((item: any, index: any) => (
                   <CarouselItem
                     key={index}
-                    className={`max-w-[1100px] rounded-2xl bg-gray-900/70 relative overflow-hidden ${
-                      isFullScreen ? "h-100" : "h-100 md:h-110"
-                    }`}
+                    className={`max-w-[1100px] rounded-2xl bg-gray-900/70 relative overflow-hidden 
+                     h-100 md:h-110`}
                   >
                     <div
                       className="flex flex-col items-center justify-center h-full p-2 md:p-4"
@@ -1165,6 +1063,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                 {cardCompleted && (
                                   <CheckCircle className="w-4 h-4" />
                                 )}
+
                                 <span className="text-xs">Answer</span>
                               </div>
                             </div>
@@ -1283,6 +1182,26 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                                 <span className="text-xs">Answer</span>
                               </div>
                             </div>
+
+                            {/* Move the space prompt outside and make it more prominent */}
+                            {cardCompleted && currentPhase === "answer" && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="w-full  text-center"
+                              >
+                                <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-900/30 rounded-full">
+                                  <span className="text-gray-300 text-sm">
+                                    Press{" "}
+                                    <kbd className="px-2 py-1 text-xs font-mono bg-gray-700 rounded-md text-gray-200">
+                                      SPACE
+                                    </kbd>
+                                    to continue
+                                  </span>
+                                </div>
+                              </motion.div>
+                            )}
 
                             {isTypingMode && (
                               <div>
@@ -1417,158 +1336,28 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                 ))}
               </CarouselContent>
 
-              <div className="w-full absolute right-1/2 -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
-                <div className="flex items-center justify-start flex-nowrap sm:items-center gap-2 sm:gap-5">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="flex flex-col switch gap-1 items-center">
-                        <Switch
-                          id="code-toggle"
-                          checked={isQuizMode}
-                          onCheckedChange={() => {
-                            if (!isQuizMode) {
-                              setIsQuizMode(true);
-                              setIsTypingMode(true);
-                            } else setIsQuizModeConfirm(true);
-                          }}
-                          className={cn(
-                            "scale-80",
-                            "data-[state=checked]:bg-blue-400",
-                            "data-[state=checked]:border-blue-400",
-                            "data-[state=checked]:ring-blue-400",
-                          )}
-                        />
-                        <Label
-                          htmlFor="code-toggle"
-                          className="text-sm flex items-center gap-2"
-                        >
-                          Quiz
-                        </Label>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Quiz Mode - Track your Progress</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        className={cn(
-                          "flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
-                          isTypingMode ? "text-blue-400" : "text-gray-400",
-                        )}
-                        onClick={() => setIsTypingMode(!isTypingMode)}
-                      >
-                        <Keyboard className="w-5 h-5" />
-                        <span className="hidden text-sm">
-                          {isTypingMode ? "On" : "Off"}
-                        </span>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Typing Mode {isTypingMode ? "On" : "Off"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        className={cn(
-                          "flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
-                          isShuffled ? "text-blue-400" : "text-gray-400",
-                        )}
-                        onClick={
-                          isShuffled ? unshuffleFlashcards : shuffleFlashcards
-                        }
-                      >
-                        <Shuffle className="w-5 h-5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isShuffled ? "Unshuffle Cards" : "Shuffle Cards"}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-
-                <div className="w-full col-span-3 relative">
-                  <div className="text-center w-25 sm:w-34 mx-auto relative">
-                    <CarouselPrevious
-                      disabled={isQuizMode}
-                      className="flex absolute left-0 top-1/2 -translate-y-1/2 z-10 scale-75 sm:scale-100"
-                    />
-                    <div className="text-gray-400 text-sm sm:text-base">
-                      {current + 1} / {count}
-                    </div>
-
-                    <CarouselNext
-                      disabled={isQuizMode}
-                      className="flex absolute right-0 top-1/2 -translate-y-1/2 z-10 scale-75 sm:scale-100"
-                    />
-                  </div>
-                  {isQuizMode && (
-                    <div className="flex items-center justify-center text-sm gap-3 absolute -translate-x-1/67 p-4 w-full">
-                      <div className="flex gap-1">
-                        <Check className="h-5 w-5 text-green-400" />
-                        <span className="text-gray-300"> {correctCount}</span>
-                      </div>
-                      <div className="flex gap-1">
-                        <X className="h-5 w-5 text-red-400" />
-                        <span className="text-gray-300"> {wrongCount}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Progress and controls */}
-                <div className="flex justify-end gap-2 sm:gap-5">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        disabled={isQuizMode}
-                        className="flex my-14 items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
-                        onClick={() => setShowResetConfirm(true)}
-                      >
-                        <Rewind className="w-5 h-5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Reset Cards</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        disabled={isQuizMode}
-                        className="flex my-14 items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
-                        onClick={handleRestart}
-                      >
-                        <RotateCcw className="w-5 h-5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Restart Card</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  {/* <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => setIsFullScreen(!isFullScreen)}
-                        className="text-gray-400 hover:text-white"
-                      >
-                        {isFullScreen ? (
-                          <Minimize className="scale-78" />
-                        ) : (
-                          <Maximize className="scale-78" />
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isFullScreen ? "Exit Fullscreen" : "Fullscreen"}</p>
-                    </TooltipContent>
-                  </Tooltip> */}
-                </div>
-              </div>
+              <FlashcardControls
+                isQuizMode={isQuizMode}
+                isTypingMode={isTypingMode}
+                isShuffled={isShuffled}
+                correctCount={correctCount}
+                wrongCount={wrongCount}
+                current={current}
+                count={count}
+                onQuizModeChange={(value) => {
+                  if (!value) {
+                    setIsQuizModeConfirm(true);
+                  } else {
+                    setIsQuizMode(true);
+                    setIsTypingMode(true);
+                  }
+                }}
+                onTypingModeChange={setIsTypingMode}
+                onShuffle={shuffleFlashcards}
+                onUnshuffle={unshuffleFlashcards}
+                onReset={() => setShowResetConfirm(true)}
+                onRestart={handleRestart}
+              />
             </Carousel>
 
             {/* Hidden input */}
@@ -1588,39 +1377,37 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
             )}
           </div>
 
-          {!isFullScreen && (
-            <div className="flex flex-col gap-5">
-              <h1 className="text-lg font-semibold text-center mb-3">
-                All Terms
-              </h1>
-              <div className="flex items-center justify-around gap-9">
-                <h1>Question</h1>
-                <h1>Answer</h1>
-              </div>
-              <Virtuoso
-                style={{ height: "400px" }}
-                totalCount={flashcard?.terms?.length || 0}
-                itemContent={(index) => {
-                  const card = flashcard?.terms[index];
-                  return (
-                    <div
-                      key={card.id}
-                      className="flex flex-col relative bg-gray-900/30 mb-3"
-                    >
-                      <div className="flex items-center justify-around gap-3 sm:gap-5">
-                        <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
-                          {card.question}
-                        </div>
-                        <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
-                          {card.answer}
-                        </div>
+          <div className="flex flex-col gap-5">
+            <h1 className="text-lg font-semibold text-center mb-3">
+              All Terms
+            </h1>
+            <div className="flex items-center justify-around gap-9">
+              <h1>Question</h1>
+              <h1>Answer</h1>
+            </div>
+            <Virtuoso
+              style={{ height: "500px" }}
+              totalCount={flashcard?.terms?.length || 0}
+              itemContent={(index) => {
+                const card = flashcard?.terms[index];
+                return (
+                  <div
+                    key={card.id}
+                    className="flex flex-col relative bg-gray-900/30 mb-3"
+                  >
+                    <div className="flex items-center justify-around gap-3 sm:gap-5">
+                      <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
+                        {card.question}
+                      </div>
+                      <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
+                        {card.answer}
                       </div>
                     </div>
-                  );
-                }}
-              />
-            </div>
-          )}
+                  </div>
+                );
+              }}
+            />
+          </div>
         </div>
       ) : (
         <div>
