@@ -11,7 +11,13 @@ import {
 import Results from "./Results";
 import { motion } from "framer-motion";
 import { spaceMono } from "@/app/ui/fonts";
-import { RotateCcw, TriangleAlert, MousePointer, Pointer } from "lucide-react";
+import {
+  RotateCcw,
+  TriangleAlert,
+  MousePointer,
+  Pointer,
+  CornerDownLeft,
+} from "lucide-react";
 // Context
 import { useWpm } from "@/app/context/WpmContext";
 import { useEditText } from "@/app/context/AddTextContext";
@@ -243,61 +249,89 @@ const StandardTyping = ({ text }) => {
     inputRef.current?.focus();
   }, [debouncedWpmUpdate]);
 
-  // Highlighting Text
+  // Highlighting Text with Horizontal Wrapping (similar to Words component)
   const highlightedText = useMemo(() => {
     if (!textData) return null;
 
-    const result = [];
-    let charIndex = 0;
+    // Split text into words for proper wrapping
+    const words = textData.split(/(\s+)/); // Keep whitespace in the split
     const userInputChars = userInput.split("");
+    let charIndex = 0;
 
-    // Process text in chunks to avoid excessive DOM nodes
-    const chunkSize = 100; // Adjust based on performance testing
-    for (let i = 0; i < textData.length; i += chunkSize) {
-      const chunk = textData.slice(i, i + chunkSize);
-      const chunkElements = [];
+    return words.map((word, wordIdx) => {
+      // Handle whitespace
+      if (/^\s+$/.test(word)) {
+        const spaceElements = [];
+        for (let i = 0; i < word.length; i++) {
+          const currentCharIndex = charIndex++;
+          const isCursor = currentCharIndex === userInput.length;
+          const userChar = userInputChars[currentCharIndex];
+          const isCorrect = userChar === word[i];
+          const isTyped = currentCharIndex < userInput.length;
 
-      for (let j = 0; j < chunk.length; j++) {
-        const currentCharIndex = charIndex++;
-        const char = chunk[j];
-        const isCursor = currentCharIndex === userInput.length;
-        const displayChar = char === " " ? "\u00A0" : char;
-
-        let className = "text-gray-500";
-        if (currentCharIndex < userInput.length) {
-          className =
-            userInputChars[currentCharIndex] === char
+          const className = isTyped
+            ? isCorrect
               ? "text-white"
-              : "text-red-600/75 bg-red-900/30";
-        }
+              : "text-red-600/75 bg-red-900/30"
+            : "text-gray-500";
 
-        chunkElements.push(
-          <span key={currentCharIndex} className="relative">
-            {isCursor && (
-              <span
-                ref={cursorRef}
-                className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                  isIdle ? "animate-pulse" : ""
-                }`}
-              />
-            )}
-            <span className={className}>{displayChar}</span>
-          </span>,
+          spaceElements.push(
+            <span key={currentCharIndex} className="relative">
+              {isCursor && (
+                <span
+                  ref={cursorRef}
+                  className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                    isIdle ? "animate-pulse" : ""
+                  }`}
+                />
+              )}
+              <span className={className}>&nbsp;</span>
+            </span>,
+          );
+        }
+        return (
+          <span key={wordIdx} className="inline">
+            {spaceElements}
+          </span>
         );
       }
 
-      result.push(
-        <span key={`chunk-${i}`} className="inline-block">
-          {chunkElements}
-        </span>,
-      );
-    }
+      // Handle regular words
+      const wordChars = word.split("");
+      return (
+        <span key={wordIdx} className="inline-block">
+          {wordChars.map((char, charIdx) => {
+            const currentCharIndex = charIndex++;
+            const isCursor = currentCharIndex === userInput.length;
+            const displayChar = char === " " ? "\u00A0" : char;
+            const userChar = userInputChars[currentCharIndex];
+            const isCorrect = userChar === char;
+            const isTyped = currentCharIndex < userInput.length;
 
-    return (
-      <div className="whitespace-pre-wrap break-words font-mono text-left">
-        {result}
-      </div>
-    );
+            let className = "text-gray-500";
+            if (isTyped) {
+              className = isCorrect
+                ? "text-white"
+                : "text-red-600/75 bg-red-900/30";
+            }
+
+            return (
+              <span key={currentCharIndex} className="relative">
+                {isCursor && (
+                  <span
+                    ref={cursorRef}
+                    className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                      isIdle ? "animate-pulse" : ""
+                    }`}
+                  />
+                )}
+                <span className={className}>{displayChar}</span>
+              </span>
+            );
+          })}
+        </span>
+      );
+    });
   }, [textData, userInput, isIdle]);
 
   const handleRefetch = useCallback(async () => {
@@ -401,6 +435,12 @@ const StandardTyping = ({ text }) => {
         e.preventDefault();
         deletePreviousWord();
       }
+
+      // Allow Enter key to be captured as part of the typing
+      if (e.key === "Enter") {
+        // Don't prevent default - let it be handled by the input change
+        return;
+      }
     },
     [deletePreviousWord],
   );
@@ -476,9 +516,9 @@ const StandardTyping = ({ text }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               ref={textDisplayRef}
-              className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.6rem] text-center transition-opacity duration-100 ${
+              className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.6rem] text-left transition-opacity duration-100 ${
                 spaceMono.className
-              } leading-10 mb-8 max-h-[50vh] overflow-y-auto overflow-x-hidden scroll-smooth
+              } leading-10 mb-8 max-h-[50vh] overflow-y-auto overflow-x-hidden scroll-smooth cursor-text
  ${!isFocused ? "blur-sm opacity-60" : "blur-0 opacty-100"}`}
               onClick={handleTextClick}
               onMouseDown={(e) => e.preventDefault()} // Prevent text selection interfering with focus
@@ -486,7 +526,7 @@ const StandardTyping = ({ text }) => {
             >
               <div
                 ref={wordsRef}
-                className="whitespace-pre-wrap break-words font-mono text-left"
+                className="flex flex-wrap justify-start leading-10 transition-transform duration-200 ease-out"
                 style={{
                   transform: `translateY(-${scrollOffset}px)`,
                   lineHeight: `${LINE_HEIGHT}px`,

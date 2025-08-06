@@ -7,6 +7,7 @@ import {
   useCallback,
   startTransition,
   useMemo,
+  memo,
 } from "react";
 import { useCode } from "@/app/context/CodeContext";
 import { useWpm } from "@/app/context/WpmContext";
@@ -33,9 +34,139 @@ const debounce = (func: any, wait: any) => {
   };
 };
 
+// Memoized Character Component to prevent unnecessary rerenders
+const CharacterComponent = memo(
+  ({
+    char,
+    absoluteIndex,
+    userInput,
+    isIdle,
+    isLocked,
+  }: {
+    char: string;
+    absoluteIndex: number;
+    userInput: string;
+    isIdle: boolean;
+    isLocked: boolean;
+  }) => {
+    const isCursor = absoluteIndex === userInput.length && !isLocked;
+    const isTyped = absoluteIndex < userInput.length;
+    const isCorrect = isTyped && userInput[absoluteIndex] === char;
+
+    const className = isTyped
+      ? isCorrect
+        ? "text-white bg-green-900/20"
+        : "text-red-400 bg-red-900/30"
+      : isLocked
+        ? "text-gray-600 opacity-50"
+        : "text-gray-500";
+
+    const displayChar = char === " " ? "\u00A0" : char;
+
+    return (
+      <span className="relative">
+        {isCursor && (
+          <span
+            className={`absolute left-0 top-[1px] w-0.5 h-4 bg-blue-400 z-10 ${
+              isIdle ? "animate-pulse" : "animate-pulse"
+            }`}
+          />
+        )}
+        <span className={className}>{displayChar}</span>
+      </span>
+    );
+  }
+);
+
+CharacterComponent.displayName = "CharacterComponent";
+
+// Memoized Line Component
+const LineComponent = memo(
+  ({
+    line,
+    lineIndex,
+    codeContent,
+    userInput,
+    isIdle,
+    lockedLines,
+  }: {
+    line: string;
+    lineIndex: number;
+    codeContent: string;
+    userInput: string;
+    isIdle: boolean;
+    lockedLines: Set<number>;
+  }) => {
+    const isLocked = lockedLines.has(lineIndex);
+
+    // Calculate absolute starting index for this line
+    const lineStartIndex = useMemo(() => {
+      let index = 0;
+      const lines = codeContent.split("\n");
+      for (let i = 0; i < lineIndex; i++) {
+        index += lines[i].length + 1; // +1 for \n
+      }
+      return index;
+    }, [codeContent, lineIndex]);
+
+    return (
+      <div key={lineIndex} className="relative min-h-[1.5rem]">
+        {/* Line number */}
+        <span className="absolute left-0 text-gray-700 select-none w-8 text-right pr-2">
+          {lineIndex + 1}
+        </span>
+
+        {/* Line content */}
+        <div className="pl-10">
+          {line.length === 0 ? (
+            // Handle empty lines
+            <span className="text-gray-500">&nbsp;</span>
+          ) : (
+            line.split("").map((char, charIndex) => {
+              const absoluteIndex = lineStartIndex + charIndex;
+
+              return (
+                <CharacterComponent
+                  key={`${lineIndex}-${charIndex}`}
+                  char={char}
+                  absoluteIndex={absoluteIndex}
+                  userInput={userInput}
+                  isIdle={isIdle}
+                  isLocked={isLocked}
+                />
+              );
+            })
+          )}
+
+          {/* Handle cursor at end of line */}
+          {(() => {
+            const lineEndIndex = lineStartIndex + line.length;
+            const isCursor = userInput.length === lineEndIndex && !isLocked;
+
+            return (
+              isCursor && (
+                <span className="relative">
+                  <span
+                    className={`absolute left-0 top-0 w-0.5 h-5 bg-blue-400 z-10 ${
+                      isIdle ? "animate-pulse" : "animate-pulse"
+                    }`}
+                  />
+                </span>
+              )
+            );
+          })()}
+        </div>
+      </div>
+    );
+  }
+);
+
+LineComponent.displayName = "LineComponent";
+
 const CodeType = () => {
   const { showWpm, setShowWpm } = useWpm();
   const { language, topic } = useCode();
+
   // Code
   const [codeData, setCodeData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,9 +175,13 @@ const CodeType = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [userInput, setUserInput] = useState("");
   const [isIdle, setIsIdle] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [currentCharInLine, setCurrentCharInLine] = useState(0);
   const [isClickingOnText, setIsClickingOnText] = useState(true);
   const [isFocused, setIsFocused] = useState(true);
+
+  // Line locking state - tracks which lines are "locked" (completed and can't be edited)
+  const [lockedLines, setLockedLines] = useState<Set<number>>(new Set());
 
   // Time
   const [startTime, setStartTime] = useState<number | null>(null);
@@ -58,6 +193,22 @@ const CodeType = () => {
   const [incorrectChars, setInCorrectChars] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [wpm, setWpm] = useState(0);
+
+  // Split code into lines for better performance
+  const codeLines = useMemo(() => {
+    if (!codeData?.code) return [];
+    return codeData.code.split("\n");
+  }, [codeData?.code]);
+
+  // Calculate current position in code
+  const currentPosition = useMemo(() => {
+    let globalIndex = 0;
+    for (let i = 0; i < currentLineIndex && i < codeLines.length; i++) {
+      globalIndex += codeLines[i].length + 1; // +1 for \n
+    }
+    globalIndex += currentCharInLine;
+    return globalIndex;
+  }, [currentLineIndex, currentCharInLine, codeLines]);
 
   // Initial Code Snippet Fetch
   useEffect(() => {
@@ -92,7 +243,9 @@ const CodeType = () => {
   // Reset Text
   const resetTest = useCallback(() => {
     setUserInput("");
-    setCurrentIndex(0);
+    setCurrentLineIndex(0);
+    setCurrentCharInLine(0);
+    setLockedLines(new Set());
     setStartTime(null);
     setWpm(0);
     setIsIdle(true);
@@ -108,7 +261,6 @@ const CodeType = () => {
       setIsLoading(true);
       const data = await getCodeSnippets(language, topic);
       setCodeData(data);
-
       resetTest();
       setIsLoading(false);
     } catch (error) {
@@ -130,104 +282,58 @@ const CodeType = () => {
     []
   );
 
-  // Highlight code with better debugging
+  // Virtualized line rendering - only render visible lines
+  const visibleLines = useMemo(() => {
+    const startLine = Math.max(0, currentLineIndex - 5);
+    const endLine = Math.min(codeLines.length, currentLineIndex + 15);
+
+    return codeLines.slice(startLine, endLine).map((line, relativeIdx) => {
+      const actualLineIdx = startLine + relativeIdx;
+      return {
+        line,
+        lineIndex: actualLineIdx,
+        isLocked: lockedLines.has(actualLineIdx),
+      };
+    });
+  }, [codeLines, currentLineIndex, lockedLines]);
+
+  // Optimized code highlighting with virtualization
   const highlightedCode = useMemo(() => {
     if (isLoading || !codeData?.code) {
       return <div className="text-gray-500">Loading code...</div>;
     }
 
-    const codeContent = codeData.code;
-    const inputLength = userInput.length;
-
     return (
       <>
-        {codeContent.split("\n").map((line: any, lineIndex: any) => (
-          <div key={lineIndex} className="relative min-h-[1.5rem]">
-            {/* Line number */}
-            <span className="absolute left-0 text-gray-700 select-none w-8 text-right pr-2">
-              {lineIndex + 1}
-            </span>
-            {/* Line content */}
-            <div className="pl-10">
-              {line.length === 0 ? (
-                // Handle empty lines
-                <span className="text-gray-500">&nbsp;</span>
-              ) : (
-                line.split("").map((char: any, charIndex: any) => {
-                  // Calculate absolute position in the entire code string
-                  let absoluteIndex = 0;
-                  for (let i = 0; i < lineIndex; i++) {
-                    absoluteIndex += codeContent.split("\n")[i].length + 1; // +1 for \n
-                  }
-                  absoluteIndex += charIndex;
-
-                  const isCursor = absoluteIndex === inputLength;
-                  const isTyped = absoluteIndex < inputLength;
-                  const isCorrect =
-                    isTyped && userInput[absoluteIndex] === char;
-
-                  const className = isTyped
-                    ? isCorrect
-                      ? "text-white bg-green-900/20"
-                      : "text-red-400 bg-red-900/30"
-                    : "text-gray-500";
-
-                  const displayChar = char === " " ? "\u00A0" : char;
-
-                  return (
-                    <span
-                      key={`${lineIndex}-${charIndex}`}
-                      className="relative"
-                    >
-                      {isCursor && (
-                        <span
-                          className={`absolute left-0 top-[1px] w-0.5 h-4  bg-blue-400 z-10 ${
-                            isIdle ? "animate-pulse" : "animate-pulse"
-                          }`}
-                        />
-                      )}
-                      <span className={className}>{displayChar}</span>
-                    </span>
-                  );
-                })
-              )}
-              {/* Handle cursor at end of line */}
-              {(() => {
-                let lineEndIndex = 0;
-                for (let i = 0; i <= lineIndex; i++) {
-                  if (i < lineIndex) {
-                    lineEndIndex += codeContent.split("\n")[i].length + 1;
-                  } else {
-                    lineEndIndex += codeContent.split("\n")[i].length;
-                  }
-                }
-                return (
-                  inputLength === lineEndIndex && (
-                    <span className="relative">
-                      <span
-                        className={`absolute left-0 top-0 w-0.5 h-5 bg-blue-400 z-10 ${
-                          isIdle ? "animate-pulse" : "animate-pulse"
-                        }`}
-                      />
-                    </span>
-                  )
-                );
-              })()}
-            </div>
-          </div>
+        {visibleLines.map(({ line, lineIndex, isLocked }) => (
+          <LineComponent
+            key={lineIndex}
+            line={line}
+            lineIndex={lineIndex}
+            codeContent={codeData.code}
+            userInput={userInput}
+            isIdle={isIdle}
+            lockedLines={lockedLines}
+          />
         ))}
       </>
     );
-  }, [codeData, userInput, isIdle, isLoading]);
+  }, [visibleLines, codeData?.code, userInput, isIdle, lockedLines, isLoading]);
 
-  // Input Change with better character tracking
+  // Optimized input change handler with line locking
   const handleInputChange = useCallback(
     (e: any) => {
       const value = e.target.value;
       const currentTime = Date.now();
 
-    
-      // Set idle state immediately
+      // Prevent editing locked content
+      if (
+        value.length < currentPosition &&
+        lockedLines.has(currentLineIndex - 1)
+      ) {
+        return;
+      }
+
       setIsIdle(false);
 
       // Start timer on first input
@@ -235,9 +341,44 @@ const CodeType = () => {
         setStartTime(currentTime);
       }
 
+      // Calculate current line and character position
+      let totalChars = 0;
+      let newLineIndex = 0;
+      let newCharInLine = 0;
+
+      for (let i = 0; i < codeLines.length; i++) {
+        const lineLength = codeLines[i].length;
+        const includeNewline = i < codeLines.length - 1;
+        const lineTotalLength = lineLength + (includeNewline ? 1 : 0);
+
+        if (value.length <= totalChars + lineLength) {
+          newLineIndex = i;
+          newCharInLine = value.length - totalChars;
+          break;
+        } else if (
+          value.length ===
+          totalChars + lineLength + (includeNewline ? 1 : 0)
+        ) {
+          // User completed this line and the newline
+          newLineIndex = i + 1;
+          newCharInLine = 0;
+
+          // Lock the completed line
+          setLockedLines((prev) => new Set([...prev, i]));
+          break;
+        } else if (value.length < totalChars + lineTotalLength) {
+          newLineIndex = i;
+          newCharInLine = value.length - totalChars;
+          break;
+        }
+
+        totalChars += lineTotalLength;
+      }
+
       // Update input immediately (high priority)
       setUserInput(value);
-      setCurrentIndex(value.length);
+      setCurrentLineIndex(newLineIndex);
+      setCurrentCharInLine(newCharInLine);
 
       // Batch non-critical updates
       startTransition(() => {
@@ -279,25 +420,76 @@ const CodeType = () => {
         }
       });
     },
-    [codeData, startTime, debouncedWpmUpdate]
+    [
+      codeData,
+      startTime,
+      debouncedWpmUpdate,
+      codeLines,
+      currentPosition,
+      lockedLines,
+      currentLineIndex,
+    ]
   );
 
-  // Delete Previous Word
+  // Delete Previous Word with line locking
   const deletePreviousWord = useCallback(() => {
-    let deleteTo = currentIndex - 1;
-    while (deleteTo > 0 && userInput[deleteTo - 1] !== " ") deleteTo--;
-    const newInput = userInput.substring(0, deleteTo);
-    setUserInput(newInput);
-    setCurrentIndex(deleteTo);
-  }, [currentIndex, userInput]);
+    // Find the start of the current word, but respect locked lines
+    let targetLineIndex = currentLineIndex;
+    let targetCharInLine = currentCharInLine;
 
-  // Improved Enter key handling
+    if (targetCharInLine === 0 && targetLineIndex > 0) {
+      targetLineIndex = targetLineIndex - 1;
+      targetCharInLine = codeLines[targetLineIndex]?.length || 0;
+    }
+
+    // Don't delete into locked lines
+    while (targetLineIndex >= 0 && lockedLines.has(targetLineIndex)) {
+      targetLineIndex++;
+      targetCharInLine = 0;
+      break;
+    }
+
+    if (targetLineIndex < 0) return;
+
+    // Calculate the position at the start of the target position
+    let newPosition = 0;
+    for (let i = 0; i < targetLineIndex; i++) {
+      newPosition += codeLines[i].length + 1; // +1 for \n
+    }
+
+    // Find word boundary
+    const line = codeLines[targetLineIndex] || "";
+    let wordStart = targetCharInLine;
+    while (wordStart > 0 && line[wordStart - 1] !== " ") {
+      wordStart--;
+    }
+
+    newPosition += wordStart;
+    const newInput = userInput.substring(0, newPosition);
+
+    setUserInput(newInput);
+    setCurrentLineIndex(targetLineIndex);
+    setCurrentCharInLine(wordStart);
+  }, [currentLineIndex, currentCharInLine, userInput, lockedLines, codeLines]);
+
+  // Improved key handling with line locking
   const handleKeyDown = useCallback(
     (e: any) => {
       if (e.key === "Backspace" && e.ctrlKey) {
         e.preventDefault();
         deletePreviousWord();
         return;
+      }
+
+      // Prevent backspace into locked content
+      if (e.key === "Backspace") {
+        const wouldDeleteIntoLocked =
+          userInput.length <= currentPosition &&
+          lockedLines.has(currentLineIndex - 1);
+        if (wouldDeleteIntoLocked) {
+          e.preventDefault();
+          return;
+        }
       }
 
       if (e.key === "Tab") {
@@ -320,7 +512,10 @@ const CodeType = () => {
           }
 
           setUserInput(newInput);
-          setCurrentIndex(newIndex);
+
+          // Update position tracking
+          const syntheticEvent = { target: { value: newInput } };
+          handleInputChange(syntheticEvent);
         }
         return;
       }
@@ -350,11 +545,6 @@ const CodeType = () => {
             newIndex++;
           }
 
-
-          // Update state with the new input and cursor position
-          setUserInput(newInput);
-          setCurrentIndex(newIndex);
-
           // Trigger input change handling to ensure correct/incorrect tracking
           const syntheticEvent = {
             target: { value: newInput },
@@ -364,10 +554,18 @@ const CodeType = () => {
         return;
       }
     },
-    [deletePreviousWord, userInput, codeData, handleInputChange]
+    [
+      deletePreviousWord,
+      userInput,
+      codeData,
+      handleInputChange,
+      currentPosition,
+      lockedLines,
+      currentLineIndex,
+    ]
   );
 
-  // Is Typing
+  // Focus handlers
   const handleTextClick = useCallback(() => {
     setIsClickingOnText(true);
     inputRef.current?.focus();
@@ -386,7 +584,7 @@ const CodeType = () => {
   }, []);
 
   return (
-    <div className="lg:pl-20  text-white min-h-screen relative">
+    <div className="lg:pl-20 text-white min-h-screen relative">
       {!isLoading ? (
         <div>
           {!completed ? (
@@ -431,9 +629,10 @@ const CodeType = () => {
                   </p>
                 </div>
               </div>
+
               <div className="relative overflow-auto mt-7 bg-black p-6 rounded-lg border border-gray-700/40">
                 <pre className="line-numbers">
-                  <code className=" md:text-lg lg:text-lg font-mono leading-relaxed">
+                  <code className="md:text-lg lg:text-lg font-mono leading-relaxed">
                     {highlightedCode}
                   </code>
                 </pre>
@@ -451,6 +650,7 @@ const CodeType = () => {
                   aria-hidden="true"
                 />
               </div>
+
               {/* Controls */}
               <div className="flex items-center justify-center gap-3 sm:gap-14 md:gap-22 lg:gap-28 my-10">
                 <button
@@ -470,17 +670,6 @@ const CodeType = () => {
                   Reset
                 </button>
               </div>
-              {/* Focus indicator */}
-              {/* {!isFocused && (
-                <div
-                  className="absolute inset-0 flex items-center justify-center bg-black/60 z-50 rounded-lg cursor-pointer"
-                  onClick={handleTextClick}
-                >
-                  <div className="text-white text-sm md:text-base bg-gray-800 px-4 py-2 rounded shadow-md">
-                    Click here to start typing...
-                  </div>
-                </div>
-              )} */}
             </div>
           ) : (
             <div className="mt-28">

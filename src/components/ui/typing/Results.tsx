@@ -162,7 +162,7 @@ const Results = ({
         {sessionType === "multiple" && (
           <button
             onClick={handleRefetch}
-            className="px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
+            className="cursor-pointer px-6 lg:px-10 py-3 border-1 border-blue-900 hover:bg-blue-800/20 rounded-md  transition-colors"
           >
             New {author === "" ? "Texts" : author == "code" ? "Code" : "Quote"}
           </button>
@@ -171,7 +171,7 @@ const Results = ({
           onClick={() => {
             handleRetype(originalQuote ?? quote);
           }}
-          className="px-6 lg:px-10 py-3 border-1 border-gray-700 hover:bg-gray-800/40 rounded-md  transition-colors"
+          className="cursor-pointer px-6 lg:px-10 py-3 border-1 border-gray-700 hover:bg-gray-800/40 rounded-md  transition-colors"
         >
           Try Again
         </button>
