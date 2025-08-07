@@ -7,7 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Shuffle, Rewind, RotateCcw, Keyboard } from "lucide-react";
+import { Shuffle, Rewind, RotateCcw, Keyboard, Check, X } from "lucide-react";
 
 export const FlashcardControls = ({
   isQuizMode,
@@ -112,10 +112,12 @@ export const FlashcardControls = ({
         {isQuizMode && (
           <div className="flex items-center justify-center text-sm gap-3 absolute -translate-x-1/67 p-4 w-full">
             <div className="flex gap-1">
-              <span className="text-gray-300"> {correctCount}</span>
+              <Check className="text-green-400" />
+              <span className="text-gray-300">{correctCount}</span>
             </div>
             <div className="flex gap-1">
-              <span className="text-gray-300"> {wrongCount}</span>
+              <X className="text-red-400" />
+              <span className="text-gray-300">{wrongCount}</span>
             </div>
           </div>
         )}
