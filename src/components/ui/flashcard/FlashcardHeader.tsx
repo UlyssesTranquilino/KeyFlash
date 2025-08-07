@@ -24,13 +24,13 @@ export const FlashcardHeader = ({
   const router = useRouter();
 
   return (
-    <div className="relative -mt-3 sm:-mt-5">
+    <div className="relative -mt-3 sm:-mt-5 mb-2">
       <div className="flex gap-1 mb-10 mt-3">
         <Button
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="rounded-md p-2 mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+          className="rounded-md p-2 mb-3 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
         >
           <ArrowLeft className="h-5 w-5" /> Back
         </Button>
