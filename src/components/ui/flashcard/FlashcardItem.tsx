@@ -1,3 +1,5 @@
+"use client"
+
 import { motion } from "framer-motion";
 import {
   CheckCircle,
@@ -12,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 
 // Virtualized Flashcard Item Component
 export const FlashcardItem = ({
@@ -28,7 +31,6 @@ export const FlashcardItem = ({
   userAnswer,
   setUserAnswer,
   userInput,
-  highlightedText,
   handleTextClick,
   handleAnswerSubmit,
   showAnswer,
@@ -37,9 +39,160 @@ export const FlashcardItem = ({
   answerInputRef,
   skipQuestion,
 }) => {
+ 
   if (!isActive) {
-    return <div className="h-100 md:h-110" />; // Placeholder for non-active items
+    return <div className="h-100 md:h-110" />;
   }
+
+  const wordsRef = useRef<HTMLDivElement>(null);
+  const textDisplayRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLSpanElement>(null);
+  const [scrollOffset, setScrollOffset] = useState(0);
+
+  const LINE_HEIGHT = 45;
+  const VISIBLE_LINES = 4;
+  const CONTAINER_HEIGHT = LINE_HEIGHT * VISIBLE_LINES;
+
+  // Reset scroll when phase or card changes
+  useEffect(() => {
+    setScrollOffset(0);
+    if (textDisplayRef.current) {
+      textDisplayRef.current.scrollTop = 0;
+    }
+  }, [currentPhase, item]);
+
+  const scrollToCursor = useCallback(() => {
+    if (cursorRef.current && textDisplayRef.current) {
+      const cursor = cursorRef.current;
+      const container = textDisplayRef.current;
+
+      const cursorRect = cursor.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      const cursorTop = cursorRect.top - containerRect.top + container.scrollTop;
+      const cursorBottom = cursorTop + cursorRect.height;
+
+      const containerHeight = container.clientHeight;
+      const scrollTop = container.scrollTop;
+      const scrollBottom = scrollTop + containerHeight;
+
+      // Only scroll if cursor is near the bottom of the visible area
+      if (cursorBottom > scrollBottom - LINE_HEIGHT) {
+        const newScrollTop = cursorBottom - containerHeight + LINE_HEIGHT;
+        container.scrollTop = Math.max(0, newScrollTop);
+      }
+    }
+  }, [LINE_HEIGHT]);
+
+  const calculateCurrentLine = useCallback((position: number, text: string) => {
+    if (!wordsRef.current || !text) return 0;
+
+    // Create a temporary element to measure text wrapping
+    const tempDiv = document.createElement("div");
+    tempDiv.style.position = "absolute";
+    tempDiv.style.visibility = "hidden";
+    tempDiv.style.whiteSpace = "pre-wrap";
+    tempDiv.style.wordBreak = "break-word";
+    tempDiv.style.width = getComputedStyle(wordsRef.current).width;
+    tempDiv.style.fontSize = getComputedStyle(wordsRef.current).fontSize;
+    tempDiv.style.fontFamily = getComputedStyle(wordsRef.current).fontFamily;
+    tempDiv.style.lineHeight = `${LINE_HEIGHT}px`;
+    tempDiv.style.textAlign = "center";
+
+    document.body.appendChild(tempDiv);
+
+    const textUpToPosition = text.substring(0, position);
+    tempDiv.textContent = textUpToPosition;
+
+    const height = tempDiv.offsetHeight;
+    const lineNumber = Math.max(0, Math.floor(height / LINE_HEIGHT));
+
+    document.body.removeChild(tempDiv);
+    return lineNumber;
+  }, [LINE_HEIGHT]);
+
+  const updateScrollPosition = useCallback(() => {
+    const currentText = currentPhase === "question" ? item?.question : item?.answer;
+    if (!currentText) return;
+
+    const currentLine = calculateCurrentLine(userInput.length, currentText);
+
+    // Only start scrolling when we're past the visible area (after line 3, since we show 4 lines)
+    if (currentLine >= VISIBLE_LINES - 1) {
+      const scrollLines = currentLine - (VISIBLE_LINES - 2); // Keep 2 lines visible above cursor
+      const newScrollOffset = scrollLines * LINE_HEIGHT;
+      setScrollOffset(Math.max(0, newScrollOffset));
+    } else {
+      setScrollOffset(0);
+    }
+  }, [userInput.length, currentPhase, item, calculateCurrentLine, LINE_HEIGHT, VISIBLE_LINES]);
+
+  useEffect(() => {
+    if (isTypingMode && userInput.length > 0) {
+      requestAnimationFrame(() => {
+        updateScrollPosition();
+        scrollToCursor();
+      });
+    }
+  }, [userInput, isTypingMode, scrollToCursor, updateScrollPosition]);
+
+  // Split text into words for better wrapping
+  const createHighlightedText = useMemo(() => {
+    if (!isTypingMode) {
+      const currentText = currentPhase === "question" ? item?.question : item?.answer;
+      return <span className="text-white">{currentText}</span>;
+    }
+
+    const currentText = currentPhase === "question" ? item?.question : item?.answer;
+    if (!currentText) return null;
+
+    // Split text into words while preserving spaces
+    const words = currentText.split(/(\s+)/);
+    let charIndex = 0;
+
+    return (
+      <div className="text-center">
+        {words.map((word, wordIndex) => {
+          const wordStartIndex = charIndex;
+          const wordEndIndex = charIndex + word.length;
+          charIndex = wordEndIndex;
+
+          return (
+            <span key={wordIndex} className="inline-block">
+              {word.split("").map((char, charIndexInWord) => {
+                const globalCharIndex = wordStartIndex + charIndexInWord;
+                const isTyped = globalCharIndex < userInput.length;
+                const isCorrect = isTyped ? userInput[globalCharIndex] === char : false;
+                const isCursor = globalCharIndex === userInput.length;
+
+                return (
+                  <span
+                    key={globalCharIndex}
+                    className={cn(
+                      "relative",
+                      isTyped
+                        ? isCorrect
+                          ? "text-white"
+                          : "text-red-600 bg-red-900/30"
+                        : "text-gray-500"
+                    )}
+                  >
+                    {char === " " ? "\u00A0" : char}
+                    {isCursor && (
+                      <span
+                        ref={cursorRef}
+                        className="absolute left-0 top-0.5 h-8 w-0.5 bg-blue-400 animate-pulse"
+                      />
+                    )}
+                  </span>
+                );
+              })}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }, [currentPhase, item, isTypingMode, userInput]);
 
   return (
     <div className="mt-2 max-w-[1100px] rounded-2xl bg-gray-900/70 relative overflow-hidden h-100 md:h-110">
@@ -116,7 +269,6 @@ export const FlashcardItem = ({
                         onClick={skipQuestion}
                         className={cn(
                           "p-2 cursor-pointer rounded-md transition-colors",
-
                           "text-gray-300 hover:text-white",
                           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900",
                         )}
@@ -169,13 +321,22 @@ export const FlashcardItem = ({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre transition-all duration-300`}
+                ref={textDisplayRef}
+                className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre-wrap transition-all duration-300 overflow-hidden`}
                 onClick={handleTextClick}
                 onMouseDown={(e) => e.preventDefault()}
+                style={{ height: `${CONTAINER_HEIGHT}px` }}
               >
                 {isTypingMode ? (
-                  <div className="flex flex-wrap justify-center text-center mx-auto">
-                    {highlightedText}
+                  <div
+                    ref={wordsRef}
+                    className="transition-transform duration-200 ease-out w-full"
+                    style={{
+                      transform: `translateY(-${scrollOffset}px)`,
+                      lineHeight: `${LINE_HEIGHT}px`,
+                    }}
+                  >
+                    {createHighlightedText}
                   </div>
                 ) : (
                   <p className="whitespace-pre-line">{item?.question}</p>
@@ -308,13 +469,22 @@ export const FlashcardItem = ({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
-                  className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre transition-all duration-300`}
+                  ref={textDisplayRef}
+                  className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre-wrap transition-all duration-300 overflow-hidden`}
                   onClick={handleTextClick}
                   onMouseDown={(e) => e.preventDefault()}
+                  style={{ height: `${CONTAINER_HEIGHT}px` }}
                 >
                   {isTypingMode ? (
-                    <div className="flex flex-wrap justify-center text-center mx-auto">
-                      {highlightedText}
+                    <div
+                      ref={wordsRef}
+                      className="transition-transform duration-200 ease-out w-full"
+                      style={{
+                        transform: `translateY(-${scrollOffset}px)`,
+                        lineHeight: `${LINE_HEIGHT}px`,
+                      }}
+                    >
+                      {createHighlightedText}
                     </div>
                   ) : (
                     <p className="whitespace-pre-line">{item?.answer}</p>

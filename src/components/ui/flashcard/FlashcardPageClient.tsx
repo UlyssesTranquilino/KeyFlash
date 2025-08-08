@@ -7,9 +7,6 @@ import {
   getFlashcard,
 } from "../../../../utils/flashcard/flashcard";
 import { Button } from "@/components/ui/button";
-import { Label } from "@radix-ui/react-label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -721,7 +718,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   userAnswer={userAnswer}
                   setUserAnswer={setUserAnswer}
                   userInput={userInput}
-                  highlightedText={highlightedText}
+                  // highlightedText={highlightedText}
                   handleTextClick={handleTextClick}
                   handleAnswerSubmit={handleAnswerSubmit}
                   showAnswer={showAnswer}
