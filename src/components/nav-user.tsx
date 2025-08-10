@@ -102,10 +102,12 @@ export function NavUser({
 
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer">
-                <BadgeCheck />
-                View Profile
-              </DropdownMenuItem>
+              <Link href="/dashboard/profile">
+                <DropdownMenuItem className="cursor-pointer">
+                  <BadgeCheck />
+                  View Profile
+                </DropdownMenuItem>
+              </Link>
 
               {!dataUser?.isPro && (
                 <>

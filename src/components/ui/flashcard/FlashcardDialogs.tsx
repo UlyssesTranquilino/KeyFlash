@@ -11,6 +11,42 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@radix-ui/react-label";
 import { Trash } from "lucide-react";
+import { FlashcardContextProvider } from "@/app/context/FlashcardContext";
+
+// Discard Changes Dialog
+export const DiscardChangesDialog = ({
+  showDiscardConfirm,
+  setShowDiscardConfirm,
+  setOpenEditFlashcard,
+  setCopyFlashcardData,
+  flashcard,
+}) => (
+  <Dialog open={showDiscardConfirm} onOpenChange={setShowDiscardConfirm}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Discard changes?</DialogTitle>
+        <DialogDescription>
+          You have unsaved edits. If you cancel now, your changes will be lost.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="flex justify-end gap-3">
+        <Button variant="outline" onClick={() => setShowDiscardConfirm(false)}>
+          Keep Editing
+        </Button>
+        <Button
+          onClick={() => {
+            setShowDiscardConfirm(false);
+            setOpenEditFlashcard(false);
+            setCopyFlashcardData(flashcard); // revert edits
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          Discard
+        </Button>
+      </div>
+    </DialogContent>
+  </Dialog>
+);
 
 // Delete Flashcard
 export const DeleteFlashcardDialog = ({ open, onOpenChange, onConfirm }) => (
