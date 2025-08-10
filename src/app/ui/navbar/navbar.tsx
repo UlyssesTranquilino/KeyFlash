@@ -139,15 +139,19 @@ export default function Navbar() {
             <DropdownMenuContent className="w-40 mx-3" align="start">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuGroup>
-                <DropdownMenuItem>
-                  <BadgeCheck />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  {" "}
-                  <Sparkles />
-                  Upgrade to Pro
-                </DropdownMenuItem>
+                <Link href="/dashboard/profile">
+                  <DropdownMenuItem>
+                    <BadgeCheck />
+                    View Profile
+                  </DropdownMenuItem>
+                </Link>
+                {!user.isPro && (
+                  <DropdownMenuItem>
+                    {" "}
+                    <Sparkles />
+                    Upgrade to Pro
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               {/* <Link href="/feedback">
