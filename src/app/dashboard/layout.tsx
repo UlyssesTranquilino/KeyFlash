@@ -1,15 +1,6 @@
-import { supabase } from "../../../utils/supabase-client";
-import { createClient } from "../../../utils/supabase/client";
-import { redirect } from "next/navigation";
+"use client"; // Add this at the top
+
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -20,13 +11,19 @@ import { WpmProvider } from "../context/WpmContext";
 import { TimerProvider } from "../context/TimerContext";
 import { QuoteProvider } from "../context/QuoteContext";
 import { CodeContextProvider } from "../context/CodeContext";
+import { useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default async function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const supaase = createClient();
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/signin"); // redirect if no user
+    }
+  }, [user, loading, router]);
 
   return (
     <CodeContextProvider>

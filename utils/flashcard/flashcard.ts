@@ -25,7 +25,8 @@ export async function getAllFlashcards(userId: string) {
     const { data, error } = await supabase
       .from("flashcards")
       .select("*")
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching flashcards: ", error);

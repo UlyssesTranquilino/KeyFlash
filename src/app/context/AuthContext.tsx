@@ -25,10 +25,14 @@ interface TransformedUser {
 }
 
 interface AuthContextType {
-  user: TransformedUser | null ;
+  user: TransformedUser | null;
   session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+  updateProfile: (
+    updates: Partial<Profile>
+  ) => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,34 +45,57 @@ export function AuthProvider({
   serverSession?: Session | null;
 }) {
   const [session, setSession] = useState<Session | null>(serverSession || null);
-  const [supabaseUser, setSupabaseUser] = useState<User | null>(serverSession?.user || null);
+  const [supabaseUser, setSupabaseUser] = useState<User | null>(
+    serverSession?.user || null
+  );
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(!serverSession);
 
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
 
-  // Fetch user profile when user changes
-  useEffect(() => {
+  /** Fetch the user's profile */
+  const refreshProfile = async () => {
     if (!supabaseUser?.id) {
       setProfile(null);
       return;
     }
+    const { data, error } = await supabase
+      .from("profiles")
+      .select()
+      .eq("id", supabaseUser.id)
+      .single();
 
-    const fetchProfile = async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select()
-        .eq('id', supabaseUser.id)
-        .single();
-      
-      if (!error && data) {
-        setProfile(data);
-      }
-    };
+    if (error) {
+      console.error("Error fetching profile:", error);
+    } else {
+      setProfile(data);
+    }
+  };
 
-    fetchProfile();
-  }, [supabaseUser?.id, supabase]);
+  /** Update profile in DB, then refresh local state */
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!supabaseUser?.id) {
+      return { error: "User not authenticated" };
+    }
+    const { error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", supabaseUser.id);
+
+    if (error) {
+      console.error("Error updating profile:", error);
+      return { error: error.message };
+    }
+
+    await refreshProfile();
+    return { error: null };
+  };
+
+  // Fetch profile when user changes
+  useEffect(() => {
+    refreshProfile();
+  }, [supabaseUser?.id]);
 
   // Handle session and auth state changes
   useEffect(() => {
@@ -76,12 +103,12 @@ export function AuthProvider({
 
     const getSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
         if (!isMounted) return;
-        
         if (error) throw error;
-
         setSession(session);
         setSupabaseUser(session?.user ?? null);
       } catch (error) {
@@ -97,19 +124,20 @@ export function AuthProvider({
       getSession();
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, currentSession) => {
       if (!isMounted) return;
-
       setSession(currentSession);
       setSupabaseUser(currentSession?.user ?? null);
 
       if (event === "SIGNED_OUT") {
-        // Clear auth cookies
-        document.cookie = 'sb-access-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        document.cookie = 'sb-refresh-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        router.push('/signin');
+        document.cookie =
+          "sb-access-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        document.cookie =
+          "sb-refresh-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+        router.push("/signin");
       }
-      
       if (["SIGNED_IN", "SIGNED_OUT"].includes(event)) {
         router.refresh();
       }
@@ -126,12 +154,10 @@ export function AuthProvider({
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
       setSupabaseUser(null);
       setSession(null);
       setProfile(null);
-      
-      window.location.href = '/signin';
+      window.location.href = "/signin";
     } catch (error) {
       console.error("Sign out error:", error);
     } finally {
@@ -139,18 +165,19 @@ export function AuthProvider({
     }
   };
 
-  const value = useMemo(() => ({
-    user: transformUser(supabaseUser, profile),
-    session,
-    loading,
-    signOut,
-  }), [supabaseUser, profile, session, loading]);
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user: transformUser(supabaseUser, profile),
+      session,
+      loading,
+      signOut,
+      refreshProfile,
+      updateProfile,
+    }),
+    [supabaseUser, profile, session, loading]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

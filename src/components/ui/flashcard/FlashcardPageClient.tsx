@@ -23,19 +23,7 @@ import {
   SkipForward,
   ChevronRight,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { cn } from "@/lib/utils";
 import { useFlashcard } from "@/app/context/FlashcardContext";
 
@@ -54,6 +42,7 @@ import {
   QuizModeConfirmDialog,
   ResetConfirmDialog,
   EditFlashcardDialog,
+  DiscardChangesDialog,
 } from "./FlashcardDialogs";
 
 // Utility functions for localStorage
@@ -160,6 +149,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const [answerTimeout, setAnswerTimeout] = useState<NodeJS.Timeout | null>(
     null,
   );
+
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
   useEffect(() => {
     const timeoutRef = answerTimeout;
@@ -275,7 +266,13 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     if (e.key === "Enter") {
       setCardCompleted(true);
 
-      if (userAnswer.toLocaleLowerCase() === currentTerm?.answer.toLocaleLowerCase()) {
+      const normalize = (str: string) =>
+        str
+          ?.trim() // remove leading/trailing spaces
+          .toLowerCase() // ignore case
+          .replace(/\s+/g, " "); // collapse multiple spaces to one
+
+      if (normalize(userAnswer) === normalize(currentTerm?.answer)) {
         setCorrect(true);
         setCorrectCount((prev) => prev + 1);
       } else {
@@ -423,12 +420,6 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           if (answerTimeout) {
             clearTimeout(answerTimeout);
           }
-
-          // const timeout = setTimeout(() => {
-          //   goToNext();
-          // }, 5000);
-
-          // setAnswerTimeout(timeout);
         }
       }
     },
@@ -471,6 +462,10 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       setIsFocused(false);
     }
   }, [isClickingOnText]);
+
+  const hasUnsavedChanges = useMemo(() => {
+    return JSON.stringify(copyFlashcardData) !== JSON.stringify(flashcard);
+  }, [copyFlashcardData, flashcard]);
 
   const handleEditFlashcard = async (e: any) => {
     const hasEmptyFields = copyFlashcardData.terms.some(
@@ -630,11 +625,21 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
             description={description}
             onEdit={() => setOpenEditFlashcard(true)}
             onDelete={() => setOpenConfirmDelete(true)}
+            flashcard={flashcard}
+            setFlashcard={setFlashcard}
           />
 
           <div className="absolute bottom-70 -right-3 -z-2 size-155 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-70%" />
 
           {/* Dialogs */}
+          <DiscardChangesDialog
+            showDiscardConfirm={showDiscardConfirm}
+            setShowDiscardConfirm={setShowDiscardConfirm}
+            setOpenEditFlashcard={setOpenEditFlashcard}
+            setCopyFlashcardData={setCopyFlashcardData}
+            flashcard={flashcard}
+          />
+
           <DeleteFlashcardDialog
             open={openConfirmDelete}
             onOpenChange={setOpenConfirmDelete}
@@ -669,7 +674,17 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
           />
           <EditFlashcardDialog
             open={openEditFlashcard}
-            onOpenChange={setOpenEditFlashcard}
+            onOpenChange={(open) => {
+              if (!open) {
+                if (hasUnsavedChanges) {
+                  setShowDiscardConfirm(true);
+                } else {
+                  setOpenEditFlashcard(false);
+                }
+              } else {
+                setOpenEditFlashcard(true);
+              }
+            }}
             flashcardData={copyFlashcardData}
             onDeleteTerm={handleDelete}
             onAddTerm={() => {

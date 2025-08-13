@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { motion } from "framer-motion";
 import {
@@ -39,7 +39,6 @@ export const FlashcardItem = ({
   answerInputRef,
   skipQuestion,
 }) => {
- 
   if (!isActive) {
     return <div className="h-100 md:h-110" />;
   }
@@ -69,7 +68,8 @@ export const FlashcardItem = ({
       const cursorRect = cursor.getBoundingClientRect();
       const containerRect = container.getBoundingClientRect();
 
-      const cursorTop = cursorRect.top - containerRect.top + container.scrollTop;
+      const cursorTop =
+        cursorRect.top - containerRect.top + container.scrollTop;
       const cursorBottom = cursorTop + cursorRect.height;
 
       const containerHeight = container.clientHeight;
@@ -84,35 +84,39 @@ export const FlashcardItem = ({
     }
   }, [LINE_HEIGHT]);
 
-  const calculateCurrentLine = useCallback((position: number, text: string) => {
-    if (!wordsRef.current || !text) return 0;
+  const calculateCurrentLine = useCallback(
+    (position: number, text: string) => {
+      if (!wordsRef.current || !text) return 0;
 
-    // Create a temporary element to measure text wrapping
-    const tempDiv = document.createElement("div");
-    tempDiv.style.position = "absolute";
-    tempDiv.style.visibility = "hidden";
-    tempDiv.style.whiteSpace = "pre-wrap";
-    tempDiv.style.wordBreak = "break-word";
-    tempDiv.style.width = getComputedStyle(wordsRef.current).width;
-    tempDiv.style.fontSize = getComputedStyle(wordsRef.current).fontSize;
-    tempDiv.style.fontFamily = getComputedStyle(wordsRef.current).fontFamily;
-    tempDiv.style.lineHeight = `${LINE_HEIGHT}px`;
-    tempDiv.style.textAlign = "center";
+      // Create a temporary element to measure text wrapping
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.visibility = "hidden";
+      tempDiv.style.whiteSpace = "pre-wrap";
+      tempDiv.style.wordBreak = "break-word";
+      tempDiv.style.width = getComputedStyle(wordsRef.current).width;
+      tempDiv.style.fontSize = getComputedStyle(wordsRef.current).fontSize;
+      tempDiv.style.fontFamily = getComputedStyle(wordsRef.current).fontFamily;
+      tempDiv.style.lineHeight = `${LINE_HEIGHT}px`;
+      tempDiv.style.textAlign = "center";
 
-    document.body.appendChild(tempDiv);
+      document.body.appendChild(tempDiv);
 
-    const textUpToPosition = text.substring(0, position);
-    tempDiv.textContent = textUpToPosition;
+      const textUpToPosition = text.substring(0, position);
+      tempDiv.textContent = textUpToPosition;
 
-    const height = tempDiv.offsetHeight;
-    const lineNumber = Math.max(0, Math.floor(height / LINE_HEIGHT));
+      const height = tempDiv.offsetHeight;
+      const lineNumber = Math.max(0, Math.floor(height / LINE_HEIGHT));
 
-    document.body.removeChild(tempDiv);
-    return lineNumber;
-  }, [LINE_HEIGHT]);
+      document.body.removeChild(tempDiv);
+      return lineNumber;
+    },
+    [LINE_HEIGHT],
+  );
 
   const updateScrollPosition = useCallback(() => {
-    const currentText = currentPhase === "question" ? item?.question : item?.answer;
+    const currentText =
+      currentPhase === "question" ? item?.question : item?.answer;
     if (!currentText) return;
 
     const currentLine = calculateCurrentLine(userInput.length, currentText);
@@ -125,7 +129,14 @@ export const FlashcardItem = ({
     } else {
       setScrollOffset(0);
     }
-  }, [userInput.length, currentPhase, item, calculateCurrentLine, LINE_HEIGHT, VISIBLE_LINES]);
+  }, [
+    userInput.length,
+    currentPhase,
+    item,
+    calculateCurrentLine,
+    LINE_HEIGHT,
+    VISIBLE_LINES,
+  ]);
 
   useEffect(() => {
     if (isTypingMode && userInput.length > 0) {
@@ -139,11 +150,13 @@ export const FlashcardItem = ({
   // Split text into words for better wrapping
   const createHighlightedText = useMemo(() => {
     if (!isTypingMode) {
-      const currentText = currentPhase === "question" ? item?.question : item?.answer;
+      const currentText =
+        currentPhase === "question" ? item?.question : item?.answer;
       return <span className="text-white">{currentText}</span>;
     }
 
-    const currentText = currentPhase === "question" ? item?.question : item?.answer;
+    const currentText =
+      currentPhase === "question" ? item?.question : item?.answer;
     if (!currentText) return null;
 
     // Split text into words while preserving spaces
@@ -162,7 +175,9 @@ export const FlashcardItem = ({
               {word.split("").map((char, charIndexInWord) => {
                 const globalCharIndex = wordStartIndex + charIndexInWord;
                 const isTyped = globalCharIndex < userInput.length;
-                const isCorrect = isTyped ? userInput[globalCharIndex] === char : false;
+                const isCorrect = isTyped
+                  ? userInput[globalCharIndex] === char
+                  : false;
                 const isCursor = globalCharIndex === userInput.length;
 
                 return (
@@ -174,7 +189,7 @@ export const FlashcardItem = ({
                         ? isCorrect
                           ? "text-white"
                           : "text-red-600 bg-red-900/30"
-                        : "text-gray-500"
+                        : "text-gray-500",
                     )}
                   >
                     {char === " " ? "\u00A0" : char}
@@ -521,7 +536,9 @@ export const FlashcardItem = ({
               >
                 <CircleX className="text-red-400 w-8 h-8 mx-auto mb-2" />
                 <span className="text-red-400 text-sm">Wrong Answer!</span>
-                <div className="mt-1">Correct Answer: {item?.answer}</div>
+                <div className="mt-1 overflow-y-auto">
+                  Correct Answer: {item?.answer}
+                </div>
               </motion.div>
             )}
           </motion.div>
