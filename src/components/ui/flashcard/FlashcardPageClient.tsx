@@ -275,7 +275,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     if (e.key === "Enter") {
       setCardCompleted(true);
 
-      if (userAnswer === currentTerm?.answer) {
+      if (userAnswer.toLocaleLowerCase() === currentTerm?.answer.toLocaleLowerCase()) {
         setCorrect(true);
         setCorrectCount((prev) => prev + 1);
       } else {
