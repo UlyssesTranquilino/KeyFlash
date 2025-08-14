@@ -82,7 +82,7 @@ const PricingPage = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/dashboard">
-                <Button className="w-full text-white cursor-pointer bg-blue-600 hover:bg-blue-700">
+                <Button className="w-full text-white cursor-pointer bg-cyan-600 hover:bg-cyan-700">
                   Go to Dashboard
                 </Button>
               </Link>

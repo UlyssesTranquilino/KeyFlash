@@ -14,6 +14,7 @@ interface ProfileUser {
   avatar_url?: string;
   is_pro?: boolean;
   created_at?: string;
+  full_name: string
 }
 
 interface TransformedUser {
@@ -29,7 +30,7 @@ interface TransformedUser {
 export function transformUser(user: AuthUser | null, profile?: ProfileUser | null): TransformedUser | null {
   if (!user) return null;
 
-  const name = profile?.nickname || 
+  const name = profile?.full_name || profile?.nickname || 
                user.user_metadata?.name || 
                (user.email ? user.email.split('@')[0] : 'User');
 

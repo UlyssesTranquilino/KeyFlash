@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { format } from "date-fns";
 import { Crown, Edit2, Loader2, Save, Check } from "lucide-react";
@@ -15,21 +15,46 @@ import { Badge } from "@/components/ui/badge";
 import { editUserProfile } from "../../../../utils/auth/userUtils";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, refreshProfile} = useAuth(); // Assuming your AuthContext provides a loading state
+  const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
+    name:  "",
+    nickname:  "",
+    email:  "",
+  });
+  const [editForm, setEditForm] = useState({
+    name:  "",
+    nickname:  "",
+    email:  "",
+  });
+
+  console.log("USER: ", user)
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
     name: user?.name || "",
     nickname: user?.nickname || "",
     email: user?.email || "",
-  });
+  })
+  setEditForm({
+    name: user?.name || "",
+    nickname: user?.nickname || "",
+    email: user?.email || "",
+  })
+  setLoading(false)
+    }
+  }, [user])
 
-  console.log("USER: ", user);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setEditForm((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -38,16 +63,15 @@ export default function ProfilePage() {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const { data: newCard, error } = await editUserProfile(formData);
+      const { data: newCard, error } = await editUserProfile(editForm);
       if (error) throw error;
+      
+    setFormData(editForm); // Update UI state immediately
+    setIsEditing(false); // Exit edit mode
+    toast.success("Profile updated successfully!");
 
-      toast.success("Flashcard created successfully!");
+      await refreshProfile();
 
-      setFormData({
-        name: newCard.name,
-        nickname: newCard.nickname,
-        ...formData,
-      });
     } catch (error) {
       toast.error("Failed to create flashcard");
       console.error("Failed to update profile", error);
@@ -55,6 +79,80 @@ export default function ProfilePage() {
       setIsSaving(false);
     }
   };
+
+  if (loading || !user) {
+    return (
+      <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto py-4 overflow-hidden">
+        {/* Background gradients */}
+        <div className="absolute top-20 right-20 w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+        <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
+
+        <div className="max-w-4xl mb-8">
+          <Skeleton className="h-8 w-48 rounded-md" />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Profile Card Skeleton */}
+          <Card className="bg-gray-900/50 border-gray-800 col-span-1">
+            <CardHeader>
+              <Skeleton className="h-6 w-24 rounded-md" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center gap-4">
+                <Skeleton className="w-24 h-24 rounded-full" />
+                <div className="text-center space-y-2 w-full">
+                  <Skeleton className="h-6 w-3/4 mx-auto rounded-md" />
+                  <Skeleton className="h-4 w-1/2 mx-auto rounded-md" />
+                  <Skeleton className="h-4 w-2/3 mx-auto rounded-md" />
+                </div>
+                <div className="flex gap-2 mt-4 w-full justify-center">
+                  <Skeleton className="h-10 w-24 rounded-md" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Details Card Skeleton */}
+          <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-2">
+            <CardHeader>
+              <Skeleton className="h-6 w-36 rounded-md" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i}>
+                    <Skeleton className="h-4 w-24 rounded-md mb-2" />
+                    <Skeleton className="h-5 w-full rounded-md" />
+                    {i < 3 && <Skeleton className="h-[1px] w-full mt-4 mb-4" />}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Subscription Card Skeleton */}
+          <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3">
+            <CardHeader>
+              <Skeleton className="h-6 w-36 rounded-md" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-32 rounded-md" />
+                  <Skeleton className="h-4 w-48 rounded-md" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-5 w-16 rounded-md" />
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                </div>
+              </div>
+              <Skeleton className="h-10 w-full mt-6 rounded-md" />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto py-4 overflow-hidden">
@@ -155,7 +253,7 @@ export default function ProfilePage() {
                   <Input
                     id="name"
                     name="name"
-                    value={formData.name}
+                    value={editForm.name}
                     onChange={handleInputChange}
                     className="bg-gray-800 border-gray-700 text-white"
                   />
@@ -168,7 +266,7 @@ export default function ProfilePage() {
                   <Input
                     id="nickname"
                     name="nickname"
-                    value={formData.nickname}
+                    value={editForm.nickname}
                     onChange={handleInputChange}
                     className="bg-gray-800 border-gray-700 text-white"
                     placeholder="Choose a nickname"
@@ -183,7 +281,7 @@ export default function ProfilePage() {
                     id="email"
                     name="email"
                     type="email"
-                    value={formData.email}
+                    value={editForm.email}
                     onChange={handleInputChange}
                     className="bg-gray-800 border-gray-700 text-white"
                     disabled
@@ -261,11 +359,13 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {!user?.isPro && (
+            {user && !user?.isPro && (
               <div className="mt-6">
-                <Button className="cursor-pointer w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
+                <Link href='/pricing'>
+                <Button className="text-white cursor-pointer w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
                   Upgrade to Pro
                 </Button>
+                </Link>
               </div>
             )}
           </CardContent>
