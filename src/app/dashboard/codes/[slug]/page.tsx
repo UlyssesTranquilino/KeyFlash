@@ -3,8 +3,15 @@ import CodePageClient from "@/components/ui/code/CodePageClient";
 import { TimerProvider } from "@/app/context/TimerContext";
 import { QuoteProvider } from "@/app/context/QuoteContext";
 
-export default async function Page({ params }: { params: { slug: string } }) {
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
+
+export default function Page({ params }: PageProps) {
   const { slug } = params;
+
   return (
     <QuoteProvider>
       <TimerProvider>
