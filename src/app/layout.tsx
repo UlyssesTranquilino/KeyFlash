@@ -25,8 +25,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${jakartaSans.className}  antialiased bg-black  `}>
+    <html lang="en" suppressHydrationWarning={true}>
+      <body className={`__className_550977  ${jakartaSans.className}  antialiased bg-black`} suppressHydrationWarning={true}>
         <TestModeContextProvider>
           <AuthProviderClient serverSession={undefined} >
             <ThemeProvider

@@ -30,44 +30,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import UpgradeToProDialog from "@/components/ui/UpgradeToProDialog";
 
 export default function HomePage() {
-  const router = useRouter();
+ const router = useRouter();
   const { user, session } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [texts, setTexts] = useState<any[]>([]);
   const [codes, setCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [openProDialog, setOpenProDialog] = useState(false);
 
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center mt-30 rounded-lg outline-1 border-blue-400 border-dashed mx-5 h-70 p-3 max-w-[500px] sm:mx-auto shadow-sm shadow-blue-700/50">
-        <CircleUserRound
-          strokeWidth={0.8}
-          className="mb-10 scale-300 text-blue-400 md:scale-350"
-        />
-        <div className="text-lg mb-3 text-center font-semibold">
-          Account Not Found
-        </div>
-        <div className="text-sm text-center text-gray-400 mb-3">
-          Use your account credentials to sign in and access this page.
-        </div>
-        <Link
-          href="/signin"
-          className="flex items-center justify-center w-full max-w-50 hover:scale-[1.01] transition-transform duration-200"
-        >
-          <Button className="mt-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-600/20 hover:text-blue-300 transition-colors duration-200">
-            Log in
-          </Button>
-        </Link>
-        <div className="absolute bottom-40 -left-4 lg:left-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-        <div className="absolute top-10 -right-4 lg:right-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-      </div>
-    );
-  }
-
+  
   // Initial quote and text fetch
   useEffect(() => {
+
+     if (!user?.id) return; 
+
     const fetchFlashcards = async () => {
       const data = await getAllFlashcards(user?.id);
 
@@ -104,6 +80,34 @@ export default function HomePage() {
     fetchTexts();
     fetchCodes();
   }, []);
+
+  
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center justify-center mt-30 rounded-lg outline-1 border-blue-400 border-dashed mx-5 h-70 p-3 max-w-[500px] sm:mx-auto shadow-sm shadow-blue-700/50">
+        <CircleUserRound
+          strokeWidth={0.8}
+          className="mb-10 scale-300 text-blue-400 md:scale-350"
+        />
+        <div className="text-lg mb-3 text-center font-semibold">
+          Account Not Found
+        </div>
+        <div className="text-sm text-center text-gray-400 mb-3">
+          Use your account credentials to sign in and access this page.
+        </div>
+        <Link
+          href="/signin"
+          className="flex items-center justify-center w-full max-w-50 hover:scale-[1.01] transition-transform duration-200"
+        >
+          <Button className="mt-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-600/20 hover:text-blue-300 transition-colors duration-200">
+            Log in
+          </Button>
+        </Link>
+        <div className="absolute bottom-40 -left-4 lg:left-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+        <div className="absolute top-10 -right-4 lg:right-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+      </div>
+    );
+  }
 
   if (loading) {
     return (

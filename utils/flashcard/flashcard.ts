@@ -208,9 +208,9 @@ export async function getFlashcardsCount() {
       return { error: "Could not check flashcard limit" };
     }
 
-    if (count >= LIMIT_COUNT) {
+    if ((count ?? 0) >= LIMIT_COUNT) {
       return {
-        count,
+        count: count ?? 0,
         isLimit: true,
         error: "You’ve reached your flashcard limit. Upgrade to continue.",
       };

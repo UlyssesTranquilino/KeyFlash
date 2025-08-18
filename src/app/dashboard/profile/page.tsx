@@ -34,7 +34,7 @@ export default function ProfilePage() {
     email:  "",
   });
 
-  console.log("USER: ", user)
+  
 
   useEffect(() => {
     if (user) {
