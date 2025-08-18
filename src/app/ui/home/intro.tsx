@@ -1,23 +1,60 @@
+"use client";
+import { motion } from "framer-motion";
+
 export default function Intro() {
   return (
-    <div className="mt-120 sm:mt-60 flex flex-col items-center justify-items-center">
-      <div className="text-center pt-5 pb-10 w-full">
-        <h1 className="text-3xl sm:text-5xl  lg:text-6xl px-4 max-w-90 sm:max-w-120 lg:max-w-150 mx-auto  sm:leading-15 lg:leading-20">
+    <section className="relative flex flex-col items-center justify-center w-full mt-120 sm:mt-60">
+      {/* Hero Text */}
+      <motion.div
+        className="text-center px-6 max-w-3xl"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
+        <h1 className="text-4xl font-bold sm:text-6xl lg:text-7xl  tracking-tight bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
           Study Smarter
         </h1>
-        <h1 className="text-3xl sm:text-5xl  lg:text-6xl px-4 max-w-90 sm:max-w-120 lg:max-w-150 mx-auto  sm:leading-15 lg:leading-20">
+        <motion.h1
+          className="text-4xl sm:text-6xl lg:text-7xl tracking-tight mt-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.7 }}
+        >
           Not Slower
-        </h1>
-        <p className="text-sm md:text-base mt-10 w-full max-w-160 mx-auto px-10">
-          KeyFlash blends typing, active recall, and smart repetition to
-          revolutionize your learning. Upload your notes to instantly turn them
-          into interactive typing sessions that boost retention and focus.
-        </p>{" "}
-      </div>
+        </motion.h1>
+        <motion.p
+          className="text-gray-400 text-base sm:text-lg mt-8 leading-relaxed"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.7 }}
+        >
+          <span className="font-medium text-white">KeyFlash</span> blends typing,
+          active recall, and smart repetition to revolutionize your learning.
+          Upload your notes to instantly turn them into interactive typing
+          sessions that boost retention and focus.
+        </motion.p>
+      </motion.div>
 
-      <div className="w-full px-4">
-        <div className="w-full h-60 bg-blue-900/50" />
-      </div>
-    </div>
+      {/* Video Showcase */}
+      <motion.div
+        className="relative w-full max-w-5xl mt-16 px-6"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.7, duration: 0.8 }}
+      >
+        <div className="overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-[450px] object-cover"
+          >
+            <source src="/Videos/Typing.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </motion.div>
+    </section>
   );
 }

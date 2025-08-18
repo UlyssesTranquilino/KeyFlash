@@ -220,7 +220,8 @@ export const EditFlashcardDialog = ({
           <h1>Answer</h1>
         </div>
 
-        {flashcardData.terms?.map((card: any, index: number) => (
+<div className="min-h-[400px] max-h-[600px] overflow-auto flex flex-col gap-4">
+          {flashcardData.terms?.map((card: any, index: number) => (
           <div key={card.id} className="flex flex-col relative bg-gray-900/30">
             {flashcardData.terms.length > 1 && (
               <button
@@ -263,6 +264,7 @@ export const EditFlashcardDialog = ({
             </div>
           </div>
         ))}
+</div>
 
         <Button
           onClick={onAddTerm}
