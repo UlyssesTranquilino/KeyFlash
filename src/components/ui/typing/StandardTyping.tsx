@@ -22,6 +22,7 @@ import {
 import { useWpm } from "@/app/context/WpmContext";
 import { useEditText } from "@/app/context/AddTextContext";
 import { formatTextWithLineBreaks } from "../../../../utils/formatTextTyping";
+
 // Debounce utility
 const debounce = (func: any, wait: any) => {
   let timeout: any;
