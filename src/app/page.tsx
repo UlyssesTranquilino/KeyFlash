@@ -63,7 +63,7 @@ export default function Home() {
 
           {/* Flashcard Typing Mode */}
           <Link
-            href="/typing/code"
+            href="/typing/flashcard"
             className="relative group transition-all duration-300 ease-in-out"
           >
             <div className="cursor-pointer pt-8 p-5 h-full w-full bg-black/30 rounded-md bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-30 border border-blue-400/30 transition-all duration-300 ease-in-out group-hover:backdrop-blur-lg group-hover:bg-opacity-40 group-hover:scale-[1.02] group-hover:shadow-md group-hover:border-blue-300/70">
