@@ -14,7 +14,7 @@ import { CodeContextProvider } from "../context/CodeContext";
 import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-
+import AuthProviderClient from "@/components/ui/AuthProviderClient";
 
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -29,6 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [user, loading, router]);
 
   return (
+    <AuthProviderClient  serverSession={undefined} >
     <CodeContextProvider>
       <QuoteProvider>
         <TimerProvider>
@@ -54,5 +55,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </TimerProvider>
       </QuoteProvider>
     </CodeContextProvider>
+    </AuthProviderClient>
   );
 }
