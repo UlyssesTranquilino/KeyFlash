@@ -46,7 +46,7 @@ export default function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: index * 0.2 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center text-center relative"
+              className="flex flex-col items-center text-center relative h-full "
             >
               {/* step number */}
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 via-cyan-400 to-blue-700 text-white font-bold text-lg shadow-md mb-4">
