@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { jakartaSans } from "./ui/fonts";
 import "./globals.css";
 import { ThemeProvider } from "./ui/theme-provider";
-import AuthProviderWrapper from "@/components/ui/AuthProviderWrapper";
 import Navbar from "./ui/navbar/navbar";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import Footer from "@/components/Footer";
+import AuthProviderClient from "@/components/ui/AuthProviderClient";
 
 export const metadata: Metadata = {
   title: "KeyFlash",
@@ -17,8 +17,7 @@ export const metadata: Metadata = {
   },
 };
 import { TestModeContextProvider } from "@/context/TestModeContext";
-
-
+import ClientWrapper from "@/components/ClientWrapper";
 
 export default function RootLayout({
   children,
@@ -29,19 +28,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${jakartaSans.className}  antialiased bg-black  `}>
         <TestModeContextProvider>
-          <AuthProviderWrapper>
+          <AuthProviderClient serverSession={undefined} >
             <ThemeProvider
               attribute="class"
               defaultTheme="dark"
               enableSystem
               disableTransitionOnChange
             >
-              <ConditionalNavbar />
-              {children}
-
-              <Footer />
+                  <ClientWrapper>{children}</ClientWrapper> 
             </ThemeProvider>
-          </AuthProviderWrapper>
+          </AuthProviderClient>
         </TestModeContextProvider>
       </body>
     </html>

@@ -10,8 +10,10 @@ import WhoIsItFor from "./ui/home/whoisitfor";
 import Ready from "./ui/home/ready";
 
 export default function Home() {
+
   return (
     <div className="flex flex-col items-center justify-center">
+
       <main className="flex flex-col items-center justify-center max-w-[1150px] px-4">
         {/* Hero Title + Description */}
         <motion.div

@@ -1,32 +1,33 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
-import { AuthProvider as BaseAuthProvider } from "@/app/context/AuthContext";
-import { createClient } from "../../../utils/supabase/client";
+import { createContext, useContext, useState } from "react";
 
-export default function AuthProviderClient({ 
-  serverSession, 
-  children 
-}: { 
-  serverSession: any; 
-  children: React.ReactNode 
+const AuthContext = createContext<any>(null);
+
+export function AuthProvider({
+  children,
+  supabase,
+  serverSession,
+}: {
+  children: React.ReactNode;
+  supabase: any;
+  serverSession: any;
 }) {
-  const [isMounted, setIsMounted] = useState(false);
-  const supabase = useMemo(() => createClient(), []);
+  const [user, setUser] = useState(serverSession?.user ?? null);
 
-  // Wait for hydration to complete
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
-  // Don't render the AuthProvider until we're on the client
-  if (!isMounted) {
-    return <div style={{ visibility: 'hidden' }}>{children}</div>;
-  }
 
   return (
-    <BaseAuthProvider serverSession={serverSession} supabase={supabase}>
+    <AuthContext.Provider value={{ user, setUser, supabase }}>
       {children}
-    </BaseAuthProvider>
+    </AuthContext.Provider>
   );
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used inside <AuthProvider>");
+  }
+  return ctx;
 }
