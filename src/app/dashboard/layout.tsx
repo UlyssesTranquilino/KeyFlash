@@ -21,6 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading } = useAuth();
 
+
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/signin"); // redirect if no user

@@ -1,59 +1,50 @@
 "use client";
 import Image from "next/image";
 import ReadyImg from "../../../../public/Home/Ready.png";
+import { useAuth } from "@/app/context/AuthContext";
+import Link from "next/link";
 
 export default function Ready() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const user = useAuth();
+
   return (
-    <div className="mt-60 w-full sm:mt-70 flex flex-col items-center justify-items-center pb-50">
-      <div className="w-full px-4 gap-5">
-        <div className="w-full  flex items-center justify-center l bg-radial from-blue-600/50 from-10% to-black rounded-full">
+    <div className="mt-60 sm:mt-70 w-full flex flex-col items-center justify-center pb-40 px-6">
+      {/* Image & Heading Section */}
+      <div className="flex flex-col items-center text-center max-w-3xl">
+        <div className="flex items-center justify-center bg-radial from-blue-600/40 from-10% to-black rounded-full p-6">
           <Image
             src={ReadyImg}
             alt="Spaceship"
-            className="w-30 sm:w-35 lg:w-45 z-2 right-5 top-5 sm:mb-4 md:right-8 md:top-8 rotate-15 "
+            className="w-28 sm:w-36 lg:w-44 rotate-12 drop-shadow-lg"
           />
         </div>
 
-        <div className="flex flex-col items-end sm:pl-5 sm:pt-3 lg:pt-8 ">
-          <h1 className="text-center sm:text-right text-2xl sm:text-3xl  lg:text-4xl sm:pl-4 max-w-90 sm:max-w-120 lg:max-w-150 mx-auto  leading-10 ">
-            Ready to Type What You Learn?
-          </h1>
-          <p className="text-center max-w-140 text-sm md:text-base mt-4 px-4 sm:px-0 sm:mt-10 w-full mx-auto  ">
-            Start your first session in seconds, no signup needed. Experience
-            the difference active typing makes in your learning journey
-          </p>
-        </div>
+        <h1 className="mt-10 text-2xl sm:text-3xl lg:text-4xl font-bold leading-snug bg-gradient-to-r from-blue-400 via-white to-blue-500 bg-clip-text text-transparent">
+          Ready to Type What You Learn?
+        </h1>
+
+        <p className="mt-6 text-gray-300 text-sm md:text-base leading-relaxed max-w-xl">
+          Start your first session in seconds — no signup needed. 
+          Experience the difference <span className="font-semibold text-blue-400">active typing</span> makes in your learning journey.
+        </p>
       </div>
 
-      <div className="mt-10 flex items-center gap-5 md:gap-7">
-        <button
-          onClick={scrollToTop}
-          className="w-30 sm:w-40 md:w=50 bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-md p-px text-xs font-semibold leading-6 text-white "
+      {/* CTA Button */}
+      <div className="mt-10">
+        <Link
+          href={user ? "/dashboard" : "/signin"}
+          className="relative group cursor-pointer"
         >
-          <span className="absolute inset-0 overflow-hidden rounded-md">
-            <span className="absolute inset-0 rounded-md bg-[image:radial-gradient(95%_100%_at_50%_0%,rgba(56,189,248,0.9)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          </span>
-          <div className="text-center  relative flex space-x-2 items-center z-10 rounded-md bg-zinc-950 py-2 px-4 ring-1 ring-white/10">
-            <span className="w-full">Get Started</span>
+          <div className="relative flex items-center justify-center px-6 py-3 rounded-lg bg-zinc-950 text-white font-semibold text-sm md:text-base shadow-lg shadow-black/50 ring-1 ring-white/10 overflow-hidden transition-transform duration-300 group-hover:scale-[1.05]">
+            {/* Glow background */}
+            <span className="absolute inset-0 bg-gradient-to-r from-blue-500/30 via-cyan-400/30 to-blue-600/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
+            <span className="relative z-10">
+              {user ? "Go to Dashboard" : "Get Started"}
+            </span>
           </div>
-          <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-blue-400/0 via-blue-400/90 to-cyan-400/0 transition-opacity duration-500 group-hover:opacity-40" />
-        </button>
-
-        <button
-          onClick={scrollToTop}
-          className="w-30 sm:w-40 md:w=50 bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-md p-px text-xs font-semibold leading-6 text-white "
-        >
-          <span className="absolute inset-0 overflow-hidden rounded-md">
-            <span className="absolute inset-0 rounded-md bg-[image:radial-gradient(95%_100%_at_50%_0%,rgba(56,189,248,0.9)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-          </span>
-          <div className="text-center  relative flex space-x-2 items-center z-10 rounded-md bg-zinc-950 py-2 px-4 ring-1 ring-white/10">
-            <span className="w-full">Sign in</span>
-          </div>
-          <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-blue-400/0 via-blue-400/90 to-cyan-400/0 transition-opacity duration-500 group-hover:opacity-40" />
-        </button>
+          {/* Underline Glow */}
+          <span className="absolute -bottom-0.5 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-blue-400/0 via-cyan-400/90 to-blue-400/0 opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
+        </Link>
       </div>
     </div>
   );

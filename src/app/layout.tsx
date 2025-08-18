@@ -6,6 +6,7 @@ import AuthProviderWrapper from "@/components/ui/AuthProviderWrapper";
 import Navbar from "./ui/navbar/navbar";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import Footer from "@/components/Footer";
+
 export const metadata: Metadata = {
   title: "KeyFlash",
   description: "Typing-powered flashcards",
