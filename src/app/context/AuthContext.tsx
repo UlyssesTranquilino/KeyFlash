@@ -182,14 +182,7 @@ export function AuthProvider({
         }
       }
       
-      if (["SIGNED_IN", "SIGNED_OUT"].includes(event)) {
-        // Small delay to ensure state is updated before refresh
-        setTimeout(() => {
-          if (typeof window !== 'undefined') {
-            window.location.reload();
-          }
-        }, 100);
-      }
+
     });
 
     return () => {
