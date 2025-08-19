@@ -78,11 +78,7 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-      queryParams: {
-        access_type: "offline",
-        prompt: "consent",
-      },
+      redirectTo: "https://keyflash.vercel.app/auth/callback", // Fallback if Supabase redirect fails
     },
   });
 
@@ -91,7 +87,7 @@ export async function signInWithGoogle() {
     return redirect("/auth/login?error=Google sign-in failed");
   }
 
-  return redirect(data.url);
+  return redirect(data.url); // Let Supabase handle the OAuth flow
 }
 
 // app/signup/actions.ts
