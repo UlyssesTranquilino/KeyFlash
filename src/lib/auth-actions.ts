@@ -72,13 +72,18 @@ export async function signout() {
   return redirect("/login?message=You have been signed out");
 }
 
+
 export async function signInWithGoogle() {
   const supabase = createClient();
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: "https://keyflash.vercel.app/auth/callback", // Fallback if Supabase redirect fails
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
     },
   });
 
@@ -87,7 +92,7 @@ export async function signInWithGoogle() {
     return redirect("/auth/login?error=Google sign-in failed");
   }
 
-  return redirect(data.url); // Let Supabase handle the OAuth flow
+  return redirect(data.url);
 }
 
 // app/signup/actions.ts

@@ -1004,70 +1004,73 @@ const TypingFlashcards = () => {
                   </Button>
                 </div>
               </TabsContent>
+<TabsContent value="upload" className="mt-4 bg-gray-950/90">
+  {!user && (
+    <div className="inset-0 flex items-center justify-center z-10 rounded-xl mb-4">
+      <h2 className="text-red-400">
+        Please <Link href="/signin" className="font-semibold text-blue-400 hover:underline">Sign in</Link> to upload a file
+      </h2>
+    </div>
+  )}
 
-              <TabsContent value="upload" className="mt-4 bg-gray-950/90">
-                {!user && (
-                  <div className="inset-0 flex items-center justify-center  z-10 rounded-xl">
-                    <h2 className="mb-4 text-red-400">
-                      Please log in to upload a file and generate flashcards.
-                    </h2>
-                  </div>
-                )}
+  <div className="text-sm text-gray-400 mb-4">
+    <p className="text-white">File format should be:</p>
+    <p className="font-mono bg-gray-900 p-2 rounded mt-1">
+      question - answer
+    </p>
+    <p className="mt-2 text-white">Example:</p>
+    <div className="font-mono bg-gray-900 p-2 rounded text-left">
+      <p>What is the capital of France? - Paris</p>
+      <p>Largest planet in our solar system? - Jupiter</p>
+    </div>
+  </div>
 
-                <div className=" text-sm text-gray-400 mb-4">
-                  <p className="text-white">File format should be:</p>
-                  <p className="font-mono bg-gray-900 p-2 rounded mt-1">
-                    question - answer
-                  </p>
-                  <p className="mt-2 text-white">Example:</p>
-                  <div className="font-mono bg-gray-900 p-2 rounded text-left">
-                    <p>What is the capital of France? - Paris</p>
-                    <p>Largest planet in our solar system? - Jupiter</p>
-                  </div>
-                </div>
-                <div
-                  className={cn(
-                    "border-2 border-dashed rounded-lg p-3 text-center transition-colors",
-                    isDragging
-                      ? "border-blue-400 bg-blue-900/20"
-                      : "border-blue-300/60",
-                    !user && "blur-xs"
-                  )}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
-                >
-                  <div className="p-3 flex flex-col items-center justify-center gap-2">
-                    <FileUp className="h-8 w-8 text-gray-400" />
-                    {isDragging ? (
-                      <p className="font-medium text-blue-400">
-                        Drop your file here
-                      </p>
-                    ) : (
-                      <>
-                        <p className="font-medium">
-                          Drag and drop your file here
-                        </p>
-                        <p className="text-gray-500">or</p>
-                      </>
-                    )}
+  <div
+    className={cn(
+      "border-2 border-dashed rounded-lg p-3 text-center transition-colors",
+      isDragging
+        ? "border-blue-400 bg-blue-900/20"
+        : "border-blue-300/60",
+      !user && "opacity-50 pointer-events-none"
+    )}
+    onDragEnter={!user ? undefined : handleDragEnter}
+    onDragLeave={!user ? undefined : handleDragLeave}
+    onDragOver={!user ? undefined : handleDragOver}
+    onDrop={!user ? undefined : handleDrop}
+  >
+    <div className="p-3 flex flex-col items-center justify-center gap-2">
+      <FileUp className="h-8 w-8 text-gray-400" />
+      {isDragging ? (
+        <p className="font-medium text-blue-400">Drop your file here</p>
+      ) : (
+        <>
+          <p className="font-medium">Drag and drop your file here</p>
+          <p className="text-gray-500">or</p>
+        </>
+      )}
 
-                    <label className="mt-2 px-4 py-2 bg-blue-900/30 text-blue-400 rounded-md cursor-pointer hover:bg-blue-900/50 transition-colors">
-                      Select File
-                      <input
-                        type="file"
-                        accept=".txt"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                      />
-                    </label>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Supports .txt files only
-                    </p>
-                  </div>
-                </div>
-              </TabsContent>
+      <label className={cn(
+        "mt-2 px-4 py-2 rounded-md cursor-pointer transition-colors",
+        user 
+          ? "bg-blue-900/30 text-blue-400 hover:bg-blue-900/50"
+          : "bg-gray-700 text-gray-500 cursor-not-allowed"
+      )}>
+        Select File
+        <input
+          type="file"
+          accept=".txt"
+          className="hidden"
+          onChange={user ? handleFileUpload : undefined}
+          disabled={!user}
+        />
+      </label>
+      <p className="text-xs text-gray-500 mt-2">
+        Supports .txt files only
+      </p>
+    </div>
+  </div>
+</TabsContent>
+
             </Tabs>
           </DialogContent>
         </Dialog>
