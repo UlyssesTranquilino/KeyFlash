@@ -30,58 +30,56 @@ import { Skeleton } from "@/components/ui/skeleton";
 import UpgradeToProDialog from "@/components/ui/UpgradeToProDialog";
 
 export default function HomePage() {
- const router = useRouter();
+const router = useRouter();
   const { user, session } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [texts, setTexts] = useState<any[]>([]);
   const [codes, setCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false); // New state
   const [openProDialog, setOpenProDialog] = useState(false);
 
-  
-  // Initial quote and text fetch
+  // Initial data fetch
   useEffect(() => {
+    if (!authChecked) return;
 
-     if (!user?.id) return; 
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        const [flashcardsData, textsData, codesData] = await Promise.all([
+          getAllFlashcards(),
+          getAllTexts(),
+          getAllCodes()
+        ]);
 
-    const fetchFlashcards = async () => {
-      const data = await getAllFlashcards(user?.id);
-
-      if (Array.isArray(data)) {
-        setFlashcards(data);
-      } else {
-        setFlashcards([]);
+        setFlashcards(Array.isArray(flashcardsData) ? flashcardsData : []);
+        setTexts(Array.isArray(textsData) ? textsData : []);
+        setCodes(Array.isArray(codesData?.data) ? codesData.data : []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    const fetchTexts = async () => {
-      const data = await getAllTexts();
+    fetchAllData();
+  }, [authChecked, user?.id]); // Add authChecked and user.id as dependencies
 
-      if (Array.isArray(data)) {
-        setTexts(data);
-      } else {
-        setTexts([]);
-      }
-    };
+  // Auth check effect
+  useEffect(() => {
+    if (user !== undefined) {
+      setAuthChecked(true);
+    }
+  }, [user]);
 
-    const fetchCodes = async () => {
-      const { data } = await getAllCodes();
-
-      if (Array.isArray(data)) {
-        setCodes(data);
-      } else {
-        setCodes([]);
-      }
-      setLoading(false);
-    };
-
-    setLoading(true);
-    fetchFlashcards();
-    fetchTexts();
-    fetchCodes();
-  }, []);
-
-  
+  // Show loading until auth check completes
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
   if (!user) {
     return (
       <div className="flex flex-col items-center justify-center mt-30 rounded-lg outline-1 border-blue-400 border-dashed mx-5 h-70 p-3 max-w-[500px] sm:mx-auto shadow-sm shadow-blue-700/50">

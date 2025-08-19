@@ -19,24 +19,38 @@ type flashcardDataType = {
 
 const LIMIT_COUNT = 5;
 
-export async function getAllFlashcards(userId: string) {
+export async function getAllFlashcards(): Promise<{
+  data?: any[];
+  error?: string;
+}> {
   try {
     const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+        if (!user) {
+      console.error("User not authenticated");
+      return { error: "User not authenticated" };
+    }
+
+
+    
     const { data, error } = await supabase
       .from("flashcards")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user?.id)
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching flashcards: ", error);
+      console.error("Database error fetching flashcards:", error);
       return { error: error.message };
     }
 
-    return data;
+    return { data }; // Consistent return format
   } catch (error) {
-    console.error("Unexpected error getting all flashcards: ", error);
-    return { error: "Unexpected error occurred" };
+    console.error("Unexpected error:", error);
+    return { error: error instanceof Error ? error.message : "An unexpected error occurred" };
   }
 }
 

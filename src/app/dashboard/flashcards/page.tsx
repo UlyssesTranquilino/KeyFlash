@@ -50,7 +50,7 @@ export default function HomePage() {
   // Initial quote and text fetch
   useEffect(() => {
     const fetchFlashcards = async () => {
-      const data = await getAllFlashcards(user?.id);
+      const data = await getAllFlashcards();
 
       setLoading(false);
 
