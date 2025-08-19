@@ -31,11 +31,11 @@ import UpgradeToProDialog from "@/components/ui/UpgradeToProDialog";
 
 export default function HomePage() {
 const router = useRouter();
-  const { user, session } = useAuth();
+  const { user, session, loading } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [texts, setTexts] = useState<any[]>([]);
   const [codes, setCodes] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingData, setLoadingData] = useState(true);
   const [authChecked, setAuthChecked] = useState(false); // New state
   const [openProDialog, setOpenProDialog] = useState(false);
 
@@ -44,7 +44,7 @@ const router = useRouter();
     if (!authChecked) return;
 
     const fetchAllData = async () => {
-      setLoading(true);
+      setLoadingData(true);
       try {
         const [flashcardsData, textsData, codesData] = await Promise.all([
           getAllFlashcards(),
@@ -58,7 +58,7 @@ const router = useRouter();
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false);
+        setLoadingData(false);
       }
     };
 
@@ -69,60 +69,32 @@ const router = useRouter();
   useEffect(() => {
     if (user !== undefined) {
       setAuthChecked(true);
+
     }
   }, [user]);
 
   // Show loading until auth check completes
-  if (!authChecked) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-  if (!user) {
-    return (
-      <div className="flex flex-col items-center justify-center mt-30 rounded-lg outline-1 border-blue-400 border-dashed mx-5 h-70 p-3 max-w-[500px] sm:mx-auto shadow-sm shadow-blue-700/50">
-        <CircleUserRound
-          strokeWidth={0.8}
-          className="mb-10 scale-300 text-blue-400 md:scale-350"
-        />
-        <div className="text-lg mb-3 text-center font-semibold">
-          Account Not Found
-        </div>
-        <div className="text-sm text-center text-gray-400 mb-3">
-          Use your account credentials to sign in and access this page.
-        </div>
-        <Link
-          href="/signin"
-          className="flex items-center justify-center w-full max-w-50 hover:scale-[1.01] transition-transform duration-200"
-        >
-          <Button className="mt-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-600/20 hover:text-blue-300 transition-colors duration-200">
-            Log in
-          </Button>
-        </Link>
-        <div className="absolute bottom-40 -left-4 lg:left-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-        <div className="absolute top-10 -right-4 lg:right-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
-      </div>
-    );
-  }
+  // if (!authChecked) {
+  //   return (
+  //     <div className="flex items-center justify-center h-screen">
+  //       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  //     </div>
+  //   );
+  // }
 
-  if (loading) {
+  
+  if (loading || loadingData || !authChecked) {
     return (
       <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
         <div className="absolute top-20 right-20  w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
         <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
-        <div className="max-w-4xl ">
-          <header className="mb-8">
-            <h1 className="text-xl sm:text-2xl font-bold text-white  ">
-              Welcome, {user.nickname || user.name}!
-            </h1>
-            {/* <p className="text-gray-200 mt-2 sm:text-lg sm:mt-3 ">
-              Current Streak: 3🔥
-            </p> */}
-          </header>
+        <div className="max-w-4xl mb-8 flex items-center gap-3">
+
+          <Skeleton className="rounded-md w-40 h-10" />
+          <Skeleton className="rounded-md w-20 h-10" />
+
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
@@ -176,6 +148,34 @@ const router = useRouter();
       </div>
     );
   }
+
+  if (!user ) {
+    return (
+      <div className="flex flex-col items-center justify-center mt-30 rounded-lg outline-1 border-blue-400 border-dashed mx-5 h-70 p-3 max-w-[500px] sm:mx-auto shadow-sm shadow-blue-700/50">
+        <CircleUserRound
+          strokeWidth={0.8}
+          className="mb-10 scale-300 text-blue-400 md:scale-350"
+        />
+        <div className="text-lg mb-3 text-center font-semibold">
+          Account Not Found
+        </div>
+        <div className="text-sm text-center text-gray-400 mb-3">
+          Use your account credentials to sign in and access this page.
+        </div>
+        <Link
+          href="/signin"
+          className="flex items-center justify-center w-full max-w-50 hover:scale-[1.01] transition-transform duration-200"
+        >
+          <Button className="mt-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-600/20 hover:text-blue-300 transition-colors duration-200">
+            Log in
+          </Button>
+        </Link>
+        <div className="absolute bottom-40 -left-4 lg:left-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+        <div className="absolute top-10 -right-4 lg:right-0 -z-2 size-90 rounded-full bg-radial-[at_50%_50%] from-blue-700/40 to-black to-90%"></div>{" "}
+      </div>
+    );
+  }
+
 
   function slugify(str: string) {
     return str
@@ -246,7 +246,7 @@ const router = useRouter();
       <div className="max-w-4xl ">
         <header className="mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-            Welcome, {user.nickname || user.name}!
+            Welcome, {user.name}!
             {user.isPro && (
               <span className="flex items-center gap-1 text-xs bg-gradient-to-r from-cyan-600/20 to-cyan-800/20 text-cyan-400 px-2 py-1 rounded-full border border-cyan-700/50">
                 <Crown className="fill-cyan-400/30" size={14} />

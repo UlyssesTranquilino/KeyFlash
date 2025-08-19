@@ -78,7 +78,7 @@ const PrivacyPage = () => {
 
   return (
     <div className="px-2 max-w-[900px] mx-auto mb-30">
-      <div className="-mt-10 h-70 md:h-100 px-3 relative flex flex-col items-center justify-center gap-10 overflow-hidden">
+      <div className="-mt-10 h-20 md:h-100 px-3 relative flex flex-col items-center justify-center gap-10 overflow-hidden">
         <h1 className="text-xl md:text-2xl lg:text-4xl">Privacy Policy</h1>
         <div className="absolute -right-6 lg:-right-20 -z-1 size-55 md:size-75 lg:size-120 rounded-full bg-radial-[at_50%_50%] from-blue-500/30 to-black to-70%"></div>
       </div>
@@ -95,8 +95,7 @@ const PrivacyPage = () => {
           </div>
         ))}
 
-        <div className="absolute bottom-30 left-0 -z-1 size-55 md:size-95 lg:size-200 lg:left-20 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-70%"></div>
-      </div>
+   </div>
     </div>
   );
 };

@@ -24,15 +24,12 @@ interface TransformedUser {
   avatar: string | null;
   isPro: boolean;
   createdAt: Date;
-  nickname: string | null;
 }
 
 export function transformUser(user: AuthUser | null, profile?: ProfileUser | null): TransformedUser | null {
   if (!user) return null;
 
-  const name = profile?.full_name || profile?.nickname || 
-               user.user_metadata?.name || 
-               (user.email ? user.email.split('@')[0] : 'User');
+  const name = profile?.full_name;
 
   const avatar = profile?.avatar_url || 
                  user.user_metadata?.avatar_url || 
@@ -46,13 +43,13 @@ export function transformUser(user: AuthUser | null, profile?: ProfileUser | nul
   );
 
 
-  return {
-    id: user.id,
-    email: user.email || '',
-    name,
-    avatar,
-    isPro: profile?.is_pro || false,
-    createdAt,
-    nickname: profile?.nickname || null,
-  };
+return {
+  id: user.id,
+  email: user.email || '',
+  name,
+  avatar,
+  isPro: profile?.is_pro || false,
+  createdAt,
+
+};
 }

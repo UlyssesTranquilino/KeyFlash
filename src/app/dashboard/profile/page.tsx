@@ -7,7 +7,6 @@ import { Crown, Edit2, Loader2, Save, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,38 +18,32 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 
 export default function ProfilePage() {
-  const { user, refreshProfile} = useAuth(); // Assuming your AuthContext provides a loading state
-  const [loading, setLoading] = useState(true)
+  const { user, refreshProfile } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState({
-    name:  "",
-    nickname:  "",
-    email:  "",
+    name: "",
+    email: "",
   });
   const [editForm, setEditForm] = useState({
-    name:  "",
-    nickname:  "",
-    email:  "",
+    name: "",
+    email: "",
   });
-
-  
 
   useEffect(() => {
     if (user) {
       setFormData({
-    name: user?.name || "",
-    nickname: user?.nickname || "",
-    email: user?.email || "",
-  })
-  setEditForm({
-    name: user?.name || "",
-    nickname: user?.nickname || "",
-    email: user?.email || "",
-  })
-  setLoading(false)
+        name: user?.name || "",
+        email: user?.email || "",
+      });
+      setEditForm({
+        name: user?.name || "",
+        email: user?.email || "",
+      });
+      setLoading(false);
     }
-  }, [user])
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,25 +54,28 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
+    if (!editForm.name.trim()) {
+      toast.error("Full name cannot be empty");
+      return;
+    }
+
     setIsSaving(true);
     try {
-      const { data: newCard, error } = await editUserProfile(editForm);
+      const { error } = await editUserProfile(editForm);
       if (error) throw error;
-      
-    setFormData(editForm); // Update UI state immediately
-    setIsEditing(false); // Exit edit mode
-    toast.success("Profile updated successfully!");
+
+      setFormData(editForm);
+      setIsEditing(false);
+      toast.success("Profile updated successfully!");
 
       await refreshProfile();
-
     } catch (error) {
-      toast.error("Failed to create flashcard");
+      toast.error("Failed to update profile");
       console.error("Failed to update profile", error);
     } finally {
       setIsSaving(false);
     }
   };
-
   if (loading || !user) {
     return (
       <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto py-4 overflow-hidden">
@@ -119,11 +115,11 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {[...Array(4)].map((_, i) => (
+                {[...Array(3)].map((_, i) => (
                   <div key={i}>
                     <Skeleton className="h-4 w-24 rounded-md mb-2" />
                     <Skeleton className="h-5 w-full rounded-md" />
-                    {i < 3 && <Skeleton className="h-[1px] w-full mt-4 mb-4" />}
+                    {i < 2 && <Skeleton className="h-[1px] w-full mt-4 mb-4" />}
                   </div>
                 ))}
               </div>
@@ -158,10 +154,6 @@ export default function ProfilePage() {
     <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto py-4 overflow-hidden">
       <Toaster position="top-center" />
 
-      {/* Background gradients */}
-      <div className="absolute top-20 right-20 w-50 sm:w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
-      <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
-
       <div className="max-w-4xl">
         <header className="mb-8">
           <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
@@ -195,9 +187,6 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-semibold text-white">
                   {user.name}
                 </h2>
-                {user.nickname && (
-                  <p className="text-blue-400">@{user.nickname}</p>
-                )}
                 <p className="text-gray-400 mt-1">{user.email}</p>
               </div>
 
@@ -248,7 +237,7 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-gray-300">
-                    Full Name
+                    Name
                   </Label>
                   <Input
                     id="name"
@@ -256,20 +245,6 @@ export default function ProfilePage() {
                     value={editForm.name}
                     onChange={handleInputChange}
                     className="bg-gray-800 border-gray-700 text-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="nickname" className="text-gray-300">
-                    Nickname
-                  </Label>
-                  <Input
-                    id="nickname"
-                    name="nickname"
-                    value={editForm.nickname}
-                    onChange={handleInputChange}
-                    className="bg-gray-800 border-gray-700 text-white"
-                    placeholder="Choose a nickname"
                   />
                 </div>
 
@@ -292,20 +267,9 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 <div>
                   <h3 className="text-sm font-medium text-gray-400">
-                    Full Name
+                    Name
                   </h3>
                   <p className="mt-1 text-white">{user.name}</p>
-                </div>
-
-                <Separator className="bg-gray-800" />
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400">
-                    Nickname
-                  </h3>
-                  <p className="mt-1 text-white">
-                    {user.nickname || "Not set"}
-                  </p>
                 </div>
 
                 <Separator className="bg-gray-800" />
@@ -361,10 +325,10 @@ export default function ProfilePage() {
 
             {user && !user?.isPro && (
               <div className="mt-6">
-                <Link href='/pricing'>
-                <Button className="text-white cursor-pointer w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
-                  Upgrade to Pro
-                </Button>
+                <Link href="/pricing">
+                  <Button className="text-white cursor-pointer w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700">
+                    Upgrade to Pro
+                  </Button>
                 </Link>
               </div>
             )}

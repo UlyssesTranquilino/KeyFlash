@@ -52,6 +52,7 @@ export function AuthProvider({
   );
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(!serverSession);
+  const [profileLoading, setProfileLoading] = useState(false); // Add this state
   
   // Track if we're on the client side and hydrated
   const [isHydrated, setIsHydrated] = useState(false);
@@ -65,10 +66,12 @@ export function AuthProvider({
   const refreshProfile = async () => {
     if (!supabaseUser?.id) {
       setProfile(null);
+      setProfileLoading(false); // Set profile loading to false
       return;
     }
     
     try {
+      setProfileLoading(true); // Start profile loading
       const { data, error } = await supabase
         .from("profiles")
         .select()
@@ -82,6 +85,8 @@ export function AuthProvider({
       }
     } catch (error) {
       console.error("Profile fetch error:", error);
+    }finally {
+      setProfileLoading(false); // End profile loading
     }
   };
 
@@ -221,7 +226,7 @@ export function AuthProvider({
     () => ({
       user: transformUser(supabaseUser, profile),
       session,
-      loading: loading || !isHydrated, // Keep loading until hydrated
+      loading: loading || !isHydrated || profileLoading, 
       signOut,
       refreshProfile,
       updateProfile,
