@@ -542,19 +542,22 @@ const highlightedText = useMemo(() => {
   </div>
 </motion.div>
 
+
             <textarea
-              ref={inputRef}
-              type="text"
-              value={userInput}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              className="absolute opacity-0 w-0 h-0 pointer-events-none"
-              autoFocus
-              aria-hidden="true"
-            />
+  ref={inputRef}
+  type="text"
+  value={userInput}
+  onChange={handleInputChange}
+  onKeyDown={handleKeyDown}
+  onFocus={handleInputFocus}
+  onBlur={handleInputBlur}
+  className="absolute opacity-0 w-1 h-1 top-0 left-0"
+  autoFocus
+  aria-hidden="true"
+/>
+
           </div>
+          
 
           <div className="absolute -top-55 -right-4 -z-2 size-100 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-90%"></div>
 
