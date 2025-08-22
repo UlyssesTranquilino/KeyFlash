@@ -621,6 +621,7 @@ const Words = ({ sessionType = "multiple" }) => {
                     transform: `translateY(-${scrollOffset}px)`,
                     lineHeight: `${LINE_HEIGHT}px`,
                   }}
+                  onClick={() => inputRef.current?.focus()} 
                 >
                   {highlightedWords}
                 </div>
@@ -628,18 +629,19 @@ const Words = ({ sessionType = "multiple" }) => {
             </motion.div>
 
             {/* Hidden input field for capturing keystrokes */}
-            <input
-              ref={inputRef}
-              type="text"
-              value={userInput}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              className="absolute opacity-0 w-0 h-0 pointer-events-none"
-              autoFocus
-              aria-hidden="true"
-            />
+<input
+  ref={inputRef}
+  type="text"
+  value={userInput}
+  onChange={handleInputChange}
+  onKeyDown={handleKeyDown}
+  onFocus={handleInputFocus}
+  onBlur={handleInputBlur}
+  autoFocus
+  className="absolute opacity-0 w-1 h-1 top-0 left-0"
+  aria-hidden="true"
+/>
+
 
             {/* Stats */}
             <div className="flex justify-between items-center -mt-14">
