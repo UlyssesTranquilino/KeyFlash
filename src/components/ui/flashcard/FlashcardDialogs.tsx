@@ -207,10 +207,10 @@ const handleAddTerm = () => {
 
 
    return (
-  <Dialog open={open} onOpenChange={onOpenChange}>
+  <Dialog open={open} onOpenChange={onOpenChange} >
     <DialogContent
       onOpenAutoFocus={(e) => e.preventDefault()}
-      className="!max-w-[750px] w-full h-[80vh]"
+      className="!max-w-[750px] w-full h-[80vh] p-4 sm:p-6"
     >
       <DialogHeader>
         <DialogTitle className="text-xl font-semibold text-center">
@@ -219,7 +219,7 @@ const handleAddTerm = () => {
         <DialogDescription className="text-sm text-gray-400"></DialogDescription>
       </DialogHeader>
 
-      <div className="px-2 flex flex-col gap-5 overflow-scroll">
+      <div className="sm:px-2 flex flex-col gap-5 overflow-scroll">
         <div className="my-3 flex flex-col gap-3">
           <div className="flex flex-col gap-3">
             <Label htmlFor="title">Title</Label>

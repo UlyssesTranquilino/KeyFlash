@@ -66,6 +66,9 @@ const saveSettings = (settings: any) => {
   }
 };
 
+
+
+
 const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const router = useRouter();
   const { user } = useAuth();
