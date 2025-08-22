@@ -218,7 +218,7 @@ export const FlashcardItem = ({
         tabIndex={0}
       >
         <motion.div
-          className="w-full h-full relative"
+          className="w-full h-full relative "
           animate={{
             rotateY: currentPhase === "question" ? 0 : 180,
           }}
@@ -231,15 +231,15 @@ export const FlashcardItem = ({
             transformStyle: "preserve-3d",
           }}
         >
-          {/* Front of the card (question) */}
+            {/* Front of the card (question) */}
           <motion.div
-            className="absolute inset-0 flex flex-col items-center justify-center p-8 backface-hidden"
+            className="absolute  inset-0 flex flex-col items-center justify-center p-8 backface-hidden"
             style={{
               backfaceVisibility: "hidden",
               display: currentPhase === "question" ? "flex" : "none",
             }}
           >
-            <div className="absolute top-6 right-0 w-full items-center flex justify-between px-3">
+            <div className="absolute top-0 right-0 w-full items-center flex justify-between px-3">
               <div className="flex items-center gap-3">
                 <div
                   onClick={(e) => {
@@ -326,11 +326,11 @@ export const FlashcardItem = ({
               )}
             </div>
 
-            <h2 className="text-sm md:text-base text-center text-gray-400 mb-4 mt-10">
+            <h2 className="mt-3 text-sm md:text-base text-center text-gray-400 mb-4 mt-10">
               {isTypingMode ? "Type the question:" : "Question:"}
             </h2>
 
-            <div className="text-center flex items-center justify-center w-full max-w-[600px]">
+            <div className="text-center  flex items-center justify-center w-full max-w-[600px]">
               <motion.div
                 key={`${index}-question`}
                 initial={{ opacity: 0, y: 10 }}
@@ -542,6 +542,7 @@ export const FlashcardItem = ({
               </motion.div>
             )}
           </motion.div>
+
         </motion.div>
       </div>
     </div>
