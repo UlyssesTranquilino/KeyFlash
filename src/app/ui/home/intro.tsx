@@ -37,12 +37,15 @@ export default function Intro() {
 
       {/* Video Showcase */}
       <motion.div
-        className="relative w-full max-w-5xl mt-16 px-6"
+        className="relative w-full max-w-5xl mt-16 px-6 "
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.7, duration: 0.8 }}
       >
-        <div className="overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10">
+        {/* The Glow Effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded2xl filter blur-3xl opacity-50 z-[-1]" />
+     
+        <div className="outline-12 outline-gray-50/10 rounded-2-xl overflow-hidden rounded-2xl shadow-xl ring-1 ring-white/10">
           <video
             autoPlay
             loop

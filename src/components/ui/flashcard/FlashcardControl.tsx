@@ -72,7 +72,7 @@ export const FlashcardControls = ({
           <TooltipTrigger asChild>
             <button
               className={cn(
-                "flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
+                "cursor-pointer flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
                 isTypingMode ? "text-blue-400" : "text-gray-400",
               )}
               onClick={() => onTypingModeChange(!isTypingMode)}
@@ -89,7 +89,7 @@ export const FlashcardControls = ({
           <TooltipTrigger asChild>
             <button
               className={cn(
-                "flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
+                "cursor-pointer flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
                 isShuffled ? "text-blue-400" : "text-gray-400",
               )}
               onClick={isShuffled ? onUnshuffle : onShuffle}
@@ -128,7 +128,7 @@ export const FlashcardControls = ({
           <TooltipTrigger asChild>
             <button
               disabled={isQuizMode}
-              className="flex my-14 items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
+              className="cursor-pointer flex my-14 items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
               onClick={onReset}
             >
               <Rewind className="w-5 h-5" />
@@ -142,7 +142,7 @@ export const FlashcardControls = ({
           <TooltipTrigger asChild>
             <button
               disabled={isQuizMode}
-              className="flex my-14 items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
+              className="cursor-pointer flex my-14 items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md text-gray-400 transition-colors"
               onClick={onRestart}
             >
               <RotateCcw className="w-5 h-5" />

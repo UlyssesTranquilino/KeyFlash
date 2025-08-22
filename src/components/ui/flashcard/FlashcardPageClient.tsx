@@ -751,7 +751,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   size="icon"
                   onClick={goToPrevious}
                   disabled={current === 0 || isQuizMode}
-                  className="h-12 w-12 rounded-full bg-gray-800/80 hover:bg-gray-700 border-gray-600"
+                  className="cursor-pointer  h-8 w-8 md:h-10 md:w-10 rounded-full bg-gray-800/80 hover:bg-gray-700 border-gray-600"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </Button>
@@ -765,7 +765,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   disabled={
                     current === flashcard.terms.length - 1 || isQuizMode
                   }
-                  className="h-12 w-12 rounded-full bg-gray-800/80 hover:bg-gray-700 border-gray-600"
+                  className="cursor-pointer h-8 w-8 md:h-10 md:w-10 rounded-full bg-gray-800/80 hover:bg-gray-700 border-gray-600"
                 >
                   <ChevronRight className="h-6 w-6" />
                 </Button>

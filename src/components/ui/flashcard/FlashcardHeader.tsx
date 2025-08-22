@@ -82,7 +82,7 @@ export const FlashcardHeader = ({
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="rounded-md p-2 mb-3 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+          className="cursor-pointer rounded-md p-2 mb-3 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
         >
           <ArrowLeft className="h-5 w-5" /> Back
         </Button>
@@ -97,7 +97,7 @@ export const FlashcardHeader = ({
               <Button
                 onClick={onEdit}
                 variant="ghost"
-                className="text-gray-400 hover:text-white"
+                className="cursor-pointer text-gray-400 hover:text-white"
               >
                 <EllipsisVertical className="w-4 h-4" />
               </Button>

@@ -1,3 +1,5 @@
+
+"use client"
 // FlashcardDialogs.tsx
 import {
   Dialog,
@@ -12,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@radix-ui/react-label";
 import { Trash } from "lucide-react";
 import { FlashcardContextProvider } from "@/app/context/FlashcardContext";
+import { useRef, useState, useEffect } from "react";
 
 // Discard Changes Dialog
 export const DiscardChangesDialog = ({
@@ -30,7 +33,7 @@ export const DiscardChangesDialog = ({
         </DialogDescription>
       </DialogHeader>
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={() => setShowDiscardConfirm(false)}>
+        <Button variant="outline" onClick={() => setShowDiscardConfirm(false)} className="cursor-pointer ">
           Keep Editing
         </Button>
         <Button
@@ -39,7 +42,7 @@ export const DiscardChangesDialog = ({
             setOpenEditFlashcard(false);
             setCopyFlashcardData(flashcard); // revert edits
           }}
-          className="bg-red-600 hover:bg-red-700 text-white"
+          className="cursor-pointer bg-red-600 hover:bg-red-700 text-white"
         >
           Discard
         </Button>
@@ -59,12 +62,12 @@ export const DeleteFlashcardDialog = ({ open, onOpenChange, onConfirm }) => (
         </DialogDescription>
       </DialogHeader>
       <div className="flex justify-end gap-3 mt-4">
-        <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <Button variant="outline" onClick={() => onOpenChange(false)} className="cursor-pointer ">
           Cancel
         </Button>
         <Button
           onClick={onConfirm}
-          className="bg-red-600 hover:bg-red-700 text-white"
+          className="bg-red-600 hover:bg-red-700 text-white cursor-pointer "
         >
           Delete
         </Button>
@@ -96,13 +99,13 @@ export const QuizModeConfirmDialog = ({
         <Button
           variant="outline"
           onClick={() => onOpenChange(false)}
-          className="text-gray-200 hover:text-white"
+          className="cursor-pointer text-gray-200 hover:text-white "
         >
           Cancel
         </Button>
         <Button
           onClick={onConfirm}
-          className="bg-red-600 hover:bg-red-700 text-white"
+          className="bg-red-600 hover:bg-red-700 text-white cursor-pointer "
         >
           Reset
         </Button>
@@ -133,13 +136,13 @@ export const ResetConfirmDialog = ({
         <Button
           variant="outline"
           onClick={() => onOpenChange(false)}
-          className="text-gray-200 hover:text-white"
+          className="text-gray-200 hover:text-white cursor-pointer "
         >
           Cancel
         </Button>
         <Button
           onClick={onConfirm}
-          className="bg-red-600 hover:bg-red-700 text-white"
+          className="bg-red-600 hover:bg-red-700 text-white cursor-pointer "
         >
           Reset
         </Button>
@@ -173,7 +176,37 @@ export const EditFlashcardDialog = ({
     value: string,
   ) => void;
   onSave: () => void;
-}) => (
+}) => {
+
+  const [newCardId, setNewCardId] = useState<string | null>(null);
+const newCardRef = useRef<HTMLDivElement>(null);
+
+const prevTermsLengthRef = useRef(flashcardData.terms.length);
+
+// Detect when a new card is added
+useEffect(() => {
+  const lastTerm = flashcardData.terms[flashcardData.terms.length - 1];
+  if (flashcardData.terms.length > prevTermsLengthRef.current && lastTerm) {
+    setNewCardId(lastTerm.id);
+  }
+  prevTermsLengthRef.current = flashcardData.terms.length;
+}, [flashcardData.terms]);
+
+// Scroll into view when a new card is added
+useEffect(() => {
+  if (newCardId && newCardRef.current) {
+    newCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    setNewCardId(null); // Reset after scrolling
+  }
+}, [newCardId]);
+
+// handleAddTerm just adds a card
+const handleAddTerm = () => {
+  onAddTerm();
+};
+
+
+   return (
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent
       onOpenAutoFocus={(e) => e.preventDefault()}
@@ -220,55 +253,58 @@ export const EditFlashcardDialog = ({
           <h1>Answer</h1>
         </div>
 
-<div className="min-h-[400px] max-h-[600px] overflow-auto flex flex-col gap-4">
-          {flashcardData.terms?.map((card: any, index: number) => (
-          <div key={card.id} className="flex flex-col relative bg-gray-900/30">
-            {flashcardData.terms.length > 1 && (
-              <button
-                onClick={() => onDeleteTerm(card.id)}
-                className="absolute hover:text-red-400 text-gray-500 self-end p-1"
-              >
-                <Trash className="scale-70" />
-              </button>
-            )}
-            <div className="flex items-center justify-around gap-3 sm:gap-5">
-              <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
-                <textarea
-                  value={card.question}
-                  onInput={(e) => {
-                    const target = e.currentTarget;
-                    target.style.height = "auto";
-                    target.style.height = `${target.scrollHeight}px`;
-                  }}
-                  onChange={(e) =>
-                    onTermChange(index, "question", e.target.value)
-                  }
-                  className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
-                />
-              </div>
 
-              <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
-                <textarea
-                  value={card.answer}
-                  onInput={(e) => {
-                    const target = e.currentTarget;
-                    target.style.height = "auto";
-                    target.style.height = `${target.scrollHeight}px`;
-                  }}
-                  onChange={(e) =>
-                    onTermChange(index, "answer", e.target.value)
-                  }
-                  className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+<div className="min-h-[400px] max-h-[600px] overflow-auto flex flex-col gap-4">
+  {flashcardData.terms?.map((card: any, index: number) => (
+    <div
+      key={card.id}
+      ref={card.id === newCardId ? newCardRef : null} // <-- assign ref only to new card
+      className="flex flex-col relative bg-gray-900/30"
+    >
+      {flashcardData.terms.length > 1 && (
+        <button
+          onClick={() => onDeleteTerm(card.id)}
+          className="cursor-pointer absolute hover:text-red-400 text-gray-500 self-end p-1"
+        >
+          <Trash className="scale-70" />
+        </button>
+      )}
+      <div className="flex items-center justify-around gap-3 sm:gap-5">
+        <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
+          <textarea
+            value={card.question}
+            onInput={(e) => {
+              const target = e.currentTarget;
+              target.style.height = "auto";
+              target.style.height = `${target.scrollHeight}px`;
+            }}
+            onChange={(e) => onTermChange(index, "question", e.target.value)}
+            className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
+          />
+        </div>
+
+        <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40">
+          <textarea
+            value={card.answer}
+            onInput={(e) => {
+              const target = e.currentTarget;
+              target.style.height = "auto";
+              target.style.height = `${target.scrollHeight}px`;
+            }}
+            onChange={(e) => onTermChange(index, "answer", e.target.value)}
+            className="h-full w-full bg-gray-900 resize-none overflow-hidden rounded-sm p-2 focus:outline-0"
+          />
+        </div>
+      </div>
+    </div>
+  ))}
 </div>
 
+
+
         <Button
-          onClick={onAddTerm}
-          className="h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2"
+       onClick={handleAddTerm} 
+          className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2"
         >
           Add Card
         </Button>
@@ -276,13 +312,13 @@ export const EditFlashcardDialog = ({
         <div className="mt-6 flex justify-end gap-3">
           <Button
             onClick={() => onOpenChange(false)}
-            className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
+            className="cursor-pointer bg-gray-900/20 hover:bg-gray-800 text-gray-200"
           >
             Cancel
           </Button>
           <Button
             onClick={onSave}
-            className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
+            className="cursor-pointer text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
           >
             Save
           </Button>
@@ -291,3 +327,4 @@ export const EditFlashcardDialog = ({
     </DialogContent>
   </Dialog>
 );
+}

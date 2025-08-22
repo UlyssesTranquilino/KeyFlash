@@ -49,10 +49,9 @@ export default function HowItWorks() {
               className="flex flex-col items-center text-center relative h-full "
             >
               {/* step number */}
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 via-cyan-400 to-blue-700 text-white font-bold text-lg shadow-md mb-4">
-                {index + 1}
-              </div>
-
+<div className="text-white text-xl flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-700 via-blue-900 to-indigo-950 font-bold text-lg shadow-md mb-4">
+    {index + 1}
+</div>
               {/* card */}
               <div className="p-6 bg-gradient-to-br from-blue-900/60 via-blue-800/40 to-cyan-700/30 backdrop-blur-sm border border-cyan-400/30 rounded-xl shadow-lg w-full max-w-xs transition-all duration-300 hover:scale-105">
                 <h2 className="text-lg md:text-xl lg:text-2xl font-semibold mb-3 text-white">
