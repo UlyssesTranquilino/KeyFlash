@@ -250,7 +250,7 @@ export const FlashcardItem = ({
               display: currentPhase === "question" ? "flex" : "none",
             }}
           >
-            <div className="absolute top-0 right-0 w-full items-center flex justify-between px-3">
+            <div className="absolute top-0 h-10 right-0 w-full items-center flex justify-between px-3">
               <div className="flex items-center gap-3">
                 <div
                   onClick={(e) => {
@@ -380,8 +380,7 @@ export const FlashcardItem = ({
               display: currentPhase === "answer" ? "flex" : "none",
             }}
           >
-            <div className="absolute top-3 right-0 w-full items-center flex justify-between ">
-              <div className="flex items-center gap-2 sm:gap-3">
+                   <div className="h-10   absolute top-0 right-0 w-full items-center flex justify-between px-3">    <div className="flex items-center gap-2 sm:gap-3">
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
