@@ -545,7 +545,7 @@ const Words = ({ sessionType = "multiple" }) => {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -17, opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
+              className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white  px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
             >
               {wpm} WPM
             </motion.div>

@@ -402,7 +402,7 @@ const QuoteType = ({ sessionType = "multiple" }) => {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: -17, opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white text-sm md:text-base px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
+              className="self-end p-5 sm:p-3 pr-0 my-2 bg-black/40 text-white  px-3 py-1 rounded-md font-mono shadow-lg backdrop-blur-sm"
             >
               {userInput.length == 0 ? 0 : wpm} WPM
             </motion.div>
@@ -456,18 +456,19 @@ const QuoteType = ({ sessionType = "multiple" }) => {
               </div>
             </motion.div>
 
-            <input
-              ref={inputRef}
-              type="text"
-              value={userInput}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              onFocus={handleInputFocus}
-              onBlur={handleInputBlur}
-              className="absolute opacity-0 w-0 h-0 pointer-events-none"
-              autoFocus
-              aria-hidden="true"
-            />
+<input
+  ref={inputRef}
+  type="text"
+  value={userInput}
+  onChange={handleInputChange}
+  onKeyDown={handleKeyDown}
+  onFocus={handleInputFocus}
+  onBlur={handleInputBlur}
+  className="absolute opacity-0 w-1 h-1 top-0 left-0"
+  autoFocus
+  aria-hidden="true"
+/>
+
 
             <div className="flex justify-between items-center mt-0 md:-mt-8">
               <div className="text-lg font-semibold"></div>
