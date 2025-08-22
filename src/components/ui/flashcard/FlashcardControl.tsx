@@ -40,7 +40,7 @@ export const FlashcardControls = ({
 }) => {
   return (
     <div className="w-full absolute right-1/2 -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
-      <div className="flex items-center justify-start flex-nowrap sm:items-center gap-2 sm:gap-5">
+      <div className="flex items-center justify-start flex-nowrap sm:items-center gap-3 sm:gap-5">
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex flex-col switch gap-1 items-center">
@@ -103,7 +103,7 @@ export const FlashcardControls = ({
         </Tooltip>
       </div>
 
-      <div className="w-full col-span-3 relative">
+      <div className="w-full col-span-3 relative -z-1">
         <div className="text-center w-25 sm:w-34 mx-auto relative">
           <div className="text-gray-400 text-sm sm:text-base">
             {current + 1} / {count}
