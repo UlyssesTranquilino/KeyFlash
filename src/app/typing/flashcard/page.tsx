@@ -1499,18 +1499,18 @@ const TypingFlashcards = () => {
         </div>
       </Carousel>
       {/* Hidden input */}
-      <input
-        ref={inputRef}
-        type="text"
-        value={userInput}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onFocus={handleInputFocus}
-        onBlur={handleInputBlur}
-        className="absolute opacity-0 w-0 h-0 pointer-events-none"
-        autoFocus
-        aria-hidden="true"
-      />
+<input
+  ref={inputRef}
+  type="text"
+  value={userInput}
+  onChange={handleInputChange}
+  onKeyDown={handleKeyDown}
+  onFocus={handleInputFocus}
+  onBlur={handleInputBlur}
+  className="absolute opacity-0 w-1 h-1 top-0 left-0"
+  autoFocus
+  aria-hidden="true"
+/>
     </div>
   );
 };

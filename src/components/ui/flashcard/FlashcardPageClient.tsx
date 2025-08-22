@@ -744,23 +744,24 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   handleFlipCard={handleFlipCard}
                   answerInputRef={answerInputRef}
                   skipQuestion={skipQuestion}
+                   goToNext={goToNext} 
                 />
               </div>
 
               {/* Navigation buttons */}
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+              <div className="absolute left-1 sm:left-4 top-1/2 transform -translate-y-1/2">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={goToPrevious}
                   disabled={current === 0 || isQuizMode}
-                  className="cursor-pointer  h-8 w-8 md:h-10 md:w-10 rounded-full bg-gray-800/80 hover:bg-gray-700 border-gray-600"
+                  className="cursor-pointer  h-7 w-7 md:h-10 md:w-10 rounded-full bg-gray-800/30 hover:bg-gray-700 border-gray-600"
                 >
                   <ChevronLeft className="h-6 w-6" />
                 </Button>
               </div>
 
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+              <div className="absolute right-1 sm:right-4 top-1/2 transform -translate-y-1/2">
                 <Button
                   variant="outline"
                   size="icon"
@@ -768,7 +769,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   disabled={
                     current === flashcard.terms.length - 1 || isQuizMode
                   }
-                  className="cursor-pointer h-8 w-8 md:h-10 md:w-10 rounded-full bg-gray-800/80 hover:bg-gray-700 border-gray-600"
+                  className="cursor-pointer h-7 w-7 md:h-10 md:w-10 rounded-full bg-gray-800/30 hover:bg-gray-700 border-gray-600"
                 >
                   <ChevronRight className="h-6 w-6" />
                 </Button>
