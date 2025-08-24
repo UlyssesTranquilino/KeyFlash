@@ -2,11 +2,11 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash, CircleUserRound, ArrowLeft, FileUp } from "lucide-react";
 import Link from "next/link";
-
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -58,6 +58,54 @@ export default function FlashcardCreate() {
   const [isDragging, setIsDragging] = useState(false);
 
   const [openProDialog, setOpenProDialog] = useState(false);
+
+
+  const isMac = typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+  const hotkeyLabel = isMac ? "⌘⏎" : "Ctrl ⏎";
+
+
+  const newCardRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const handleAddCard = () => {
+    const id = Date.now();
+
+    setFlashCardData((prev: any) => [
+      ...prev,
+      {
+        id,
+        question: "",
+        answer: "",
+      },
+    ]);
+
+    // Wait for React to render the new card, then focus + scroll
+    requestAnimationFrame(() => {
+      if (newCardRef.current) {
+        newCardRef.current.focus();
+        newCardRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    });
+  };
+
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Support Ctrl+Enter (Windows/Linux) and Cmd+Enter (Mac)
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        handleAddCard();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -392,7 +440,7 @@ export default function FlashcardCreate() {
             {flashCardData.length > 1 && (
               <button
                 onClick={() => handleDelete(card.id)}
-                className="absolute  hover:text-red-400 text-gray-500 self-end p-1"
+                className="cursor-pointer absolute  hover:text-red-400 text-gray-500 self-end p-1"
               >
                 <Trash className="scale-70" />
               </button>
@@ -400,6 +448,7 @@ export default function FlashcardCreate() {
             <div className="flex items-start justify-around gap-3 sm:gap-5">
               <div className="bg-gray-900 rounded-sm w-full h-full p-2 sm:p-4 min-h-30 md:min-h-40 flex">
                 <textarea
+                  ref={index === flashCardData.length - 1 ? newCardRef : null}
                   value={card.question}
                   onInput={(e) => {
                     e.currentTarget.style.height = "auto";
@@ -445,25 +494,29 @@ export default function FlashcardCreate() {
           </div>
         ))}
 
-        <Button
-          onClick={() => {
-            const MAX_CARDS_GUEST = 10;
-            const isLoggedIn = false;
-            const isGuest = !isLoggedIn;
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={handleAddCard}
+              aria-keyshortcuts={isMac ? "Meta+Enter" : "Control+Enter"}
+              accessKey="n" // optional: Alt+Shift+N (Chrome/Win)
+              className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 
+                        hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2 
+                        inline-flex items-center justify-center gap-2"
+            >
+              <span>Add Card</span>
+              <kbd className="rounded-md px-2 py-1 text-xs bg-gray-800/70 border border-gray-700">
+                {hotkeyLabel}
+              </kbd>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Add a new card ({isMac ? "Cmd" : "Ctrl"} + Enter)</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
-            setFlashCardData((prev: any) => [
-              ...prev,
-              {
-                id: Date.now(),
-                question: "",
-                answer: "",
-              },
-            ]);
-          }}
-          className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2"
-        >
-          Add Card
-        </Button>
       </div>
 
       <div className="mt-20 flex justify-end gap-3 sm:gap-8">

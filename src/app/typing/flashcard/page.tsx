@@ -426,10 +426,11 @@ const TypingFlashcards = () => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Backspace" && e.ctrlKey) {
-        e.preventDefault();
-        deletePreviousWord();
-      }
+    if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      deletePreviousWord();
+    }
+
     },
     [deletePreviousWord]
   );

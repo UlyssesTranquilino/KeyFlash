@@ -15,6 +15,7 @@ import { Label } from "@radix-ui/react-label";
 import { Trash } from "lucide-react";
 import { FlashcardContextProvider } from "@/app/context/FlashcardContext";
 import { useRef, useState, useEffect } from "react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Discard Changes Dialog
 export const DiscardChangesDialog = ({
@@ -178,8 +179,12 @@ export const EditFlashcardDialog = ({
   onSave: () => void;
 }) => {
 
-  const [newCardId, setNewCardId] = useState<string | null>(null);
+const [newCardId, setNewCardId] = useState<string | null>(null);
 const newCardRef = useRef<HTMLDivElement>(null);
+// put this near the top of the component (inside the component body)
+const isMac = typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+const hotkeyLabel = isMac ? "⌘⏎" : "Ctrl ⏎";
+
 
 const prevTermsLengthRef = useRef(flashcardData.terms.length);
 
@@ -191,6 +196,23 @@ useEffect(() => {
   }
   prevTermsLengthRef.current = flashcardData.terms.length;
 }, [flashcardData.terms]);
+
+useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+    e.preventDefault();
+    handleAddTerm();
+  }
+
+  };
+
+  window.addEventListener("keydown", handleKeyDown);
+  return () => {
+    window.removeEventListener("keydown", handleKeyDown);
+  };
+}, []);
+
+
 
 // Scroll into view when a new card is added
 useEffect(() => {
@@ -204,6 +226,8 @@ useEffect(() => {
 const handleAddTerm = () => {
   onAddTerm();
 };
+
+
 
 
    return (
@@ -302,12 +326,28 @@ const handleAddTerm = () => {
 
 
 
-        <Button
-       onClick={handleAddTerm} 
-          className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2"
-        >
-          Add Card
-        </Button>
+<TooltipProvider>
+  <Tooltip>
+    <TooltipTrigger asChild>
+      <Button
+        onClick={handleAddTerm}
+        aria-keyshortcuts={isMac ? "Meta+Enter" : "Control+Enter"}
+        title={`${isMac ? "Cmd" : "Ctrl"} + Enter`}
+        accessKey="n" // optional; gives Alt+Shift+N (Chrome/Win) or Ctrl+Alt+N (Linux)
+        className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2 inline-flex items-center justify-center gap-2"
+      >
+        <span>Add Card</span>
+        <kbd className="rounded-md px-2 py-1 text-xs bg-gray-800/70 border border-gray-700">
+          {hotkeyLabel}
+        </kbd>
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>Add a new card ({isMac ? "Cmd" : "Ctrl"} + Enter)</p>
+    </TooltipContent>
+  </Tooltip>
+</TooltipProvider>
+
 
         <div className="mt-6 flex justify-end gap-3">
           <Button

@@ -277,7 +277,7 @@ const skipPhase = useCallback(() => {
   // Handle answer submission in blur mode
   const handleAnswerSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
 
-  if (e.ctrlKey && e.key === "Enter") {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter")  {
 
     e.preventDefault();
     setCurrentPhase("question");
@@ -467,12 +467,12 @@ const skipPhase = useCallback(() => {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       // Ctrl+Enter or Tab to skip question
-      if (currentPhase === "question" && e.ctrlKey && e.key === "Enter") {
+      if  (currentPhase === "question" && (e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
         skipPhase();
       }
 
-      if (e.key === "Backspace" && e.ctrlKey) {
+      if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         deletePreviousWord();
       }
