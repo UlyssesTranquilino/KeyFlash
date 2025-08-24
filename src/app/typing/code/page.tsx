@@ -475,11 +475,12 @@ const CodeType = () => {
   // Improved key handling with line locking
   const handleKeyDown = useCallback(
     (e: any) => {
-      if (e.key === "Backspace" && e.ctrlKey) {
+      if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         deletePreviousWord();
         return;
       }
+
 
       // Prevent backspace into locked content
       if (e.key === "Backspace") {

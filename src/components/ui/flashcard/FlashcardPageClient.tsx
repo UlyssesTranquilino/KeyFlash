@@ -5,6 +5,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import {
   editFlashcard,
   getFlashcard,
+  getFlashcardPublic,
 } from "../../../../utils/flashcard/flashcard";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,7 +27,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { useFlashcard } from "@/app/context/FlashcardContext";
-
+import { getUserPublicProfile } from "../../../../utils/auth/userUtils";
 import SkeletonFlashcard from "./SkeletonFlashcard";
 import { SimpleResults } from "./ResultsComponent";
 import { deleteFlashcard } from "../../../../utils/flashcard/flashcard";
@@ -66,10 +67,13 @@ const saveSettings = (settings: any) => {
   }
 };
 
-
-
-
-const FlashcardPageClient = ({ slug }: { slug: string }) => {
+const FlashcardPageClient = ({
+  slug,
+  isPublicView = false,
+}: {
+  slug: string;
+  isPublicView?: boolean;
+}) => {
   const router = useRouter();
   const { user } = useAuth();
   const id = slug.split("-")[0];
@@ -210,21 +214,32 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
   useEffect(() => {
     const fetchFlashcard = async () => {
-      if (user?.id) {
-        setLoading(true);
-        const { data } = await getFlashcard(user.id, id);
+      setLoading(true);
 
-        setCurrentTerm(data.terms[0]);
-        setTitle(data.title);
-        setDescription(data.description);
-        setLoading(false);
+      let data;
+      if (isPublicView) {
+        const res = await getFlashcardPublic(id);
+
+        data = res.data;
+      } else if (user?.id) {
+        const res = await getFlashcard(user.id, id);
+        data = res.data;
+      }
+
+      if (data) {
         setFlashcard(data);
         setCopyFlashcardData(data);
+        setTitle(data.title);
+        setDescription(data.description);
+        setCurrentTerm(data.terms[0]);
         setCount(data.terms.length);
       }
+
+      setLoading(false);
     };
+
     fetchFlashcard();
-  }, [user, id]);
+  }, [user?.id, id, isPublicView]); // ✅ only primitives
 
   // Update current term when current index changes
   useEffect(() => {
@@ -249,23 +264,45 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     }
   };
 
-  const skipQuestion = useCallback(() => {
-    setQuestionCompleted(true);
-    setCurrentPhase("answer");
-    setUserInput("");
-    setCurrentIndex(0);
+  const skipPhase = useCallback(() => {
+    if (currentPhase === "question") {
+      // Skip forward → show answer
+      setQuestionCompleted(true);
+      setCurrentPhase("answer");
+      setUserInput("");
+      setCurrentIndex(0);
 
-    setTimeout(() => {
-      if (blurAnswer) {
-        answerInputRef.current?.focus();
-      } else {
+      setTimeout(() => {
+        if (blurAnswer) {
+          answerInputRef.current?.focus();
+        } else {
+          inputRef.current?.focus();
+        }
+      }, 100);
+    } else {
+      // Skip backward → return to question
+      setCurrentPhase("question");
+      setUserInput("");
+      setTimeout(() => {
         inputRef.current?.focus();
-      }
-    }, 100);
-  }, [blurAnswer]);
+      }, 100);
+    }
+  }, [currentPhase, blurAnswer]);
 
   // Handle answer submission in blur mode
   const handleAnswerSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      setCurrentPhase("question");
+
+      // Focus hidden input after flipping
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+
+      return; // ⬅️ prevent falling through to normal Enter handling
+    }
+
     if (e.key === "Enter") {
       setCardCompleted(true);
 
@@ -442,12 +479,16 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       // Ctrl+Enter or Tab to skip question
-      if (currentPhase === "question" && e.ctrlKey && e.key === "Enter") {
+      if (
+        currentPhase === "question" &&
+        (e.ctrlKey || e.metaKey) &&
+        e.key === "Enter"
+      ) {
         e.preventDefault();
-        skipQuestion();
+        skipPhase();
       }
 
-      if (e.key === "Backspace" && e.ctrlKey) {
+      if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         deletePreviousWord();
       }
@@ -689,6 +730,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
               }
             }}
             flashcardData={copyFlashcardData}
+            setFlashcardData={setCopyFlashcardData}
             onDeleteTerm={handleDelete}
             onAddTerm={() => {
               setCopyFlashcardData((prev: any) => ({
@@ -743,8 +785,8 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   correct={correct}
                   handleFlipCard={handleFlipCard}
                   answerInputRef={answerInputRef}
-                  skipQuestion={skipQuestion}
-                   goToNext={goToNext} 
+                  skipPhase={skipPhase}
+                  goToNext={goToNext}
                 />
               </div>
 
@@ -801,19 +843,18 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
 
             {/* Hidden input */}
             {isTypingMode && (
-<input
-  ref={inputRef}
-  type="text"
-  value={userInput}
-  onChange={handleInputChange}
-  onKeyDown={handleKeyDown}
-  onFocus={handleInputFocus}
-  onBlur={handleInputBlur}
-  className="absolute opacity-0 w-1 h-1 top-0 left-0"
-  autoFocus
-  aria-hidden="true"
-/>
-
+              <input
+                ref={inputRef}
+                type="text"
+                value={userInput}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                onFocus={handleInputFocus}
+                onBlur={handleInputBlur}
+                className="absolute opacity-0 w-1 h-1 top-0 left-0"
+                autoFocus
+                aria-hidden="true"
+              />
             )}
           </div>
 

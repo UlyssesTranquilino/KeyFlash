@@ -360,15 +360,17 @@ const QuoteType = ({ sessionType = "multiple" }) => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Backspace" && e.ctrlKey) {
+      if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         deletePreviousWord();
       }
 
+
       // Ensure the input stays focused
-      if (e.ctrlKey || e.key === "Backspace") {
+      if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
         e.stopPropagation();
       }
+
     },
     [deletePreviousWord]
   );

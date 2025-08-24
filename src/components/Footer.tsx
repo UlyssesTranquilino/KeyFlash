@@ -50,6 +50,9 @@ const Footer = () => {
             <Link href="/contact" className="hover:text-white transition">
               Contact
             </Link>
+                  <Link href="/privacy" className="hover:text-white transition">
+              Privacy
+            </Link>
           </div>
         </div>
       </footer>
