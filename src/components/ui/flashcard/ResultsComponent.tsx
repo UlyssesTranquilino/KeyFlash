@@ -80,7 +80,7 @@ export const SimpleResults = ({
                 onRestart();
                 setOpen(false);
               }}
-              className="flex-1 bg-blue-950/30 hover:bg-blue-950 text-white border-0 py-2"
+              className="cursor-pointer flex-1 bg-blue-950/30 hover:bg-blue-950 text-white border-0 py-2"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
               Practice Again

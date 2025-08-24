@@ -38,7 +38,7 @@ export const FlashcardItem = ({
   correct,
   handleFlipCard,
   answerInputRef,
-  skipQuestion,
+  skipPhase,
   goToNext
 }) => {
   if (!isActive) {
@@ -292,7 +292,7 @@ export const FlashcardItem = ({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        onClick={skipQuestion}
+                        onClick={skipPhase}
                         className={cn(
                           "p-2 cursor-pointer rounded-md transition-colors",
                           "text-gray-300 hover:text-white",
@@ -449,7 +449,29 @@ export const FlashcardItem = ({
 
 
               {isTypingMode && (
-                <div>
+                   <div className="flex gap-3 items-center">
+
+<Tooltip>
+  <TooltipTrigger asChild>
+    <button
+      onClick={skipPhase}
+      className={cn(
+        "p-2 cursor-pointer rounded-md transition-colors",
+        "text-gray-300 hover:text-white",
+        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900",
+      )}
+      aria-label="Skip back to question"
+    >
+      <SkipForward className="w-4" />
+    </button>
+  </TooltipTrigger>
+  <TooltipContent>
+    <p>Skip back to question (Ctrl+Enter)</p>
+  </TooltipContent>
+</Tooltip>
+
+
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button

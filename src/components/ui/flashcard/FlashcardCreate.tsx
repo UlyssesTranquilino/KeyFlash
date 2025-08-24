@@ -460,7 +460,7 @@ export default function FlashcardCreate() {
               },
             ]);
           }}
-          className="h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2"
+          className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2"
         >
           Add Card
         </Button>

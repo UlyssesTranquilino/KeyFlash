@@ -249,7 +249,9 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
     }
   };
 
-  const skipQuestion = useCallback(() => {
+const skipPhase = useCallback(() => {
+  if (currentPhase === "question") {
+    // Skip forward → show answer
     setQuestionCompleted(true);
     setCurrentPhase("answer");
     setUserInput("");
@@ -262,10 +264,33 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
         inputRef.current?.focus();
       }
     }, 100);
-  }, [blurAnswer]);
+  } else {
+    // Skip backward → return to question
+    setCurrentPhase("question");
+    setUserInput("");
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  }
+}, [currentPhase, blurAnswer]);
 
   // Handle answer submission in blur mode
   const handleAnswerSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+
+  if (e.ctrlKey && e.key === "Enter") {
+
+    e.preventDefault();
+    setCurrentPhase("question");
+
+    // Focus hidden input after flipping
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+
+    return; // ⬅️ prevent falling through to normal Enter handling
+  }
+
+
     if (e.key === "Enter") {
       setCardCompleted(true);
 
@@ -444,7 +469,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
       // Ctrl+Enter or Tab to skip question
       if (currentPhase === "question" && e.ctrlKey && e.key === "Enter") {
         e.preventDefault();
-        skipQuestion();
+        skipPhase();
       }
 
       if (e.key === "Backspace" && e.ctrlKey) {
@@ -743,7 +768,7 @@ const FlashcardPageClient = ({ slug }: { slug: string }) => {
                   correct={correct}
                   handleFlipCard={handleFlipCard}
                   answerInputRef={answerInputRef}
-                  skipQuestion={skipQuestion}
+                  skipPhase={skipPhase}
                    goToNext={goToNext} 
                 />
               </div>

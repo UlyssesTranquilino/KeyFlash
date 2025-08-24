@@ -779,7 +779,7 @@ const TypingFlashcards = () => {
                   resetCurrentCard();
                   setAllComplete(false);
                 }}
-                className="flex-1 bg-blue-950/30 hover:bg-blue-950 text-white border-0"
+                className="cursor-pointer flex-1 bg-blue-950/30 hover:bg-blue-950 text-white border-0"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Practice Again
@@ -788,7 +788,7 @@ const TypingFlashcards = () => {
               <Button
                 onClick={() => setOpenEditFlashcard(true)}
                 variant="ghost"
-                className="flex-1 text-gray-400 hover:text-white"
+                className="cursor-pointer flex-1 text-gray-400 hover:text-white"
               >
                 <Pencil className="w-4 h-4 mr-2" />
                 Edit Cards
