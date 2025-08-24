@@ -49,7 +49,6 @@ const PaymentPage = () => {
       // ✅ Optional: check if capture actually succeeded
       if (response.ok && result.captureData?.status === "COMPLETED") {
         const resUpgradeUser = await upgradeUserToPro();
-        console.log("RES: ", resUpgradeUser);
 
         // window.location.href = "/complete-payment";
       } else {

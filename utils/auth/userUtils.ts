@@ -99,6 +99,32 @@ export async function deleteFlashcard(flashcardId: string) {
   }
 }
 
+export async function getUserPublicProfile(user_id: string) {
+  try {
+    const supabase = createClient();
+
+    // Fetch only public fields
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user_id)
+      .single();
+
+    if (error) {
+      console.error("Failed to fetch user profile:", error);
+      return { error: error.message };
+    }
+
+    if (!data) {
+      return { error: "User not found" };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error("Unexpected error fetching user profile:", err);
+    return { error: "Unexpected error occurred" };
+  }
+}
 
 // server-side function
 export async function deleteUserProfile() {

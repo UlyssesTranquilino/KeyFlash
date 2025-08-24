@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { format } from "date-fns";
-import { Crown, Edit2, Loader2, Save, Check, } from "lucide-react";
+import { Crown, Edit2, Loader2, Save, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,9 +26,8 @@ import {
 } from "@/components/ui/dialog";
 import { deleteUserProfile } from "../../../../utils/auth/userUtils";
 
-
 export default function ProfilePage() {
-  const router = useRouter()
+  const router = useRouter();
 
   const { user, refreshProfile, signOut } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -44,8 +43,8 @@ export default function ProfilePage() {
   });
 
   // Delete Account
-  const [showDeleteAccDialog, setShowDeleteAccDialog] = useState(false)
-const [confirmText, setConfirmText] = useState("");
+  const [showDeleteAccDialog, setShowDeleteAccDialog] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -93,23 +92,22 @@ const [confirmText, setConfirmText] = useState("");
     }
   };
 
-// client component
-const handleDeleteAccount = async () => {
-  try {
-    const { success, error } = await deleteUserProfile();
+  // client component
+  const handleDeleteAccount = async () => {
+    try {
+      const { success, error } = await deleteUserProfile();
 
-    if (success) {
-      toast.success("Account deleted");
-      signOut();
-    } else {
-      toast.error(error || "Failed to delete account");
+      if (success) {
+        toast.success("Account deleted");
+        signOut();
+      } else {
+        toast.error(error || "Failed to delete account");
+      }
+    } catch (error) {
+      toast.error("Unexpected error");
+      console.error("Failed to delete account", error);
     }
-  } catch (error) {
-    toast.error("Unexpected error");
-    console.error("Failed to delete account", error);
-  }
-};
-
+  };
 
   if (loading || !user) {
     return (
@@ -181,37 +179,34 @@ const handleDeleteAccount = async () => {
             </CardContent>
           </Card>
 
+          <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3 mt-6">
+            <CardHeader>
+              <Skeleton className="h-6 w-36 rounded-md" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-32 rounded-md" />
+                </div>
+              </div>
+              <Skeleton className="h-10 w-full mt-6 rounded-md" />
+            </CardContent>
+          </Card>
 
-                        <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3 mt-6">
-      <CardHeader>
-        <Skeleton className="h-6 w-36 rounded-md" />
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-32 rounded-md" />
-          </div>
-
-        </div>
-        <Skeleton className="h-10 w-full mt-6 rounded-md" />
-      </CardContent>
-    </Card>
-
-              <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3 mt-6">
-      <CardHeader>
-        <Skeleton className="h-6 w-36 rounded-md" />
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-32 rounded-md" />
-            <Skeleton className="h-4 w-48 rounded-md" />
-          </div>
-
-        </div>
-        <Skeleton className="h-10 w-full mt-6 rounded-md" />
-      </CardContent>
-    </Card>
+          <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3 mt-6">
+            <CardHeader>
+              <Skeleton className="h-6 w-36 rounded-md" />
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="space-y-2">
+                  <Skeleton className="h-6 w-32 rounded-md" />
+                  <Skeleton className="h-4 w-48 rounded-md" />
+                </div>
+              </div>
+              <Skeleton className="h-10 w-full mt-6 rounded-md" />
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -221,47 +216,52 @@ const handleDeleteAccount = async () => {
     <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto py-4 overflow-hidden">
       <Toaster position="top-center" />
 
+      <Dialog open={showDeleteAccDialog} onOpenChange={setShowDeleteAccDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete this account forever?</DialogTitle>
+            <DialogDescription>
+              This action is{" "}
+              <span className="font-semibold text-red-400">irreversible</span>.
+              Please type{" "}
+              <span className="font-mono text-gray-200">
+                delete this account
+              </span>{" "}
+              to confirm.
+            </DialogDescription>
+          </DialogHeader>
 
-<Dialog open={showDeleteAccDialog} onOpenChange={setShowDeleteAccDialog}>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Delete this account forever?</DialogTitle>
-      <DialogDescription>
-        This action is <span className="font-semibold text-red-400">irreversible</span>.  
-        Please type <span className="font-mono text-gray-200">delete this account</span> to confirm.
-      </DialogDescription>
-    </DialogHeader>
+          <div className="mt-4">
+            <Input
+              placeholder="Type 'delete this account'"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              className="bg-gray-800 border-gray-700 text-white"
+            />
+          </div>
 
-    <div className="mt-4">
-      <Input
-        placeholder="Type 'delete this account'"
-        value={confirmText}
-        onChange={(e) => setConfirmText(e.target.value)}
-        className="bg-gray-800 border-gray-700 text-white"
-      />
-    </div>
-
-    <div className="flex justify-end gap-3 mt-6">
-      <Button
-        variant="outline"
-        onClick={() => setShowDeleteAccDialog(false)}
-        className="cursor-pointer"
-      >
-        Cancel
-      </Button>
-      <Button
-        disabled={confirmText.trim().toLowerCase() !== "delete this account"}
-        onClick={() => {
-          handleDeleteAccount()
-        }}
-        className="cursor-pointer bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Delete This Account Forever
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
-
+          <div className="flex justify-end gap-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteAccDialog(false)}
+              className="cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={
+                confirmText.trim().toLowerCase() !== "delete this account"
+              }
+              onClick={() => {
+                handleDeleteAccount();
+              }}
+              className="cursor-pointer bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Delete This Account Forever
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="max-w-4xl">
         <header className="mb-8">
@@ -375,9 +375,7 @@ const handleDeleteAccount = async () => {
             ) : (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-sm font-medium text-gray-400">
-                    Name
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-400">Name</h3>
                   <p className="mt-1 text-white">{user.name}</p>
                 </div>
 
@@ -405,8 +403,6 @@ const handleDeleteAccount = async () => {
             )}
           </CardContent>
         </Card>
-
-        
 
         {/* Subscription Card */}
         <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3">
@@ -436,9 +432,12 @@ const handleDeleteAccount = async () => {
 
             {user && !user?.isPro && (
               <div className="mt-10 mb-2 ">
-                <Link href="/pricing" className="w-full flex items-center justify-center">
-                  <Button         className=" max-w-120 py-6 cursor-pointer mt-6 w-full outline-1 outline-blue-600 bg-blue-600/60 hover:bg-blue-600/80 text-white rounded-md transition">
-        Upgrade to Pro
+                <Link
+                  href="/pricing"
+                  className="w-full flex items-center justify-center"
+                >
+                  <Button className=" max-w-120 py-6 cursor-pointer mt-6 w-full outline-1 outline-blue-600 bg-blue-600/60 hover:bg-blue-600/80 text-white rounded-md transition">
+                    Upgrade to Pro
                   </Button>
                 </Link>
               </div>
@@ -446,48 +445,59 @@ const handleDeleteAccount = async () => {
           </CardContent>
         </Card>
 
+        {/* Logout Card */}
+        <Card className="bg-gray-900/60 border border-gray-800 shadow-lg rounded-2xl col-span-1 lg:col-span-3 mt-6">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              Log Out
+            </CardTitle>
+            <p className="text-sm text-gray-400">
+              You will be signed out of your account. You can log in again
+              anytime.
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row justify-end items-center gap-4">
+              <Button
+                className="w-full md:w-auto cursor-pointer text-white bg-gray-600 hover:bg-gray-700"
+                onClick={() => {
+                  signOut();
+                }}
+              >
+                {" "}
+                Log out{" "}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-{/* Logout Card */}
-<Card className="bg-gray-900/60 border border-gray-800 shadow-lg rounded-2xl col-span-1 lg:col-span-3 mt-6">
-  <CardHeader>
-    <CardTitle className="text-white flex items-center gap-2">
-
-      Log Out
-    </CardTitle>
-    <p className="text-sm text-gray-400">
-      You will be signed out of your account. You can log in again anytime.
-    </p>
-  </CardHeader>
-  <CardContent>
-    <div className="flex flex-col md:flex-row justify-end items-center gap-4">
-<Button className="w-full md:w-auto cursor-pointer text-white bg-gray-600 hover:bg-gray-700" onClick={() => { signOut()}} > Log out </Button>
-    </div>
-  </CardContent>
-</Card>
-
-
-     {/* Danger Zone Card */}
-<Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3 mt-6">
-  <CardHeader>
-    <CardTitle className=" text-red-400">Danger Zone</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-      <div className="w-full">
-        <h3 className="text-lg font-medium text-white">Delete Account</h3>
-        <p className="text-gray-400 mt-1">
-          This action is irreversible. All of your data will be permanently removed.
-        </p>
-      </div>
-      <Button 
-        className="w-full md:w-auto cursor-pointer text-white bg-red-600 hover:bg-red-700"
-        onClick={() => { setShowDeleteAccDialog(true)}}
-      >
-        Delete Account
-      </Button>
-    </div>
-  </CardContent>
-</Card>   
+        {/* Danger Zone Card */}
+        <Card className="bg-gray-900/50 border-gray-800 col-span-1 lg:col-span-3 mt-6">
+          <CardHeader>
+            <CardTitle className=" text-red-400">Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="w-full">
+                <h3 className="text-lg font-medium text-white">
+                  Delete Account
+                </h3>
+                <p className="text-gray-400 mt-1">
+                  This action is irreversible. All of your data will be
+                  permanently removed.
+                </p>
+              </div>
+              <Button
+                className="w-full md:w-auto cursor-pointer text-white bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  setShowDeleteAccDialog(true);
+                }}
+              >
+                Delete Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

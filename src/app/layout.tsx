@@ -10,7 +10,7 @@ import AuthProviderClient from "@/components/ui/AuthProviderClient";
 export const metadata: Metadata = {
   title: "KeyFlash",
   description: "Typing-powered flashcards",
-    icons: {
+  icons: {
     icon: "/KeyFlashLogo.png",
     shortcut: "/KeyFlashLogo.png",
     apple: "/KeyFlashLogo.png",
@@ -26,16 +26,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning={true}>
-      <body className={`__className_550977  ${jakartaSans.className}  antialiased bg-black`} suppressHydrationWarning={true}>
+      <body
+        className={`__className_550977  ${jakartaSans.className}  antialiased bg-black`}
+        suppressHydrationWarning={true}
+      >
         <TestModeContextProvider>
-          <AuthProviderClient serverSession={undefined} >
+          <AuthProviderClient serverSession={undefined}>
             <ThemeProvider
               attribute="class"
               defaultTheme="dark"
               enableSystem
               disableTransitionOnChange
             >
-                  <ClientWrapper>{children}</ClientWrapper> 
+              <ClientWrapper>{children}</ClientWrapper>
             </ThemeProvider>
           </AuthProviderClient>
         </TestModeContextProvider>

@@ -1,12 +1,15 @@
-
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Trash, CircleUserRound, ArrowLeft, FileUp } from "lucide-react";
-import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,6 +55,7 @@ export default function FlashcardCreate() {
       answer: "",
     },
   ]);
+  const [isPublic, setIsPublic] = useState(false);
 
   const [openReset, setOpenReset] = useState(false);
   const [openUpload, setOpenUpload] = useState(false);
@@ -59,10 +63,10 @@ export default function FlashcardCreate() {
 
   const [openProDialog, setOpenProDialog] = useState(false);
 
-
-  const isMac = typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+  const isMac =
+    typeof navigator !== "undefined" &&
+    /Mac|iPod|iPhone|iPad/.test(navigator.platform);
   const hotkeyLabel = isMac ? "⌘⏎" : "Ctrl ⏎";
-
 
   const newCardRef = useRef<HTMLTextAreaElement | null>(null);
 
@@ -90,7 +94,6 @@ export default function FlashcardCreate() {
     });
   };
 
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Support Ctrl+Enter (Windows/Linux) and Cmd+Enter (Mac)
@@ -105,7 +108,6 @@ export default function FlashcardCreate() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -134,7 +136,7 @@ export default function FlashcardCreate() {
     if (!flashCardData || flashCardData.length <= 0) return;
 
     setFlashCardData((prev: any) =>
-      prev ? prev.filter((card: any) => card.id !== id) : []
+      prev ? prev.filter((card: any) => card.id !== id) : [],
     );
   };
 
@@ -147,7 +149,7 @@ export default function FlashcardCreate() {
 
   const handleCreateFlashcard = async () => {
     const hasEmptyFields = flashCardData.some(
-      (card: any) => !card.question?.trim() || !card.answer?.trim()
+      (card: any) => !card.question?.trim() || !card.answer?.trim(),
     );
 
     if (hasEmptyFields || !title) {
@@ -172,6 +174,7 @@ export default function FlashcardCreate() {
       title,
       description,
       terms: flashCardData,
+      is_public: isPublic,
       created_at: new Date(),
     };
 
@@ -342,7 +345,7 @@ export default function FlashcardCreate() {
               isDragging
                 ? "border-blue-400 bg-blue-900/20"
                 : "border-blue-300/60",
-              !user && "blur-xs"
+              !user && "blur-xs",
             )}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
@@ -429,6 +432,17 @@ export default function FlashcardCreate() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2 my-4">
+        <label htmlFor="isPublic" className="text-gray-200">
+          Public
+        </label>
+        <Switch
+          checked={isPublic}
+          onCheckedChange={setIsPublic}
+          className=" data-[state=checked]:bg-blue-500 cursor-pointer"
+        />
+      </div>
+
       <h1 className=" mt-10 mb-5 font-semibold">Terms</h1>
       <div className="flex items-center justify-around gap-9 ">
         <h1>Question</h1>
@@ -494,29 +508,28 @@ export default function FlashcardCreate() {
           </div>
         ))}
 
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={handleAddCard}
-              aria-keyshortcuts={isMac ? "Meta+Enter" : "Control+Enter"}
-              accessKey="n" // optional: Alt+Shift+N (Chrome/Win)
-              className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleAddCard}
+                aria-keyshortcuts={isMac ? "Meta+Enter" : "Control+Enter"}
+                accessKey="n" // optional: Alt+Shift+N (Chrome/Win)
+                className="cursor-pointer h-12 border-2 border-dashed bg-gray-900/20 
                         hover:bg-gray-800/30 text-gray-200 w-1/2 mx-auto p-3 mt-2 
                         inline-flex items-center justify-center gap-2"
-            >
-              <span>Add Card</span>
-              <kbd className="rounded-md px-2 py-1 text-xs bg-gray-800/70 border border-gray-700">
-                {hotkeyLabel}
-              </kbd>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Add a new card ({isMac ? "Cmd" : "Ctrl"} + Enter)</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
+              >
+                <span>Add Card</span>
+                <kbd className="rounded-md px-2 py-1 text-xs bg-gray-800/70 border border-gray-700">
+                  {hotkeyLabel}
+                </kbd>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Add a new card ({isMac ? "Cmd" : "Ctrl"} + Enter)</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <div className="mt-20 flex justify-end gap-3 sm:gap-8">

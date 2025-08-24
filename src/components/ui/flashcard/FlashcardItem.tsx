@@ -7,7 +7,6 @@ import {
   EyeClosed,
   SkipForward,
   CircleX,
-  
 } from "lucide-react";
 import {
   Tooltip,
@@ -39,7 +38,7 @@ export const FlashcardItem = ({
   handleFlipCard,
   answerInputRef,
   skipPhase,
-  goToNext
+  goToNext,
 }) => {
   if (!isActive) {
     return <div className="h-100 md:h-110" />;
@@ -65,11 +64,11 @@ export const FlashcardItem = ({
   }, [currentPhase, item]);
 
   useEffect(() => {
-  const checkMobile = () => setIsMobile(window.innerWidth <= 768); // adjust breakpoint
-  checkMobile();
-  window.addEventListener("resize", checkMobile);
-  return () => window.removeEventListener("resize", checkMobile);
-}, []);
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768); // adjust breakpoint
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const scrollToCursor = useCallback(() => {
     if (cursorRef.current && textDisplayRef.current) {
@@ -242,7 +241,7 @@ export const FlashcardItem = ({
             transformStyle: "preserve-3d",
           }}
         >
-            {/* Front of the card (question) */}
+          {/* Front of the card (question) */}
           <motion.div
             className="absolute  inset-0 flex flex-col items-center justify-center p-8 backface-hidden"
             style={{
@@ -380,7 +379,9 @@ export const FlashcardItem = ({
               display: currentPhase === "answer" ? "flex" : "none",
             }}
           >
-                   <div className="h-10   absolute top-0 right-0 w-full items-center flex justify-between px-3">    <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-10   absolute top-0 right-0 w-full items-center flex justify-between px-3">
+              {" "}
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
@@ -415,62 +416,56 @@ export const FlashcardItem = ({
                   <span className="text-xs">Answer</span>
                 </div>
               </div>
-
- {cardCompleted && currentPhase === "answer" && (
-  <motion.div
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
-    className="w-full text-center"
-  >
-    {isMobile ? (
-      <div
-        onClick={goToNext} // move to next card
-        className="inline-flex items-center ml-3 gap-2 px-3 py-1 bg-blue-900/30 rounded-full cursor-pointer hover:bg-blue-800/50"
-      >
-        <SkipForward className="text-gray-300 w-3 h-3"/>
-        <span className="hidden sm:block text-gray-300 text-sm">
-          Continue
-        </span>
-      </div>
-    ) : (
-      <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-900/30 rounded-full">
-        <span className="text-gray-300 text-sm">
-          Press{" "}
-          <kbd className="px-2 py-1 text-xs font-mono bg-gray-700 rounded-md text-gray-200">
-            SPACE
-          </kbd>{" "}
-          to continue
-        </span>
-      </div>
-    )}
-  </motion.div>
-)}
-
-
+              {cardCompleted && currentPhase === "answer" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full text-center"
+                >
+                  {isMobile ? (
+                    <div
+                      onClick={goToNext} // move to next card
+                      className="inline-flex items-center ml-3 gap-2 px-3 py-1 bg-blue-900/30 rounded-full cursor-pointer hover:bg-blue-800/50"
+                    >
+                      <SkipForward className="text-gray-300 w-3 h-3" />
+                      <span className="hidden sm:block text-gray-300 text-sm">
+                        Continue
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-900/30 rounded-full">
+                      <span className="text-gray-300 text-sm">
+                        Press{" "}
+                        <kbd className="px-2 py-1 text-xs font-mono bg-gray-700 rounded-md text-gray-200">
+                          SPACE
+                        </kbd>{" "}
+                        to continue
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
+              )}
               {isTypingMode && (
-                   <div className="flex gap-3 items-center">
-
-<Tooltip>
-  <TooltipTrigger asChild>
-    <button
-      onClick={skipPhase}
-      className={cn(
-        "p-2 cursor-pointer rounded-md transition-colors",
-        "text-gray-300 hover:text-white",
-        "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900",
-      )}
-      aria-label="Skip back to question"
-    >
-      <SkipForward className="w-4" />
-    </button>
-  </TooltipTrigger>
-  <TooltipContent>
-    <p>Skip back to question (Ctrl+Enter)</p>
-  </TooltipContent>
-</Tooltip>
-
-
+                <div className="flex gap-3 items-center">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={skipPhase}
+                        className={cn(
+                          "p-2 cursor-pointer rounded-md transition-colors",
+                          "text-gray-300 hover:text-white",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900",
+                        )}
+                        aria-label="Skip back to question"
+                      >
+                        <SkipForward className="w-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Skip back to question (Ctrl+Enter)</p>
+                    </TooltipContent>
+                  </Tooltip>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -587,7 +582,6 @@ export const FlashcardItem = ({
               </motion.div>
             )}
           </motion.div>
-
         </motion.div>
       </div>
     </div>
