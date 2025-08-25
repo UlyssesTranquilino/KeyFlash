@@ -1,19 +1,15 @@
+// app/api/paypal/capture/route.ts
 import { NextResponse } from "next/server";
-import { upgradeUserToPro } from "../../../../../utils/auth/userUtils";
 
 export async function POST(req: Request) {
   try {
-    const { orderId, userId } = await req.json(); // make sure you pass userId
-    if (!orderId || !userId) {
-      return NextResponse.json(
-        { error: "Missing orderId or userId" },
-        { status: 400 }
-      );
+    const { orderId } = await req.json();
+    if (!orderId) {
+      return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
     }
 
     const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
     const secret = process.env.PAYPAL_SECRET_KEY;
-    const isSandbox = process.env.PAYPAL_SANDBOX === "true";
 
     if (!clientId || !secret) {
       return NextResponse.json(
@@ -22,16 +18,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const baseUrl = isSandbox
-      ? "https://api-m.sandbox.paypal.com"
-      : "https://api-m.paypal.com";
-
     const base64Credentials = Buffer.from(`${clientId}:${secret}`).toString(
       "base64"
     );
 
     // 1. Get access token
-    const tokenRes = await fetch(`${baseUrl}/v1/oauth2/token`, {
+    const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
       method: "POST",
       headers: {
         Authorization: `Basic ${base64Credentials}`,
@@ -52,7 +44,7 @@ export async function POST(req: Request) {
 
     // 2. Capture payment
     const captureRes = await fetch(
-      `${baseUrl}/v2/checkout/orders/${orderId}/capture`,
+      `https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`,
       {
         method: "POST",
         headers: {
@@ -62,7 +54,7 @@ export async function POST(req: Request) {
       }
     );
 
-    const captureData = await captureRes.json();
+    const captureData = await captureRes.json(); // <-- parse before using
 
     if (!captureRes.ok) {
       return NextResponse.json(
@@ -81,18 +73,6 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    const paidAmount =
-      captureData.purchase_units[0].payments.captures[0].amount.value;
-    if (paidAmount !== "0.01") {
-      return NextResponse.json(
-        { error: "Payment amount mismatch", details: captureData },
-        { status: 400 }
-      );
-    }
-
-    // 4. Upgrade user
-    await upgradeUserToPro();
 
     return NextResponse.json({
       message: "Payment captured successfully",

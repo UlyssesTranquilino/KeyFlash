@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const secret = process.env.PAYPAL_SECRET_KEY;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  const isSandbox = process.env.PAYPAL_SANDBOX === "true"; // toggle sandbox
+  const isSandbox = false; // toggle sandbox
 
   if (!clientId || !secret || !siteUrl) {
     return NextResponse.json(
