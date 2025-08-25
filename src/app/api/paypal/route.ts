@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   try {
     // 1. Get access token
     const tokenResponse = await fetch(
-      "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+      "https://api-m.paypal.com/v1/oauth2/token",
       {
         method: "POST",
         headers: {
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
 
     // 2. Create order
     const orderResponse = await fetch(
-      "https://api-m.sandbox.paypal.com/v2/checkout/orders",
+      "https://api-m.paypal.com/v2/checkout/orders",
       {
         method: "POST",
         headers: {
@@ -48,11 +48,11 @@ export async function POST(req: Request) {
             {
               amount: {
                 currency_code: "USD",
-                value: "9.99",
+                value: "0.01",
                 breakdown: {
                   item_total: {
                     currency_code: "USD",
-                    value: "9.99",
+                    value: "0.01",
                   },
                 },
               },
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
                   quantity: "1",
                   unit_amount: {
                     currency_code: "USD",
-                    value: "9.99",
+                    value: "0.01",
                   },
                 },
               ],
