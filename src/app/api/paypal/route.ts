@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  const secret = process.env.NEXT_PUBLIC_PAYPAL_SECRET_KEY;
+  const secret = process.env.PAYPAL_SECRET_KEY;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   const base64Credentials = Buffer.from(`${clientId}:${secret}`).toString(
