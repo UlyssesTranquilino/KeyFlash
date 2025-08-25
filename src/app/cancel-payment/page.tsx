@@ -45,6 +45,16 @@ export default function PaymentCancelledPage() {
             >
               Need Help? Contact Support
             </Button>
+            {/* Support Email */}
+            <p className="text-sm text-gray-400">
+              Or email us at{" "}
+              <a
+                href="mailto:support@keyflash.app"
+                className="text-blue-400 hover:text-blue-300"
+              >
+                support@keyflash.app
+              </a>
+            </p>
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-700">
@@ -54,7 +64,7 @@ export default function PaymentCancelledPage() {
             <Button
               variant="link"
               onClick={() => router.push("/pricing")}
-              className="text-blue-400 hover:text-blue-300 text-xs mt-2"
+              className=" cursor-pointer text-blue-400 hover:text-blue-300 text-xs mt-2"
             >
               Explore payment options
             </Button>

@@ -126,6 +126,36 @@ export async function getUserPublicProfile(user_id: string) {
   }
 }
 
+export async function getUserProStatus() {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    // Fetch only public fields
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("is_pro")
+      .eq("id", user?.id)
+      .single();
+
+    if (error) {
+      console.error("Failed to fetch user profile:", error);
+      return { error: error.message };
+    }
+
+    if (!data) {
+      return { error: "User not found" };
+    }
+
+    return { data, error: null };
+  } catch (err) {
+    console.error("Unexpected error fetching user profile:", err);
+    return { error: "Unexpected error occurred" };
+  }
+}
+
 // server-side function
 export async function deleteUserProfile() {
   try {
