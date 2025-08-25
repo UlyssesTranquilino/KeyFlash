@@ -1,16 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { Check } from "lucide-react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { upgradeUserToPro } from "../../../utils/auth/userUtils";
 
 const PaymentPage = () => {
-  const amount = 9.99;
-  const { user } = useAuth();
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-
   const initialOptions = {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
   };

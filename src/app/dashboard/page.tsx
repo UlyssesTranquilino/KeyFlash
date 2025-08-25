@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import UpgradeToProDialog from "@/components/ui/UpgradeToProDialog";
 
 export default function HomePage() {
-const router = useRouter();
+  const router = useRouter();
   const { user, session, loading } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [texts, setTexts] = useState<any[]>([]);
@@ -49,7 +49,7 @@ const router = useRouter();
         const [flashcardsData, textsData, codesData] = await Promise.all([
           getAllFlashcards(),
           getAllTexts(),
-          getAllCodes()
+          getAllCodes(),
         ]);
 
         setFlashcards(Array.isArray(flashcardsData) ? flashcardsData : []);
@@ -69,7 +69,6 @@ const router = useRouter();
   useEffect(() => {
     if (user !== undefined) {
       setAuthChecked(true);
-
     }
   }, [user]);
 
@@ -82,7 +81,6 @@ const router = useRouter();
   //   );
   // }
 
-  
   if (loading || loadingData || !authChecked) {
     return (
       <div className="container relative max-w-[1350px] px-2 md:px-5 mx-auto  py-4  overflow-hidden">
@@ -91,10 +89,8 @@ const router = useRouter();
         <div className="-z-3 absolute -bottom-50 -left-[200px] w-[400px] h-[200px] pointer-events-none rounded-full bg-[radial-gradient(ellipse_at_60%_40%,rgba(59,130,246,0.15)_0%,transparent_70%)] blur-2xl" />
 
         <div className="max-w-4xl mb-8 flex items-center gap-3">
-
           <Skeleton className="rounded-md w-40 h-10" />
           <Skeleton className="rounded-md w-20 h-10" />
-
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
@@ -149,7 +145,7 @@ const router = useRouter();
     );
   }
 
-  if (!user ) {
+  if (!user) {
     return (
       <div className="flex flex-col items-center justify-center mt-30 rounded-lg outline-1 border-blue-400 border-dashed mx-5 h-70 p-3 max-w-[500px] sm:mx-auto shadow-sm shadow-blue-700/50">
         <CircleUserRound
@@ -175,7 +171,6 @@ const router = useRouter();
       </div>
     );
   }
-
 
   function slugify(str: string) {
     return str

@@ -8,10 +8,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
     }
 
-    // Use server-only environment variables
-    const clientId = process.env.PAYPAL_CLIENT_ID;
+    // Server-only environment variables
+    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
     const secret = process.env.PAYPAL_SECRET_KEY;
-    const sandbox = false; // optional flag
 
     if (!clientId || !secret) {
       return NextResponse.json(
@@ -25,19 +24,14 @@ export async function POST(req: Request) {
     );
 
     // 1. Get access token
-    const tokenRes = await fetch(
-      sandbox
-        ? "https://api-m.sandbox.paypal.com/v1/oauth2/token"
-        : "https://api-m.paypal.com/v1/oauth2/token",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${base64Credentials}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: "grant_type=client_credentials",
-      }
-    );
+    const tokenRes = await fetch("https://api-m.paypal.com/v1/oauth2/token", {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${base64Credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: "grant_type=client_credentials",
+    });
 
     if (!tokenRes.ok) {
       const errBody = await tokenRes.text();
@@ -51,11 +45,7 @@ export async function POST(req: Request) {
 
     // 2. Capture payment
     const captureRes = await fetch(
-      `${
-        sandbox
-          ? "https://api-m.sandbox.paypal.com"
-          : "https://api-m.paypal.com"
-      }/v2/checkout/orders/${orderId}/capture`,
+      `https://api-m.paypal.com/v2/checkout/orders/${orderId}/capture`,
       {
         method: "POST",
         headers: {
@@ -69,7 +59,10 @@ export async function POST(req: Request) {
 
     if (!captureRes.ok) {
       return NextResponse.json(
-        { error: captureData || "Failed to capture payment" },
+        {
+          error: captureData?.message || "Failed to capture payment",
+          details: captureData,
+        },
         { status: captureRes.status }
       );
     }
