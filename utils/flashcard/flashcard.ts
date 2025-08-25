@@ -9,6 +9,7 @@ type termType = {
 };
 
 type flashcardDataType = {
+  is_public: boolean;
   id: string;
   user_id: string | undefined;
   title: string;
@@ -22,7 +23,9 @@ const LIMIT_COUNT = 5;
 export async function getAllFlashcards() {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       console.error("User not authenticated");
@@ -66,6 +69,7 @@ export async function editFlashcard(flashcardData: flashcardDataType) {
         title: flashcardData.title,
         description: flashcardData.description,
         terms: flashcardData.terms,
+        is_public: flashcardData.is_public,
       })
       .eq("id", flashcardData.id)
       .eq("user_id", user.id)
@@ -80,6 +84,43 @@ export async function editFlashcard(flashcardData: flashcardDataType) {
     return { data, error: null };
   } catch (error) {
     console.error("Unexpected error inserting flashcard:", error);
+    return { error: "Unexpected error occurred" };
+  }
+}
+
+export async function getFlashcardPublic(flashcardId: string) {
+  try {
+    const supabase = createClient();
+
+    // Fetch only public flashcards
+    const { data, error } = await supabase
+      .from("flashcards")
+      .select(
+        `
+        id,
+        title,
+        description,
+        terms,
+        user_id,
+        is_public
+      `
+      )
+      .eq("id", flashcardId)
+      .eq("is_public", true)
+      .single();
+
+    if (error) {
+      console.error("Error fetching public flashcard:", error);
+      return { error: error.message };
+    }
+
+    if (!data) {
+      return { error: "Flashcard not found or not public" };
+    }
+
+    return { data };
+  } catch (err) {
+    console.error("Unexpected error fetching public flashcard:", err);
     return { error: "Unexpected error occurred" };
   }
 }
@@ -129,6 +170,7 @@ export async function insertFlashcard(flashcardData: flashcardDataType) {
           description: flashcardData.description,
           created_at: flashcardData.created_at,
           terms: flashcardData.terms,
+          is_public: flashcardData.is_public ?? false,
         },
       ])
       .select()

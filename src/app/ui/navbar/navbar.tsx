@@ -140,17 +140,20 @@ export default function Navbar() {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <Link href="/dashboard/profile">
-                  <DropdownMenuItem>
+                  <DropdownMenuItem className="cursor-pointer">
                     <BadgeCheck />
                     View Profile
                   </DropdownMenuItem>
                 </Link>
                 {!user.isPro && (
-                  <DropdownMenuItem>
+                  <Link href="/payment">
                     {" "}
-                    <Sparkles />
-                    Upgrade to Pro
-                  </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      {" "}
+                      <Sparkles />
+                      Upgrade to Pro
+                    </DropdownMenuItem>
+                  </Link>
                 )}
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
@@ -227,12 +230,19 @@ export default function Navbar() {
               </div>
               <div className="grid flex-1 auto-rows-min gap-6 px-4"></div>
               <SheetFooter>
-                {user && (
+                {user ? (
                   <Link
                     href="/dashboard"
                     className="text-center py-[12px]  bg-blue-600/10 hover:bg-blue-600/20 border-1 border-blue-500/30 hover:border-blue-400/40 p-[6px] px-3 rounded-sm"
                   >
                     Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    href="/signin"
+                    className="text-center py-[12px]  bg-blue-600/10 hover:bg-blue-600/20 border-1 border-blue-500/30 hover:border-blue-400/40 p-[6px] px-3 rounded-sm"
+                  >
+                    Get Started
                   </Link>
                 )}
 

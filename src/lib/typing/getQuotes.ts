@@ -18,10 +18,10 @@ export async function getRandomQuote() {
 
   for (let i = 0; i < 100; i++) {
     try {
-     const { data } = await axios.get<
+      const { data } = await axios.get<
         [{ quote: string; author: string; category?: string }]
       >("https://api.api-ninjas.com/v1/quotes", {
-        headers: { "X-Api-Key": process.env.NEXT_PUBLIC_NINJAS_KEY! },
+        headers: { "X-Api-Key": process.env.NINJAS_KEY! },
       });
 
       if (data && data.length > 0) {
@@ -48,5 +48,5 @@ export const insertQuotes = async () => {
 
   if (error) {
     console.error("Error inserting quotes:", error);
-  } 
+  }
 };

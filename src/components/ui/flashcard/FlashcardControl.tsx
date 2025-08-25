@@ -43,7 +43,7 @@ export const FlashcardControls = ({
       <div className="flex items-center justify-start flex-nowrap sm:items-center gap-3 sm:gap-5">
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex flex-col switch gap-1 items-center">
+            <div className="flex flex-col switch gap-1 items-center cursor-pointer">
               <Switch
                 id="code-toggle"
                 checked={isQuizMode}

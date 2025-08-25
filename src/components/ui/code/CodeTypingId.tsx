@@ -260,11 +260,12 @@ const CodeTypingId = ({ codeData }: { codeData: CodeTypingProps }) => {
   // Improved Enter key handling
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Backspace" && e.ctrlKey) {
+      if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         deletePreviousWord();
         return;
       }
+
 
       if (e.key === "Tab") {
         e.preventDefault();

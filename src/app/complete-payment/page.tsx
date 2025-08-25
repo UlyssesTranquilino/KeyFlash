@@ -4,91 +4,85 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-
+import { getUserProStatus } from "../../../utils/auth/userUtils";
 const SuccessPage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
-  const supabase = createClientComponentClient();
+  const [checkProStatusLoading, setCheckProStatusLoading] = useState(true);
 
-  // useEffect(() => {
-  //   const checkProStatus = async () => {
-  //     if (!user) return;
-  //     setLoading(true);
+  useEffect(() => {
+    if (!user) return; // wait until user is loaded
 
-  //     const { data, error } = await supabase
-  //       .from("profiles")
-  //       .select("*")
-  //       .eq("id", user.id)
-  //       .single();
+    const checkProStatus = async () => {
+      setCheckProStatusLoading(true);
 
-  //     console.log("DATA: ", data);
-  //     if (error) {
-  //       console.error("Error checking pro status: ", error);
-  //       setLoading(false);
-  //       return;
-  //     }
+      const { data, error } = await getUserProStatus();
 
-  //     if (data?.is_pro) {
-  //       setSuccess(true);
-  //     }
+      if (error) {
+        console.error("Error checking pro status:", error);
+        setCheckProStatusLoading(false);
+        return;
+      }
 
-  //     setLoading(false);
-  //   };
+      if (data?.is_pro) {
+        setSuccess(true);
+      }
 
-  //   checkProStatus();
-  // }, []);
+      setCheckProStatusLoading(false);
+    };
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen  text-white flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-  //         <p>Processing your payment...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+    checkProStatus();
+  }, [user]); // << key change: watch user
 
-  // if (!success) {
-  //   return (
-  //     <div className="min-h-screen -mt-10 text-white flex items-center justify-center px-4">
-  //       <div className="bg-gray-950 border border-red-500 rounded-xl max-w-md w-full p-8 text-center shadow-lg">
-  //         <div className="flex justify-center mb-4">
-  //           <svg
-  //             xmlns="http://www.w3.org/2000/svg"
-  //             className="h-12 w-12 text-red-500"
-  //             fill="none"
-  //             viewBox="0 0 24 24"
-  //             stroke="currentColor"
-  //           >
-  //             <path
-  //               strokeLinecap="round"
-  //               strokeLinejoin="round"
-  //               strokeWidth={2}
-  //               d="M12 9v2m0 4h.01m-6.938 4h13.856C19.07 19 20 18.07 20 16.938V7.062C20 5.93 19.07 5 17.938 5H6.062C4.93 5 4 5.93 4 7.062v9.876C4 18.07 4.93 19 6.062 19z"
-  //             />
-  //           </svg>
-  //         </div>
-  //         <h2 className="text-xl font-semibold text-red-400 mb-2">
-  //           Payment Failed
-  //         </h2>
-  //         <p className="text-sm text-gray-300 mb-6">
-  //           There was an issue processing your payment. Please try again or
-  //           contact support if the issue persists.
-  //         </p>
-  //         <button
-  //           onClick={() => router.push("/payment")}
-  //           className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition duration-200"
-  //         >
-  //           Back to Payment
-  //         </button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  if (!user || loading || checkProStatusLoading) {
+    return (
+      <div className="min-h-screen  text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p>Processing your payment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!success) {
+    return (
+      <div className="min-h-screen -mt-10 text-white flex items-center justify-center px-4">
+        <div className="bg-gray-950 border border-red-500 rounded-xl max-w-md w-full p-8 text-center shadow-lg">
+          <div className="flex justify-center mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-12 w-12 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856C19.07 19 20 18.07 20 16.938V7.062C20 5.93 19.07 5 17.938 5H6.062C4.93 5 4 5.93 4 7.062v9.876C4 18.07 4.93 19 6.062 19z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-red-400 mb-2">
+            Payment Failed
+          </h2>
+          <p className="text-sm text-gray-300 mb-6">
+            There was an issue processing your payment. Please try again or
+            contact support if the issue persists.
+          </p>
+          <button
+            onClick={() => router.push("/payment")}
+            className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition duration-200"
+          >
+            Back to Payment
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen -mt-10 text-white flex items-center justify-center">
@@ -120,7 +114,7 @@ const SuccessPage = () => {
         </div>
         <button
           onClick={() => router.push("/dashboard")}
-          className="cursor-pointer w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+          className="cursor-pointer  w-full outline-1 outline-blue-600 bg-blue-600/60 hover:bg-blue-600/80 text-white py-2 rounded-md transition"
         >
           Go to Dashboard
         </button>

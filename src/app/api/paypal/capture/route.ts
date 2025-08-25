@@ -2,23 +2,33 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  const secret = process.env.NEXT_PUBLIC_PAYPAL_SECRET_KEY;
-
-  const base64Credentials = Buffer.from(`${clientId}:${secret}`).toString(
-    "base64"
-  );
-
   try {
     const { orderId } = await req.json();
-
     if (!orderId) {
       return NextResponse.json({ error: "Missing orderId" }, { status: 400 });
     }
 
-    // Get access token
+    // Use server-only environment variables
+    const clientId = process.env.PAYPAL_CLIENT_ID;
+    const secret = process.env.PAYPAL_SECRET_KEY;
+    const sandbox = false; // optional flag
+
+    if (!clientId || !secret) {
+      return NextResponse.json(
+        { error: "PayPal credentials are not configured" },
+        { status: 500 }
+      );
+    }
+
+    const base64Credentials = Buffer.from(`${clientId}:${secret}`).toString(
+      "base64"
+    );
+
+    // 1. Get access token
     const tokenRes = await fetch(
-      "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+      sandbox
+        ? "https://api-m.sandbox.paypal.com/v1/oauth2/token"
+        : "https://api-m.paypal.com/v1/oauth2/token",
       {
         method: "POST",
         headers: {
@@ -29,12 +39,23 @@ export async function POST(req: Request) {
       }
     );
 
-    const tokenData = await tokenRes.json();
-    const access_token = tokenData.access_token;
+    if (!tokenRes.ok) {
+      const errBody = await tokenRes.text();
+      return NextResponse.json(
+        { error: `Failed to get access token: ${errBody}` },
+        { status: tokenRes.status }
+      );
+    }
 
-    // Capture payment
+    const { access_token } = await tokenRes.json();
+
+    // 2. Capture payment
     const captureRes = await fetch(
-      `https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`,
+      `${
+        sandbox
+          ? "https://api-m.sandbox.paypal.com"
+          : "https://api-m.paypal.com"
+      }/v2/checkout/orders/${orderId}/capture`,
       {
         method: "POST",
         headers: {

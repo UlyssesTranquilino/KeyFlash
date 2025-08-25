@@ -29,10 +29,10 @@ const Footer = () => {
             <p className="text-white/80 hover:text-white transition-colors duration-200">
               Contact us at{" "}
               <a
-                href="mailto:keyflashapp.contact@gmail.com"
+                href="mailto:support@keyflash.app"
                 className="text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-200"
               >
-                keyflashapp.contact@gmail.com
+                support@keyflash.app
               </a>
             </p>
           </div>
@@ -49,6 +49,9 @@ const Footer = () => {
             </Link>
             <Link href="/contact" className="hover:text-white transition">
               Contact
+            </Link>
+            <Link href="/privacy" className="hover:text-white transition">
+              Privacy
             </Link>
           </div>
         </div>
