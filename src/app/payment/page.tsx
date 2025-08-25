@@ -145,7 +145,7 @@ const PaymentPage = () => {
           <div className="rounded-xl border border-gray-700 p-6 bg-gray-800/50">
             <h2 className="text-xl font-semibold mb-4">Pro Plan</h2>
             <div className="mb-6">
-              <span className="text-4xl font-bold">$9.99</span>
+              <span className="text-4xl font-bold">$4.99</span>
               <span className="text-gray-400 ml-2">one-time payment</span>
             </div>
 
@@ -189,11 +189,11 @@ const PaymentPage = () => {
             <div className="mb-6">
               <div className="flex justify-between mb-2">
                 <span className="text-gray-300">Pro Plan</span>
-                <span>$9.99</span>
+                <span>$4.99</span>
               </div>
               <div className="flex justify-between font-semibold text-lg pt-2 border-t border-gray-700">
                 <span>Total</span>
-                <span>$9.99</span>
+                <span>$4.99</span>
               </div>
             </div>
 

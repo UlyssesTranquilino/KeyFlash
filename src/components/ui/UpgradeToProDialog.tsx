@@ -65,7 +65,7 @@ const UpgradeToProDialog = ({
               <span className="font-medium text-white">Early Access Deal</span>
             </div>
             <p className="text-sm text-blue-200 mt-1">
-              Get lifetime access for just $9.99. Price will increase soon!
+              Get lifetime access for just $4.99. Price will increase soon!
             </p>
           </div>
         </div>

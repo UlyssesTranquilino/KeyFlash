@@ -86,7 +86,7 @@ export const supportFaqs = [
       {
         question: "How much does Pro cost?",
         answer:
-          "Right now, we're offering an Early Access Lifetime Deal for just $9.99 — one-time payment, no subscription. This price may increase in the future.",
+          "Right now, we're offering an Early Access Lifetime Deal for just $4.99 — one-time payment, no subscription. This price may increase in the future.",
       },
       {
         question: "Do I need Pro to use the app?",

@@ -178,7 +178,7 @@ const PricingPage = () => {
         <div className="rounded-2xl border border-blue-700 p-6 bg-gradient-to-b from-blue-900/60 to-black shadow-xl">
           <h2 className="text-xl font-semibold text-white mb-4">Pro</h2>
           <div className="flex flex-col gap-3 h-26">
-            <h1 className="font-semibold text-3xl ">9.99$</h1>
+            <h1 className="font-semibold text-3xl ">4.99$</h1>
             <div className="flex flex-col md:flex-row gap-1 md:gap-3">
               <p className="text-sm text-blue-300 bg-blue-950/30 rounded-md w-48 p-2 ">
                 Early Access Lifetime Deal
