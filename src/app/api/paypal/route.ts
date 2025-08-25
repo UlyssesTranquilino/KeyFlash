@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const secret = process.env.NEXT_PUBLIC_PAYPAL_SECRET_KEY;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   const base64Credentials = Buffer.from(`${clientId}:${secret}`).toString(
     "base64"
@@ -78,8 +79,8 @@ export async function POST(req: Request) {
                 shipping_preference: "NO_SHIPPING",
                 locale: "en-US",
                 user_action: "PAY_NOW",
-                return_url: "https://yourdomain.com/complete-payment",
-                cancel_url: "https://yourdomain.com/cancel-payment",
+                return_url: `${siteUrl}/complete-payment`,
+                cancel_url: `${siteUrl}/cancel-payment`,
               },
             },
           },

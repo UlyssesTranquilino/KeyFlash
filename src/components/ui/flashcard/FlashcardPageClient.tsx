@@ -226,6 +226,12 @@ const FlashcardPageClient = ({
         data = res.data;
       }
 
+      if (!data) {
+        toast.error("Access denied or flashcard not found.");
+        router.replace("/signin"); // redirect to homepage
+        return;
+      }
+
       if (data) {
         setFlashcard(data);
         setCopyFlashcardData(data);

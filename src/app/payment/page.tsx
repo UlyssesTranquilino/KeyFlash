@@ -50,7 +50,7 @@ const PaymentPage = () => {
       if (response.ok && result.captureData?.status === "COMPLETED") {
         const resUpgradeUser = await upgradeUserToPro();
 
-        // window.location.href = "/complete-payment";
+        window.location.href = "/complete-payment";
       } else {
         throw new Error("Payment not completed");
       }
