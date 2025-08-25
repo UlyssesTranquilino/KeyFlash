@@ -1,5 +1,9 @@
 "use client";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
@@ -53,11 +57,21 @@ export const privacySections = [
 ];
 
 const PrivacyPage = () => {
-  const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
+  const FAQItem = ({
+    question,
+    answer,
+  }: {
+    question: string;
+    answer: string;
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="flex flex-col gap-2">
+      <Collapsible
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        className="flex flex-col gap-2"
+      >
         <CollapsibleTrigger asChild>
           <div className="bg-gray-900/70 hover:bg-gray-900 cursor-pointer p-3 flex items-center justify-between gap-4 px-4">
             <h4 className="text-sm lg:text-base font-medium">{question}</h4>
@@ -78,7 +92,7 @@ const PrivacyPage = () => {
 
   return (
     <div className="px-2 max-w-[900px] mx-auto mb-30">
-      <div className="-mt-10 h-20 md:h-100 px-3 relative flex flex-col items-center justify-center gap-10 overflow-hidden">
+      <div className=" mt-2 h-20 md:h-100 px-3 relative flex flex-col items-center justify-center gap-10 overflow-hidden">
         <h1 className="text-xl md:text-2xl lg:text-4xl">Privacy Policy</h1>
         <div className="absolute -right-6 lg:-right-20 -z-1 size-55 md:size-75 lg:size-120 rounded-full bg-radial-[at_50%_50%] from-blue-500/30 to-black to-70%"></div>
       </div>
@@ -89,13 +103,16 @@ const PrivacyPage = () => {
             <h1 className="md:text-lg font-semibold mb-5">{section.section}</h1>
             <div className="flex flex-col gap-4">
               {section.faqs.map((faq) => (
-                <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
+                <FAQItem
+                  key={faq.question}
+                  question={faq.question}
+                  answer={faq.answer}
+                />
               ))}
             </div>
           </div>
         ))}
-
-   </div>
+      </div>
     </div>
   );
 };

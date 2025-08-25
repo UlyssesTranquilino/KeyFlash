@@ -1,10 +1,23 @@
 "use client";
 
+import { useEffect } from "react";
 import { Check } from "lucide-react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { upgradeUserToPro } from "../../../utils/auth/userUtils";
+import { useAuth } from "../context/AuthContext";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PaymentPage = () => {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/signin"); // redirect if user not found
+    }
+  }, [user, router]);
+
   const initialOptions = {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
   };
@@ -58,6 +71,63 @@ const PaymentPage = () => {
     console.error("Paypal error: ", error);
     window.location.href = "/cancel-payment";
   };
+
+  if (loading || !user) {
+    return (
+      <div className="min-h-screen text-white">
+        <div className="container mx-auto px-4 py-12 max-w-4xl">
+          {/* Header Skeleton */}
+          <div className="text-center mb-10">
+            <Skeleton className="h-8 w-64 mx-auto mb-2" />
+            <Skeleton className="h-4 w-48 mx-auto" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column - Plan Details Skeleton */}
+            <div className="rounded-xl border border-gray-700 p-6 bg-gray-800/50">
+              <Skeleton className="h-7 w-32 mb-4" />
+              <div className="mb-6">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-4 w-32 mt-2" />
+              </div>
+
+              <ul className="space-y-3 mb-8">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <Skeleton className="h-4 w-4 rounded-full" />
+                    <Skeleton className="h-4 w-40" />
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right Column - Payment Form Skeleton */}
+            <div className="rounded-xl border border-blue-700 p-6 bg-gradient-to-b from-blue-900/30 to-gray-900">
+              <Skeleton className="h-7 w-48 mb-6" />
+
+              <div className="mb-6">
+                <div className="flex justify-between mb-2">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <div className="flex justify-between font-semibold text-lg pt-2 border-t border-gray-700">
+                  <Skeleton className="h-5 w-12" />
+                  <Skeleton className="h-5 w-12" />
+                </div>
+              </div>
+
+              {/* PayPal Button Skeleton */}
+              <div className="bg-gray-700 p-3 rounded-md h-40 flex items-center justify-center">
+                <Skeleton className="h-10 w-full" />
+              </div>
+
+              <Skeleton className="h-3 w-64 mx-auto mt-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-white">
@@ -130,7 +200,6 @@ const PaymentPage = () => {
             <div className="bg-white p-3 rounded-md">
               <PayPalScriptProvider options={initialOptions}>
                 <PayPalButtons
-                  // style={styles}
                   createOrder={onCreateOrder}
                   onApprove={onApprove}
                   onError={onError}
