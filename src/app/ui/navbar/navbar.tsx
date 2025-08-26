@@ -164,8 +164,10 @@ export default function Navbar() {
                       </DropdownMenuItem>
                     </Link> */}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                {" "}
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="cursor-pointer"
+              >
                 <LogOut />
                 Log out
               </DropdownMenuItem>
