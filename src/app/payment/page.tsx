@@ -13,10 +13,12 @@ const PaymentPage = () => {
   const router = useRouter();
 
   useEffect(() => {
+    if (loading) return;
+
     if (!loading && !user) {
       router.push("/signin"); // redirect if user not found
     }
-  }, [user, router]);
+  }, [user, router, loading]);
 
   const initialOptions = {
     clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,

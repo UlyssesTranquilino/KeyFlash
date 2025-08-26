@@ -526,7 +526,7 @@ export default function FlashcardCreate() {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Add a new card ({isMac ? "Cmd" : "Ctrl"} + Enter)</p>
+              <p>Add a new card ({isMac ? "⌘" : "Ctrl"} + Enter)</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

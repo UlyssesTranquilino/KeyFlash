@@ -1,3 +1,6 @@
+"use client";
+import { useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@radix-ui/react-label";
@@ -38,6 +41,23 @@ export const FlashcardControls = ({
   onReset: () => void;
   onRestart: () => void;
 }) => {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Restart card with Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)
+      if (
+        (e.ctrlKey || e.metaKey) &&
+        e.shiftKey &&
+        e.key.toLowerCase() === "r"
+      ) {
+        e.preventDefault();
+        onRestart(); // 🔥 trigger parent restart logic
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onRestart]);
+
   return (
     <div className="w-full absolute right-1/2 -bottom-30 grid grid-cols-5 items-center translate-x-1/2">
       <div className="flex items-center justify-start flex-nowrap sm:items-center gap-3 sm:gap-5">
@@ -149,7 +169,12 @@ export const FlashcardControls = ({
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Restart Card</p>
+            <p className="flex flex-col items-center justify-center">
+              Restart Card{" "}
+              <span className="text-xs text-gray-300">
+                (Ctrl+Shift+R / ⌘+Shift+R)
+              </span>
+            </p>
           </TooltipContent>
         </Tooltip>
       </div>

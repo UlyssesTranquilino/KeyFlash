@@ -428,7 +428,7 @@ export const FlashcardItem = ({
                       onClick={goToNext} // move to next card
                       className="inline-flex items-center ml-3 gap-2 px-3 py-1 bg-blue-900/30 rounded-full cursor-pointer hover:bg-blue-800/50"
                     >
-                      <SkipForward className="text-gray-300 w-3 h-3" />
+                      <SkipForward className="text-gray-300 w-3 h-3  rotate-180" />
                       <span className="hidden sm:block text-gray-300 text-sm">
                         Continue
                       </span>
@@ -459,7 +459,7 @@ export const FlashcardItem = ({
                         )}
                         aria-label="Skip back to question"
                       >
-                        <SkipForward className="w-4" />
+                        <SkipForward className="w-4 rotate-180" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>

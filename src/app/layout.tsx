@@ -8,14 +8,57 @@ import Footer from "@/components/Footer";
 import AuthProviderClient from "@/components/ui/AuthProviderClient";
 
 export const metadata: Metadata = {
-  title: "KeyFlash",
-  description: "Typing-powered flashcards",
-  icons: {
-    icon: "/KeyFlashLogo.png",
-    shortcut: "/KeyFlashLogo.png",
-    apple: "/KeyFlashLogo.png",
+  metadataBase: new URL("https://keyflash.app"),
+  title: {
+    default: "KeyFlash – Learn by Typing",
+    template: "%s | KeyFlash",
   },
+  description:
+    "Typing‑powered flashcards and practice modes that boost recall, accuracy, and WPM. Upload notes or code, then master by typing.",
+  keywords: [
+    "typing flashcards",
+    "learn by typing",
+    "active recall",
+    "typing practice app",
+    "flashcard typing mode",
+    "WPM tracking",
+    "study app",
+    "code typing practice",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: "https://keyflash.app/",
+    siteName: "KeyFlash",
+    title: "KeyFlash – Learn by Typing",
+    description:
+      "Turn notes into interactive typing sessions. Boost retention with active recall, WPM tracking, and gamified repetition.",
+    images: [
+      {
+        url: "/KeyFlashLogo.png",
+        width: 1200,
+        height: 630,
+        alt: "KeyFlash – Typing‑powered flashcards",
+      },
+    ],
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/KeyFlashLogo.png", sizes: "32x32", type: "image/png" },
+      { url: "/KeyFlashLogo.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
+  manifest: "/manifest.json",
+  themeColor: "#0A1A2F", // match your brand/navy
 };
+
 import { TestModeContextProvider } from "@/context/TestModeContext";
 import ClientWrapper from "@/components/ClientWrapper";
 

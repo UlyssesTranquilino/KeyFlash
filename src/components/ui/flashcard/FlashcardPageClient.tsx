@@ -75,7 +75,7 @@ const FlashcardPageClient = ({
   isPublicView?: boolean;
 }) => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { loading, user } = useAuth();
   const id = slug.split("-")[0];
   const [flashcard, setFlashcard] = useState<any>({
     title: "",
@@ -84,7 +84,7 @@ const FlashcardPageClient = ({
   });
 
   const [copyFlashcardData, setCopyFlashcardData] = useState<any>({});
-  const [loading, setLoading] = useState(true);
+  const [loadingFetch, setLoadingFetch] = useState(true);
 
   // Flashcard Navigation
   const [current, setCurrent] = useState(0);
@@ -213,13 +213,14 @@ const FlashcardPageClient = ({
   }, [isTypingMode, currentPhase, cardCompleted, answerTimeout, goToNext]);
 
   useEffect(() => {
+    if (loading) return;
+
     const fetchFlashcard = async () => {
-      setLoading(true);
+      setLoadingFetch(true);
 
       let data;
-      if (isPublicView) {
+      if (isPublicView && flashcard.user_id != user?.id) {
         const res = await getFlashcardPublic(id);
-
         data = res.data;
       } else if (user?.id) {
         const res = await getFlashcard(user.id, id);
@@ -241,11 +242,11 @@ const FlashcardPageClient = ({
         setCount(data.terms.length);
       }
 
-      setLoading(false);
+      setLoadingFetch(false);
     };
 
     fetchFlashcard();
-  }, [user?.id, id, isPublicView]); // ✅ only primitives
+  }, [user?.id, id, isPublicView, loading]); // ✅ only primitives
 
   // Update current term when current index changes
   useEffect(() => {
@@ -668,7 +669,7 @@ const FlashcardPageClient = ({
         />
       )}
 
-      {!loading ? (
+      {!loadingFetch ? (
         <div className="relative -mt-3 sm:-mt-5">
           <FlashcardHeader
             title={title}
