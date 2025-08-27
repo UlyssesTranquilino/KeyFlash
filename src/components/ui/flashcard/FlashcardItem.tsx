@@ -567,20 +567,19 @@ export const FlashcardItem = ({
                     isExactCorrect ? (
                       <div className="mt-4 p-4  rounded-md w-full text-yellow-400">
                         <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-                        <p className="mb-2 ">Almost - correct:</p>
+                        <p className="mb-2 ">Almost - correct</p>
                         <p className="text-white text-xl">{item?.answer}</p>
                       </div>
                     ) : (
                       <>
                         <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-                        "Correct!"
+                        Correct!
                       </>
                     )
                   ) : (
                     <>
-                      {" "}
                       <CheckCircle className="w-8 h-8 mx-auto mb-2" />
-                      "Card completed!"
+                      Card completed!
                     </>
                   )}
                 </span>
