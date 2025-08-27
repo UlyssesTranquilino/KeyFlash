@@ -6,6 +6,9 @@ import Navbar from "./ui/navbar/navbar";
 import ConditionalNavbar from "@/components/ConditionalNavbar";
 import Footer from "@/components/Footer";
 import AuthProviderClient from "@/components/ui/AuthProviderClient";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://keyflash.app"),
@@ -81,7 +84,22 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <ClientWrapper>{children}</ClientWrapper>
+              <ClientWrapper>
+                <Script
+                  src="https://www.googletagmanager.com/gtag/js?id=G-692LX2CBYH"
+                  strategy="afterInteractive"
+                />
+                <Script id="google-analytics" strategy="afterInteractive">
+                  {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-692LX2CBYH');
+          `}
+                </Script>
+
+                {children}
+              </ClientWrapper>
             </ThemeProvider>
           </AuthProviderClient>
         </TestModeContextProvider>
