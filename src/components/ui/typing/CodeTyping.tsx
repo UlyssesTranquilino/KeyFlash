@@ -335,7 +335,7 @@ const CodeTyping: React.FC<CodeTypingProps> = ({
 
           <div className="flex items-center justify-center gap-3 sm:gap-14 md:gap-22 lg:gap-28 my-10">
             <button
-              className="flex items-center justify-center lg:text-lg mt-4 p-2 px-6 hover:text-gray-300 hover:bg-gray-900 rounded-sm text-gray-400 transition-colors"
+              className="cursor-pointer flex items-center justify-center lg:text-lg mt-4 p-2 px-6 hover:text-gray-300 hover:bg-gray-900 rounded-sm text-gray-400 transition-colors"
               onClick={resetTest}
             >
               <RotateCcw className="mr-2 lg:mr-3 w-4 h-4 lg:scale-130" />

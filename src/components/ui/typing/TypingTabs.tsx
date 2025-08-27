@@ -425,7 +425,7 @@ export default function TypingTabs() {
                 <button
                   onClick={() => setOpenAddText(!openAddText)}
                   className={cn(
-                    "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                    "cursor-pointer flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                     openAddText
                       ? "text-blue-400"
                       : "text-gray-400 hover:text-white",

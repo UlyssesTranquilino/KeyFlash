@@ -56,7 +56,7 @@ const StandardTyping = ({ text }) => {
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [mistakes, setMistakes] = useState(0);
   const [loading, setLoading] = useState(false);
-const [textData, setTextData] = useState(formatTextWithLineBreaks(text));
+  const [textData, setTextData] = useState(formatTextWithLineBreaks(text));
 
   // Stats
   const [endTime, setEndTime] = useState<number | null>(null);
@@ -172,41 +172,44 @@ const [textData, setTextData] = useState(formatTextWithLineBreaks(text));
   const CONTAINER_HEIGHT = LINE_HEIGHT * VISIBLE_LINES;
 
   // Function to calculate which line a character position is on
-const calculateLineForPosition = useCallback(
-  (position: number) => {
-    if (!wordsRef.current || !textData) return 0;
+  const calculateLineForPosition = useCallback(
+    (position: number) => {
+      if (!wordsRef.current || !textData) return 0;
 
-    // Count actual newlines up to the position
-    const textUpToPosition = textData.substring(0, position);
-    const newlineCount = (textUpToPosition.match(/\n/g) || []).length;
-    
-    // Create a temporary element to measure wrapped lines
-    const tempDiv = document.createElement("div");
-    tempDiv.style.position = "absolute";
-    tempDiv.style.visibility = "hidden";
-    tempDiv.style.whiteSpace = "pre-wrap"; // Important: preserve whitespace and newlines
-    tempDiv.style.wordWrap = "break-word";
-    tempDiv.style.fontSize = window.getComputedStyle(wordsRef.current).fontSize;
-    tempDiv.style.fontFamily = window.getComputedStyle(wordsRef.current).fontFamily;
-    tempDiv.style.width = window.getComputedStyle(wordsRef.current).width;
-    tempDiv.style.lineHeight = `${LINE_HEIGHT}px`;
+      // Count actual newlines up to the position
+      const textUpToPosition = textData.substring(0, position);
+      const newlineCount = (textUpToPosition.match(/\n/g) || []).length;
 
-    document.body.appendChild(tempDiv);
+      // Create a temporary element to measure wrapped lines
+      const tempDiv = document.createElement("div");
+      tempDiv.style.position = "absolute";
+      tempDiv.style.visibility = "hidden";
+      tempDiv.style.whiteSpace = "pre-wrap"; // Important: preserve whitespace and newlines
+      tempDiv.style.wordWrap = "break-word";
+      tempDiv.style.fontSize = window.getComputedStyle(
+        wordsRef.current,
+      ).fontSize;
+      tempDiv.style.fontFamily = window.getComputedStyle(
+        wordsRef.current,
+      ).fontFamily;
+      tempDiv.style.width = window.getComputedStyle(wordsRef.current).width;
+      tempDiv.style.lineHeight = `${LINE_HEIGHT}px`;
 
-    // Set the text content preserving formatting
-    tempDiv.textContent = textUpToPosition;
+      document.body.appendChild(tempDiv);
 
-    const height = tempDiv.offsetHeight;
-    const wrappedLines = Math.floor(height / LINE_HEIGHT);
+      // Set the text content preserving formatting
+      tempDiv.textContent = textUpToPosition;
 
-    document.body.removeChild(tempDiv);
+      const height = tempDiv.offsetHeight;
+      const wrappedLines = Math.floor(height / LINE_HEIGHT);
 
-    // The total lines is the maximum of wrapped lines and newline-based lines
-    return Math.max(newlineCount, wrappedLines);
-  },
-  [textData, LINE_HEIGHT],
-);
+      document.body.removeChild(tempDiv);
 
+      // The total lines is the maximum of wrapped lines and newline-based lines
+      return Math.max(newlineCount, wrappedLines);
+    },
+    [textData, LINE_HEIGHT],
+  );
 
   // Update scroll position based on current typing position
   const updateScrollPosition = useCallback(() => {
@@ -252,93 +255,92 @@ const calculateLineForPosition = useCallback(
   }, [debouncedWpmUpdate]);
 
   // Highlighting Text with Horizontal Wrapping (similar to Words component)
-const highlightedText = useMemo(() => {
-  if (!textData) return null;
+  const highlightedText = useMemo(() => {
+    if (!textData) return null;
 
-  // Split text preserving both words and all whitespace characters separately
-  const segments = textData.split(/(\s)/); // Split on each individual whitespace character
-  const userInputChars = userInput.split("");
-  let charIndex = 0;
+    // Split text preserving both words and all whitespace characters separately
+    const segments = textData.split(/(\s)/); // Split on each individual whitespace character
+    const userInputChars = userInput.split("");
+    let charIndex = 0;
 
-  return segments.map((segment, segmentIdx) => {
-    // Handle individual whitespace characters (including newlines)
-    if (/^\s$/.test(segment)) {
-      const currentCharIndex = charIndex++;
-      const isCursor = currentCharIndex === userInput.length;
-      const userChar = userInputChars[currentCharIndex];
-      const isCorrect = userChar === segment;
-      const isTyped = currentCharIndex < userInput.length;
+    return segments.map((segment, segmentIdx) => {
+      // Handle individual whitespace characters (including newlines)
+      if (/^\s$/.test(segment)) {
+        const currentCharIndex = charIndex++;
+        const isCursor = currentCharIndex === userInput.length;
+        const userChar = userInputChars[currentCharIndex];
+        const isCorrect = userChar === segment;
+        const isTyped = currentCharIndex < userInput.length;
 
-      const className = isTyped
-        ? isCorrect
-          ? "text-white"
-          : "text-red-600/75 bg-red-900/30"
-        : "text-gray-500";
+        const className = isTyped
+          ? isCorrect
+            ? "text-white"
+            : "text-red-600/75 bg-red-900/30"
+          : "text-gray-500";
 
-      // Handle different types of whitespace
-      let displayChar;
-      if (segment === '\n') {
-        displayChar = <br />;
-      } else if (segment === ' ') {
-        displayChar = '\u00A0'; // Non-breaking space
-      } else if (segment === '\t') {
-        displayChar = '\u00A0\u00A0\u00A0\u00A0'; // Tab as 4 spaces
-      } else {
-        displayChar = '\u00A0'; // Other whitespace as space
+        // Handle different types of whitespace
+        let displayChar;
+        if (segment === "\n") {
+          displayChar = <br />;
+        } else if (segment === " ") {
+          displayChar = "\u00A0"; // Non-breaking space
+        } else if (segment === "\t") {
+          displayChar = "\u00A0\u00A0\u00A0\u00A0"; // Tab as 4 spaces
+        } else {
+          displayChar = "\u00A0"; // Other whitespace as space
+        }
+
+        return (
+          <span key={segmentIdx} className="relative">
+            {isCursor && (
+              <span
+                ref={cursorRef}
+                className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                  isIdle ? "animate-pulse" : ""
+                }`}
+              />
+            )}
+            <span className={className}>{displayChar}</span>
+          </span>
+        );
       }
 
+      // Handle regular word segments
+      const wordChars = segment.split("");
       return (
-        <span key={segmentIdx} className="relative">
-          {isCursor && (
-            <span
-              ref={cursorRef}
-              className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                isIdle ? "animate-pulse" : ""
-              }`}
-            />
-          )}
-          <span className={className}>{displayChar}</span>
+        <span key={segmentIdx} className="inline">
+          {wordChars.map((char, charIdx) => {
+            const currentCharIndex = charIndex++;
+            const isCursor = currentCharIndex === userInput.length;
+            const userChar = userInputChars[currentCharIndex];
+            const isCorrect = userChar === char;
+            const isTyped = currentCharIndex < userInput.length;
+
+            let className = "text-gray-500";
+            if (isTyped) {
+              className = isCorrect
+                ? "text-white"
+                : "text-red-600/75 bg-red-900/30";
+            }
+
+            return (
+              <span key={currentCharIndex} className="relative">
+                {isCursor && (
+                  <span
+                    ref={cursorRef}
+                    className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
+                      isIdle ? "animate-pulse" : ""
+                    }`}
+                  />
+                )}
+                <span className={className}>{char}</span>
+              </span>
+            );
+          })}
         </span>
       );
-    }
-
-    // Handle regular word segments
-    const wordChars = segment.split("");
-    return (
-      <span key={segmentIdx} className="inline">
-        {wordChars.map((char, charIdx) => {
-          const currentCharIndex = charIndex++;
-          const isCursor = currentCharIndex === userInput.length;
-          const userChar = userInputChars[currentCharIndex];
-          const isCorrect = userChar === char;
-          const isTyped = currentCharIndex < userInput.length;
-
-          let className = "text-gray-500";
-          if (isTyped) {
-            className = isCorrect
-              ? "text-white"
-              : "text-red-600/75 bg-red-900/30";
-          }
-
-          return (
-            <span key={currentCharIndex} className="relative">
-              {isCursor && (
-                <span
-                  ref={cursorRef}
-                  className={`absolute left-0 top-1 lg:top-[9px] w-0.5 h-6 bg-blue-400 cursor-blink ${
-                    isIdle ? "animate-pulse" : ""
-                  }`}
-                />
-              )}
-              <span className={className}>{char}</span>
-            </span>
-          );
-        })}
-      </span>
-    );
-  });
-}, [textData, userInput, isIdle]);
-
+    });
+  }, [textData, userInput, isIdle]);
 
   const handleRefetch = useCallback(async () => {
     setLoading(true);
@@ -516,53 +518,50 @@ const highlightedText = useMemo(() => {
               </motion.div>
             )}
 
-<motion.div
-  key={testId}
-  initial={{ opacity: 0, y: 10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.3, ease: "easeOut" }}
-  ref={textDisplayRef}
-  className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.6rem] text-left transition-opacity duration-100 ${
-    spaceMono.className
-  } leading-10 mb-8 max-h-[50vh] overflow-y-auto overflow-x-hidden scroll-smooth cursor-text whitespace-pre-wrap
+            <motion.div
+              key={testId}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              ref={textDisplayRef}
+              className={`px-5 md:px-10 lg:px-0 relative text-xl lg:text-[1.6rem] text-left transition-opacity duration-100 ${
+                spaceMono.className
+              } leading-10 mb-8 max-h-[50vh] overflow-y-auto overflow-x-hidden scroll-smooth cursor-text whitespace-pre-wrap
    ${!isFocused ? "blur-sm opacity-60" : "blur-0 opacty-100"}`}
-  onClick={handleTextClick}
-  onMouseDown={(e) => e.preventDefault()}
-  style={{ height: `${CONTAINER_HEIGHT}px` }}
->
-  <div
-    ref={wordsRef}
-    className="leading-10 transition-transform duration-200 ease-out whitespace-pre-wrap"
-    style={{
-      transform: `translateY(-${scrollOffset}px)`,
-      lineHeight: `${LINE_HEIGHT}px`,
-    }}
-  >
-    {highlightedText}
-  </div>
-</motion.div>
-
+              onClick={handleTextClick}
+              onMouseDown={(e) => e.preventDefault()}
+              style={{ height: `${CONTAINER_HEIGHT}px` }}
+            >
+              <div
+                ref={wordsRef}
+                className="leading-10 transition-transform duration-200 ease-out whitespace-pre-wrap"
+                style={{
+                  transform: `translateY(-${scrollOffset}px)`,
+                  lineHeight: `${LINE_HEIGHT}px`,
+                }}
+              >
+                {highlightedText}
+              </div>
+            </motion.div>
 
             <textarea
-  ref={inputRef}
-  type="text"
-  value={userInput}
-  onChange={handleInputChange}
-  onKeyDown={handleKeyDown}
-  onFocus={handleInputFocus}
-  onBlur={handleInputBlur}
-  className="absolute opacity-0 w-1 h-1 top-0 left-0"
-  autoFocus
-  aria-hidden="true"
-/>
-
+              ref={inputRef}
+              type="text"
+              value={userInput}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              className="absolute opacity-0 w-1 h-1 top-0 left-0"
+              autoFocus
+              aria-hidden="true"
+            />
           </div>
-          
 
           <div className="absolute -top-55 -right-4 -z-2 size-100 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-90%"></div>
 
           <button
-            className="mx-auto flex items-center justify-center mt-4 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
+            className="cursor-pointer mx-auto flex items-center justify-center mt-4 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
             onClick={() => handleReType(textData)}
             disabled={loading}
             onMouseEnter={() => setIsHoveringNewTexts(true)}

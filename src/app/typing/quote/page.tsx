@@ -365,12 +365,10 @@ const QuoteType = ({ sessionType = "multiple" }) => {
         deletePreviousWord();
       }
 
-
       // Ensure the input stays focused
       if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
         e.stopPropagation();
       }
-
     },
     [deletePreviousWord]
   );
@@ -458,19 +456,18 @@ const QuoteType = ({ sessionType = "multiple" }) => {
               </div>
             </motion.div>
 
-<input
-  ref={inputRef}
-  type="text"
-  value={userInput}
-  onChange={handleInputChange}
-  onKeyDown={handleKeyDown}
-  onFocus={handleInputFocus}
-  onBlur={handleInputBlur}
-  className="absolute opacity-0 w-1 h-1 top-0 left-0"
-  autoFocus
-  aria-hidden="true"
-/>
-
+            <input
+              ref={inputRef}
+              type="text"
+              value={userInput}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
+              className="absolute opacity-0 w-1 h-1 top-0 left-0"
+              autoFocus
+              aria-hidden="true"
+            />
 
             <div className="flex justify-between items-center mt-0 md:-mt-8">
               <div className="text-lg font-semibold"></div>
@@ -483,7 +480,7 @@ const QuoteType = ({ sessionType = "multiple" }) => {
           <div className="absolute -top-55 -right-4 -z-2 size-100 rounded-full bg-radial-[at_50%_50%] from-blue-500/20 to-black to-90%"></div>
 
           <button
-            className="mx-auto flex items-center justify-center mt-4 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
+            className="cursor-pointer mx-auto flex items-center justify-center mt-4 p-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-sm text-gray-400 transition-colors"
             onClick={handleRefetch}
             disabled={loading}
             onMouseEnter={() => setIsHoveringNewQuote(true)}

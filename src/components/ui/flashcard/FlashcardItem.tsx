@@ -39,6 +39,7 @@ export const FlashcardItem = ({
   answerInputRef,
   skipPhase,
   goToNext,
+  isExactCorrect,
 }) => {
   if (!isActive) {
     return <div className="h-100 md:h-110" />;
@@ -555,15 +556,33 @@ export const FlashcardItem = ({
               </div>
             )}
 
-            {cardCompleted && correct && (
+            {cardCompleted && (correct || isExactCorrect) && (
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="text-green-400 text-center mt-6"
               >
-                <CheckCircle className="w-8 h-8 mx-auto mb-2" />
                 <span className="text-sm">
-                  {blurAnswer ? "Correct Answer!" : "Card completed!"}
+                  {blurAnswer ? (
+                    isExactCorrect ? (
+                      <div className="mt-4 p-4  rounded-md w-full text-yellow-400">
+                        <CheckCircle className="w-8 h-8 mx-auto mb-2" />
+                        <p className="mb-2 ">Almost - correct:</p>
+                        <p className="text-white text-xl">{item?.answer}</p>
+                      </div>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-8 h-8 mx-auto mb-2" />
+                        "Correct!"
+                      </>
+                    )
+                  ) : (
+                    <>
+                      {" "}
+                      <CheckCircle className="w-8 h-8 mx-auto mb-2" />
+                      "Card completed!"
+                    </>
+                  )}
                 </span>
               </motion.div>
             )}

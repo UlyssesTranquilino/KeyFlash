@@ -24,6 +24,7 @@ import {
   SkipForward,
   ChevronRight,
 } from "lucide-react";
+import { distance, closest } from "fastest-levenshtein";
 
 import { cn } from "@/lib/utils";
 import { useFlashcard } from "@/app/context/FlashcardContext";
@@ -158,6 +159,9 @@ const FlashcardPageClient = ({
   );
 
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+
+  // is Exact Correct
+  const [isExactCorrect, setIsExactCorrect] = useState(false);
 
   useEffect(() => {
     const timeoutRef = answerTimeout;
@@ -319,11 +323,34 @@ const FlashcardPageClient = ({
           .toLowerCase() // ignore case
           .replace(/\s+/g, " "); // collapse multiple spaces to one
 
-      if (normalize(userAnswer) === normalize(currentTerm?.answer)) {
+      const correctAnswer = normalize(currentTerm?.answer || "");
+      const userAns = normalize(userAnswer || "");
+
+      // Exact check first
+      const isExact = userAns === correctAnswer;
+
+      // Levenshtein distance
+      const d = distance(userAns, correctAnswer);
+
+      // Allow small mistakes (tune threshold)
+      const allowedMistakes = Math.max(
+        1,
+        Math.floor(correctAnswer.length * 0.2),
+      );
+
+      // Decide outcome
+      if (isExact) {
         setCorrect(true);
+        setIsExactCorrect(false);
         setCorrectCount((prev) => prev + 1);
+      } else if (d > 0 && d <= allowedMistakes) {
+        // Close enough — mark as accepted but show correction
+        setCorrect(true); // or true if you want to treat it as correct
+        setIsExactCorrect(true);
+        setCorrectCount((prev) => prev + 1); // optional: give partial credit as correct
       } else {
         setCorrect(false);
+        setIsExactCorrect(false);
         setWrongCount((prev) => prev + 1);
       }
 
@@ -794,6 +821,7 @@ const FlashcardPageClient = ({
                   answerInputRef={answerInputRef}
                   skipPhase={skipPhase}
                   goToNext={goToNext}
+                  isExactCorrect={isExactCorrect}
                 />
               </div>
 

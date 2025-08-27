@@ -72,7 +72,7 @@ const DashboardCodeTyping = () => {
               variant="outline"
               role="combobox"
               aria-expanded={openLang}
-              className="w-[95px] md:w-full max-w-[150px] sm:w-[110px] justify-between border-0 truncate"
+              className="cursor-pointer w-[95px] md:w-full max-w-[150px] sm:w-[110px] justify-between border-0 truncate"
             >
               {language
                 ? languages.find((l) => l.value === language)?.label
@@ -98,7 +98,7 @@ const DashboardCodeTyping = () => {
                       {lang.label}
                       <Check
                         className={cn(
-                          "ml-auto",
+                          "cursor-pointer ml-auto",
                           selectedLang === lang.value
                             ? "opacity-100"
                             : "opacity-0"
@@ -117,7 +117,7 @@ const DashboardCodeTyping = () => {
               variant="outline"
               role="combobox"
               aria-expanded={openTopic}
-              className="w-[95px]  md:w-full max-w-[150px] sm:w-[110px] justify-between border-0 truncate"
+              className="cursor-pointer w-[95px]  md:w-full max-w-[150px] sm:w-[110px] justify-between border-0 truncate"
             >
               {topic ? topics.find((t) => t.value === topic)?.label : "Topic"}
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -141,7 +141,7 @@ const DashboardCodeTyping = () => {
                       {topic.label}
                       <Check
                         className={cn(
-                          "ml-auto",
+                          "cursor-pointer ml-auto",
                           selectedTopic === topic.value
                             ? "opacity-100"
                             : "opacity-0"
@@ -160,7 +160,7 @@ const DashboardCodeTyping = () => {
             <button
               onClick={() => setShowWpm(!showWpm)}
               className={cn(
-                "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                "cursor-pointer flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                 showWpm ? "text-blue-400" : "text-gray-400 hover:text-white"
               )}
             >

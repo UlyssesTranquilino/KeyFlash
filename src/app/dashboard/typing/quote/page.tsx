@@ -30,7 +30,7 @@ const DashboardQuoteType = () => {
                 }
               }}
               className={cn(
-                "flex items-center gap-2 text-sm transition px-2",
+                "cursor-pointer flex items-center gap-2 text-sm transition px-2",
                 isLowercase ? "text-blue-400" : "text-gray-400 hover:text-white"
               )}
             >
@@ -47,7 +47,7 @@ const DashboardQuoteType = () => {
             <button
               onClick={() => setShowWpm(!showWpm)}
               className={cn(
-                "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                "cursor-pointer flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                 showWpm ? "text-blue-400" : "text-gray-400 hover:text-white"
               )}
             >

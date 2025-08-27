@@ -129,7 +129,7 @@ const Story = () => {
                 <TabsTrigger
                   value="write"
                   className={cn(
-                    "flex items-center gap-2 bg-blue-950/30 ",
+                    "cursor-pointer flex items-center gap-2 bg-blue-950/30 ",
                     activeTab === "write" && "text-blue-400"
                   )}
                 >
@@ -138,7 +138,7 @@ const Story = () => {
                 <TabsTrigger
                   value="upload"
                   className={cn(
-                    "flex items-center gap-2",
+                    "cursor-pointer flex items-center gap-2",
                     activeTab === "upload" && "text-blue-400"
                   )}
                 >
@@ -281,14 +281,14 @@ const Story = () => {
                   setOpenAddText(false);
                   clearSavedText();
                 }}
-                className="bg-gray-900/20 hover:bg-gray-800 text-gray-200"
+                className="cursor-pointer bg-gray-900/20 hover:bg-gray-800 text-gray-200"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSubmit}
                 disabled={text.length === 0 || text.length > 350}
-                className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
+                className="cursor-pointer text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
               >
                 Add Text
               </Button>
@@ -319,7 +319,7 @@ const Story = () => {
           </div>
           <Button
             onClick={() => setOpenAddText(true)}
-            className="text-blue-400 bg-blue-950/30 hover:bg-blue-950/70 md:mt-3 md:scale-105"
+            className="cursor-pointer text-blue-400 bg-blue-950/30 hover:bg-blue-950/70 md:mt-3 md:scale-105"
           >
             Add Text
           </Button>

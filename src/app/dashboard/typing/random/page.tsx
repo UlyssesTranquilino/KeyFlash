@@ -63,7 +63,7 @@ const DashboardRandomType = () => {
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="justify-between flex items-center"
+                    className="cursor-pointer justify-between flex items-center"
                   >
                     {time > 0 ? time : <Infinity />}
                     <Timer className="text-gray-400 ml-2" />
@@ -91,7 +91,7 @@ const DashboardRandomType = () => {
                               }
                             }}
                           >
-                            <div className="flex items-center justify-center w-full">
+                            <div className="cursor-pointer flex items-center justify-center w-full">
                               {timeOption.label}
                             </div>
                           </CommandItem>
@@ -113,7 +113,7 @@ const DashboardRandomType = () => {
             <button
               onClick={() => setShowWpm(!showWpm)}
               className={cn(
-                "flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
+                "cursor-pointer flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                 showWpm ? "text-blue-400" : "text-gray-400 hover:text-white"
               )}
             >

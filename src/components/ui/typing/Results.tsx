@@ -45,7 +45,7 @@ const Results = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="max-w-4xl mx-auto p-6 -mt-18 "
+      className="max-w-4xl mx-auto p-6 -mt-18 overflow-y-scroll max-h-160 lg:max-h-full"
     >
       <div className="text-center mb-4">
         <h2 className="text-3xl  text-white mb-2">Typing Results</h2>
