@@ -767,13 +767,15 @@ const FlashcardPageClient = ({
             setFlashcardData={setCopyFlashcardData}
             onDeleteTerm={handleDelete}
             onAddTerm={() => {
-              setCopyFlashcardData((prev: any) => ({
+              if (openEditFlashcard) {
+                setCopyFlashcardData((prev: any) => ({
                 ...prev,
                 terms: [
                   ...prev.terms,
                   { id: Date.now(), question: "", answer: "" },
                 ],
               }));
+              }
             }}
             onTitleChange={(value) => {
               setCopyFlashcardData((prev: any) => ({ ...prev, title: value }));

@@ -47,6 +47,14 @@ export const FlashcardHeader = ({
   const { user } = useAuth();
   const router = useRouter();
   const [ownerName, setOwnerName] = useState<string>("");
+  const formattedDate = new Date(flashcard.created_at).toLocaleDateString(
+    "en-US",
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }
+  );
 
   const handleDownloadTxt = () => {
     if (!flashcard?.terms) return;
@@ -55,7 +63,7 @@ export const FlashcardHeader = ({
     const content = flashcard.terms
       .map(
         (term: any) =>
-          `${term.question?.trim() || ""} - ${term.answer?.trim() || ""}`,
+          `${term.question?.trim() || ""} - ${term.answer?.trim() || ""}`
       )
       .join("\n\n");
 
@@ -128,7 +136,7 @@ export const FlashcardHeader = ({
             {flashcard.is_public ? (
               <span
                 className="text-sm text-blue-300 bg-blue-800/20
- px-2 py-1 rounded-md"
+          px-2 py-1 rounded-md"
               >
                 Public
               </span>
@@ -139,9 +147,14 @@ export const FlashcardHeader = ({
             )}
           </div>
 
-          {ownerName && (
-            <p className="text-gray-400 text-sm mt-1">Created by {ownerName}</p>
-          )}
+          <div className="flex items-center gap-3 mt-1 text-gray-500">
+            {ownerName && (
+              <p className="text-gray-400 text-sm flex items-center gap-2">
+                Created by {ownerName} <span>•</span>
+                <span>{formattedDate}</span>
+              </p>
+            )}{" "}
+          </div>
 
           <p className="text-gray-300 max-w-170">{description}</p>
         </div>

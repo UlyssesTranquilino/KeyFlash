@@ -212,11 +212,11 @@ export const EditFlashcardDialog = ({
       setNewCardId(lastTerm.id);
     }
     prevTermsLengthRef.current = flashcardData.terms.length;
-  }, [flashcardData?.terms]);
+  }, [flashcardData?.terms, open]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && open) {
         e.preventDefault();
         handleAddTerm();
       }
@@ -226,7 +226,7 @@ export const EditFlashcardDialog = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, []);
+  }, [open]);
 
   // Scroll into view when a new card is added
   useEffect(() => {
