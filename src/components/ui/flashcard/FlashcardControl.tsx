@@ -72,7 +72,7 @@ export const FlashcardControls = ({
                   "scale-80",
                   "data-[state=checked]:bg-blue-400",
                   "data-[state=checked]:border-blue-400",
-                  "data-[state=checked]:ring-blue-400",
+                  "data-[state=checked]:ring-blue-400"
                 )}
               />
               <Label
@@ -93,7 +93,7 @@ export const FlashcardControls = ({
             <button
               className={cn(
                 "cursor-pointer flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
-                isTypingMode ? "text-blue-400" : "text-gray-400",
+                isTypingMode ? "text-blue-400" : "text-gray-400"
               )}
               onClick={() => onTypingModeChange(!isTypingMode)}
             >
@@ -110,7 +110,7 @@ export const FlashcardControls = ({
             <button
               className={cn(
                 "cursor-pointer flex items-center gap-2 py-2 hover:text-blue-400 hover:bg-blue-950/30 rounded-md transition-colors",
-                isShuffled ? "text-blue-400" : "text-gray-400",
+                isShuffled ? "text-blue-400" : "text-gray-400"
               )}
               onClick={isShuffled ? onUnshuffle : onShuffle}
             >
@@ -132,12 +132,13 @@ export const FlashcardControls = ({
         {isQuizMode && (
           <div className="flex items-center justify-center text-sm gap-3 absolute -translate-x-1/67 p-4 w-full">
             <div className="flex gap-1">
-              <Check className="text-green-400" />
-              <span className="text-gray-300">{correctCount}</span>
-            </div>
-            <div className="flex gap-1">
               <X className="text-red-400" />
               <span className="text-gray-300">{wrongCount}</span>
+            </div>
+
+            <div className="flex gap-1">
+              <Check className="text-green-400" />
+              <span className="text-gray-300">{correctCount}</span>
             </div>
           </div>
         )}

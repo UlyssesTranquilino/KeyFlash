@@ -7,6 +7,8 @@ import {
   EyeClosed,
   SkipForward,
   CircleX,
+  Check,
+  X,
 } from "lucide-react";
 import {
   Tooltip,
@@ -40,6 +42,8 @@ export const FlashcardItem = ({
   skipPhase,
   goToNext,
   isExactCorrect,
+  isQuizMode,
+  quizModeTypingOff,
 }) => {
   if (!isActive) {
     return <div className="h-100 md:h-110" />;
@@ -122,7 +126,7 @@ export const FlashcardItem = ({
       document.body.removeChild(tempDiv);
       return lineNumber;
     },
-    [LINE_HEIGHT],
+    [LINE_HEIGHT]
   );
 
   const updateScrollPosition = useCallback(() => {
@@ -200,7 +204,7 @@ export const FlashcardItem = ({
                         ? isCorrect
                           ? "text-white"
                           : "text-red-600 bg-red-900/30"
-                        : "text-gray-500",
+                        : "text-gray-500"
                     )}
                   >
                     {char === " " ? "\u00A0" : char}
@@ -261,8 +265,8 @@ export const FlashcardItem = ({
                     currentPhase === "question"
                       ? "bg-blue-600/20 text-blue-400"
                       : questionCompleted
-                        ? "bg-green-600/20 text-green-400"
-                        : "bg-gray-600/20 text-gray-400"
+                      ? "bg-green-600/20 text-green-400"
+                      : "bg-gray-600/20 text-gray-400"
                   }`}
                 >
                   {questionCompleted && <CheckCircle className="w-4 h-4" />}
@@ -278,8 +282,8 @@ export const FlashcardItem = ({
                     currentPhase === "answer"
                       ? "bg-blue-600/20 text-blue-400"
                       : cardCompleted
-                        ? "bg-green-600/20 text-green-400"
-                        : "bg-gray-600/20 text-gray-400"
+                      ? "bg-green-600/20 text-green-400"
+                      : "bg-gray-600/20 text-gray-400"
                   }`}
                 >
                   {cardCompleted && <CheckCircle className="w-4 h-4" />}
@@ -296,7 +300,7 @@ export const FlashcardItem = ({
                         className={cn(
                           "p-2 cursor-pointer rounded-md transition-colors",
                           "text-gray-300 hover:text-white",
-                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
                         )}
                         aria-label="Skip question"
                       >
@@ -319,7 +323,7 @@ export const FlashcardItem = ({
                           "cursor-pointer flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                           blurAnswer
                             ? "text-blue-400"
-                            : "text-gray-400 hover:text-white",
+                            : "text-gray-400 hover:text-white"
                         )}
                       >
                         {!blurAnswer ? (
@@ -348,7 +352,7 @@ export const FlashcardItem = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
                 ref={textDisplayRef}
-                className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre-wrap transition-all duration-300 overflow-hidden`}
+                className={`overflow-y-scroll text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre-wrap transition-all duration-300 overflow-hidden`}
                 onClick={handleTextClick}
                 onMouseDown={(e) => e.preventDefault()}
                 style={{ height: `${CONTAINER_HEIGHT}px` }}
@@ -392,8 +396,8 @@ export const FlashcardItem = ({
                     currentPhase === "question"
                       ? "bg-blue-600/20 text-blue-400"
                       : questionCompleted
-                        ? "bg-green-600/20 text-green-400"
-                        : "bg-gray-600/20 text-gray-400"
+                      ? "bg-green-600/20 text-green-400"
+                      : "bg-gray-600/20 text-gray-400"
                   }`}
                 >
                   {questionCompleted && <CheckCircle className="w-4 h-4" />}
@@ -409,8 +413,8 @@ export const FlashcardItem = ({
                     currentPhase === "answer"
                       ? "bg-blue-600/20 text-blue-400"
                       : cardCompleted
-                        ? "bg-green-600/20 text-green-400"
-                        : "bg-gray-600/20 text-gray-400"
+                      ? "bg-green-600/20 text-green-400"
+                      : "bg-gray-600/20 text-gray-400"
                   }`}
                 >
                   {cardCompleted && <CheckCircle className="w-4 h-4" />}
@@ -456,7 +460,7 @@ export const FlashcardItem = ({
                         className={cn(
                           "p-2 cursor-pointer rounded-md transition-colors",
                           "text-gray-300 hover:text-white",
-                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900",
+                          "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
                         )}
                         aria-label="Skip back to question"
                       >
@@ -479,7 +483,7 @@ export const FlashcardItem = ({
                           "cursor-pointer flex items-center gap-2 text-[0.9rem] transition px-3 lg:px-2",
                           blurAnswer
                             ? "text-blue-400"
-                            : "text-gray-400 hover:text-white",
+                            : "text-gray-400 hover:text-white"
                         )}
                       >
                         {!blurAnswer ? (
@@ -520,32 +524,59 @@ export const FlashcardItem = ({
                   />
                 </div>
               ) : (
-                <motion.div
-                  key={`${index}-answer`}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  ref={textDisplayRef}
-                  className={`text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre-wrap transition-all duration-300 overflow-hidden`}
-                  onClick={handleTextClick}
-                  onMouseDown={(e) => e.preventDefault()}
-                  style={{ height: `${CONTAINER_HEIGHT}px` }}
-                >
-                  {isTypingMode ? (
-                    <div
-                      ref={wordsRef}
-                      className="transition-transform duration-200 ease-out w-full"
-                      style={{
-                        transform: `translateY(-${scrollOffset}px)`,
-                        lineHeight: `${LINE_HEIGHT}px`,
-                      }}
-                    >
-                      {createHighlightedText}
-                    </div>
-                  ) : (
-                    <p className="whitespace-pre-line">{item?.answer}</p>
-                  )}
-                </motion.div>
+                <div>
+                  <motion.div
+                    key={`${index}-answer`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    ref={textDisplayRef}
+                    className={`overflow-y-scroll text-xl md:text-2xl text-center font-mono leading-relaxed mb-8 sm:px-4 cursor-text whitespace-pre-wrap transition-all duration-300 overflow-hidden`}
+                    onClick={handleTextClick}
+                    onMouseDown={(e) => e.preventDefault()}
+                    style={{ height: `${CONTAINER_HEIGHT}px` }}
+                  >
+                    {isTypingMode ? (
+                      <div
+                        ref={wordsRef}
+                        className="transition-transform duration-200 ease-out w-full"
+                        style={{
+                          transform: `translateY(-${scrollOffset}px)`,
+                          lineHeight: `${LINE_HEIGHT}px`,
+                        }}
+                      >
+                        {createHighlightedText}
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-line">{item?.answer}</p>
+                    )}
+                  </motion.div>
+
+                  <div>
+                    {/* Quiz mode and typing mode off */}
+                    {!isTypingMode && isQuizMode && (
+                      <div className="bottom-0 w-full flex items-center justify-center gap-8">
+                        <button
+                          onClick={() => {
+                            quizModeTypingOff(false);
+                          }}
+                          className="w-20 flex items-center justify-center  p-2  rounded-sm cursor-pointer bg-red-800/20 hover:bg-red-800/40"
+                        >
+                          <X className="text-red-400" />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            quizModeTypingOff(true);
+                          }}
+                          className="w-20 flex items-center justify-center  p-2  rounded-sm cursor-pointer bg-green-800/20 hover:bg-green-800/40"
+                        >
+                          <Check className="text-green-400" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
