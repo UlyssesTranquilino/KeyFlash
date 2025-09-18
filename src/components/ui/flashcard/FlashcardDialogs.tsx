@@ -188,7 +188,7 @@ export const EditFlashcardDialog = ({
   onTermChange: (
     index: number,
     field: "question" | "answer",
-    value: string,
+    value: string
   ) => void;
   onSave: () => void;
   setFlashcardData: (flashcardData: any) => void;

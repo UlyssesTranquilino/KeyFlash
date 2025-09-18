@@ -155,7 +155,7 @@ const FlashcardPageClient = ({
 
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
   const [answerTimeout, setAnswerTimeout] = useState<NodeJS.Timeout | null>(
-    null,
+    null
   );
 
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -335,7 +335,7 @@ const FlashcardPageClient = ({
       // Allow small mistakes (tune threshold)
       const allowedMistakes = Math.max(
         1,
-        Math.floor(correctAnswer.length * 0.2),
+        Math.floor(correctAnswer.length * 0.2)
       );
 
       // Decide outcome
@@ -360,6 +360,19 @@ const FlashcardPageClient = ({
       }, 0);
       setUserInput("");
     }
+  };
+
+  const quizModeTypingOff = (isCorrect: boolean) => {
+    if (isCorrect) {
+      setCorrectCount((prev) => prev + 1);
+    } else {
+      setWrongCount((prev) => prev + 1);
+    }
+    // Focus back to the hidden input to continue typing
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+    goToNext();
   };
 
   const handleTextClick = useCallback(() => {
@@ -392,7 +405,7 @@ const FlashcardPageClient = ({
                     ? "text-white"
                     : "text-red-600 bg-red-900/30"
                   : "text-gray-500",
-                "relative",
+                "relative"
               )}
             >
               {char}
@@ -497,7 +510,7 @@ const FlashcardPageClient = ({
         }
       }
     },
-    [currentText, currentPhase, startTime, answerTimeout, goToNext],
+    [currentText, currentPhase, startTime, answerTimeout, goToNext]
   );
 
   const deletePreviousWord = useCallback(() => {
@@ -527,7 +540,7 @@ const FlashcardPageClient = ({
         deletePreviousWord();
       }
     },
-    [deletePreviousWord],
+    [deletePreviousWord]
   );
 
   const handleInputFocus = useCallback(() => {
@@ -547,12 +560,12 @@ const FlashcardPageClient = ({
 
   const handleEditFlashcard = async (e: any) => {
     const hasEmptyFields = copyFlashcardData.terms.some(
-      (card: any) => !card.question?.trim() || !card.answer?.trim(),
+      (card: any) => !card.question?.trim() || !card.answer?.trim()
     );
 
     if (hasEmptyFields || !copyFlashcardData.title) {
       toast.warning(
-        "Please make sure all flashcards have both a question and an answer.",
+        "Please make sure all flashcards have both a question and an answer."
       );
       return;
     }
@@ -633,7 +646,7 @@ const FlashcardPageClient = ({
       if (!isTypingMode && e.key === " ") {
         e.preventDefault();
         setCurrentPhase((prev) =>
-          prev === "question" ? "answer" : "question",
+          prev === "question" ? "answer" : "question"
         );
       }
     };
@@ -769,12 +782,12 @@ const FlashcardPageClient = ({
             onAddTerm={() => {
               if (openEditFlashcard) {
                 setCopyFlashcardData((prev: any) => ({
-                ...prev,
-                terms: [
-                  ...prev.terms,
-                  { id: Date.now(), question: "", answer: "" },
-                ],
-              }));
+                  ...prev,
+                  terms: [
+                    ...prev.terms,
+                    { id: Date.now(), question: "", answer: "" },
+                  ],
+                }));
               }
             }}
             onTitleChange={(value) => {
@@ -824,6 +837,8 @@ const FlashcardPageClient = ({
                   skipPhase={skipPhase}
                   goToNext={goToNext}
                   isExactCorrect={isExactCorrect}
+                  isQuizMode={isQuizMode}
+                  quizModeTypingOff={quizModeTypingOff}
                 />
               </div>
 
