@@ -194,7 +194,7 @@ const CreateText = () => {
           variant="ghost"
           size="icon"
           onClick={() => router.back()}
-          className="rounded-md p-2 mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
+          className="cursor-pointer rounded-md p-2 mb-5 -ml-2 w-20 hover:bg-gray-800 text-gray-400"
         >
           <ArrowLeft className="h-5 w-5" /> Back
         </Button>

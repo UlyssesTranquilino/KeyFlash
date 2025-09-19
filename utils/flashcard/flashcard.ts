@@ -9,6 +9,7 @@ type termType = {
 };
 
 type flashcardDataType = {
+  folder_id: null;
   is_public: boolean;
   id: string;
   user_id: string | undefined;
@@ -171,6 +172,7 @@ export async function insertFlashcard(flashcardData: flashcardDataType) {
           created_at: flashcardData.created_at,
           terms: flashcardData.terms,
           is_public: flashcardData.is_public ?? false,
+          folder_id: flashcardData.folder_id ?? null,
         },
       ])
       .select()

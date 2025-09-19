@@ -310,7 +310,7 @@ export default function HomePage() {
                   </p>
                   <div className="mt-6">
                     <Link
-                      href="/code/create"
+                      href="/dashboard/codes/create"
                       className="flex max-w-60 mx-auto items-center justify-center p-3 rounded-lg gap-3 w-full cursor-pointer text-blue-400 bg-gray-800/50 hover:bg-blue-700/20 hover:text-blue-300 transition-all duration-300 hover:scale-[1.02]"
                     >
                       <svg

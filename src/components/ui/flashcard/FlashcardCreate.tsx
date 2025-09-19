@@ -2,7 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash, CircleUserRound, ArrowLeft, FileUp } from "lucide-react";
+import {
+  Trash,
+  CircleUserRound,
+  ArrowLeft,
+  FileUp,
+  Check,
+  ChevronsUpDown,
+} from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
   Tooltip,
@@ -10,6 +17,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,12 +50,14 @@ import {
 } from "@/components/ui/dialog";
 
 // Utils
-
+import {
+  getAllFolders,
+  createFolder,
+} from "../../../../utils/folder/folderUtils";
 import {
   getFlashcardsCount,
   insertFlashcard,
 } from "../../../../utils/flashcard/flashcard";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import UpgradeToProDialog from "@/components/ui/UpgradeToProDialog";
 
 export default function FlashcardCreate() {
@@ -63,6 +86,23 @@ export default function FlashcardCreate() {
 
   const [openProDialog, setOpenProDialog] = useState(false);
 
+  // Folders
+  const [folders, setFolders] = useState<any[]>([]);
+  const [openFolder, setOpenFolder] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+
+  // Fetch folders when user or session changes
+  useEffect(() => {
+    async function fetchFolders() {
+      if (!user) return;
+      const data = await getAllFolders(user.id);
+      setFolders(data || []);
+    }
+    fetchFolders();
+  }, [user]);
+
   const isMac =
     typeof navigator !== "undefined" &&
     /Mac|iPod|iPhone|iPad/.test(navigator.platform);
@@ -70,6 +110,35 @@ export default function FlashcardCreate() {
 
   const newCardRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // Create Folder
+  // create folder on demand
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) {
+      toast.warning("Folder name cannot be empty");
+      return;
+    }
+
+    try {
+      const folder = await createFolder({
+        userId: user.id,
+        name: newFolderName,
+        description: "",
+      });
+
+      if (folder.error) throw folder.error;
+
+      toast.success("Folder created!");
+      setFolders((prev) => [...prev, folder.data]);
+      setSelectedFolder(folder.data.id);
+      setNewFolderName("");
+      setIsCreatingFolder(false);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to create folder");
+    }
+  };
+
+  // Add Card
   const handleAddCard = () => {
     const id = Date.now();
 
@@ -136,7 +205,7 @@ export default function FlashcardCreate() {
     if (!flashCardData || flashCardData.length <= 0) return;
 
     setFlashCardData((prev: any) =>
-      prev ? prev.filter((card: any) => card.id !== id) : [],
+      prev ? prev.filter((card: any) => card.id !== id) : []
     );
   };
 
@@ -147,9 +216,26 @@ export default function FlashcardCreate() {
       .replace(/(^-|-$)+/g, "");
   }
 
+  useEffect(() => {
+    localStorage.setItem(
+      "flashcardDraft",
+      JSON.stringify({ title, description, flashCardData })
+    );
+  }, [title, description, flashCardData]);
+
+  useEffect(() => {
+    const draft = localStorage.getItem("flashcardDraft");
+    if (draft) {
+      const parsed = JSON.parse(draft);
+      setTitle(parsed.title);
+      setDescription(parsed.description);
+      setFlashCardData(parsed.flashCardData);
+    }
+  }, []);
+
   const handleCreateFlashcard = async () => {
     const hasEmptyFields = flashCardData.some(
-      (card: any) => !card.question?.trim() || !card.answer?.trim(),
+      (card: any) => !card.question?.trim() || !card.answer?.trim()
     );
 
     if (hasEmptyFields || !title) {
@@ -175,6 +261,7 @@ export default function FlashcardCreate() {
       description,
       terms: flashCardData,
       is_public: isPublic,
+      folder_id: selectedFolder,
       created_at: new Date(),
     };
 
@@ -345,7 +432,7 @@ export default function FlashcardCreate() {
               isDragging
                 ? "border-blue-400 bg-blue-900/20"
                 : "border-blue-300/60",
-              !user && "blur-xs",
+              !user && "blur-xs"
             )}
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
@@ -432,15 +519,101 @@ export default function FlashcardCreate() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 my-4">
-        <label htmlFor="isPublic" className="text-gray-200">
-          Public
-        </label>
-        <Switch
-          checked={isPublic}
-          onCheckedChange={setIsPublic}
-          className=" data-[state=checked]:bg-blue-500 cursor-pointer"
-        />
+      <div className="flex-col my-4 w-full gap-10">
+        <div className="flex items-center gap-2 my-5">
+          <label htmlFor="isPublic" className="text-gray-200">
+            Public
+          </label>
+          <Switch
+            checked={isPublic}
+            onCheckedChange={setIsPublic}
+            className=" data-[state=checked]:bg-blue-500 cursor-pointer"
+          />
+        </div>
+
+        <div className="w-full flex items-center gap-3">
+          <Label htmlFor="folder">Folder</Label>
+
+          {!isCreatingFolder ? (
+            <Popover open={openFolder} onOpenChange={setOpenFolder}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openFolder}
+                  className="cursor-pointer w-full max-w-[250px]  justify-between border-0 truncate"
+                >
+                  {selectedFolder
+                    ? folders.find((f) => f.id === selectedFolder)?.name
+                    : "No Folder"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full max-w-[250px] cursor-pointer p-0">
+                <Command>
+                  <CommandInput placeholder="Search folder..." />
+                  <CommandList>
+                    <CommandEmpty>No folder found.</CommandEmpty>
+                    <CommandGroup>
+                      {folders.map((folder) => (
+                        <CommandItem
+                          key={folder.id}
+                          value={folder.id}
+                          onSelect={(current) => {
+                            setSelectedFolder(current);
+                            setOpenFolder(false);
+                          }}
+                        >
+                          {folder.name}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              selectedFolder === folder.id
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                      <CommandItem
+                        value="new"
+                        onSelect={() => {
+                          setIsCreatingFolder(true);
+                          setOpenFolder(false);
+                        }}
+                      >
+                        Create new folder
+                      </CommandItem>
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="New folder name"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                className="input-glow !bg-gray-900 !border-0 flex-1"
+              />
+              <Button
+                onClick={handleCreateFolder}
+                className="cursor-pointer text-blue-400 bg-blue-950/30 hover:bg-blue-950/70"
+              >
+                Save
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setIsCreatingFolder(false)}
+                className="text-gray-300 cursor-pointer bg-gray-900/20"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
 
       <h1 className=" mt-10 mb-5 font-semibold">Terms</h1>
