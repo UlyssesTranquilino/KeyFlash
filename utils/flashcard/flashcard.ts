@@ -71,6 +71,7 @@ export async function editFlashcard(flashcardData: flashcardDataType) {
         description: flashcardData.description,
         terms: flashcardData.terms,
         is_public: flashcardData.is_public,
+        folder_id: flashcardData.folder_id ?? null,
       })
       .eq("id", flashcardData.id)
       .eq("user_id", user.id)

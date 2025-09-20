@@ -59,11 +59,13 @@ export const FlashcardHeader = ({
   const handleDownloadTxt = () => {
     if (!flashcard?.terms) return;
 
-    // Format: "Question - Answer"
+    // Format: "Question:\nAnswer:"
     const content = flashcard.terms
       .map(
         (term: any) =>
-          `${term.question?.trim() || ""} - ${term.answer?.trim() || ""}`
+          `Question: ${term.question?.trim() || ""}\nAnswer: ${
+            term.answer?.trim() || ""
+          }`
       )
       .join("\n\n");
 

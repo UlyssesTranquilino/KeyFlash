@@ -8,6 +8,22 @@ interface CreateFolderProps {
   icon?: string;
 }
 
+export async function getFolderById(userId: string, folderId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("folders")
+    .select("id, name")
+    .eq("id", folderId);
+
+  if (error) {
+    console.error("Error getting folder:", error);
+    return null;
+  }
+
+  return data || null;
+}
+
 export async function getAllFolders(userId: string) {
   const supabase = createClient();
 

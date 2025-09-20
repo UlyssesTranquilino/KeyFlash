@@ -225,7 +225,12 @@ export const FlashcardItem = ({
   }, [currentPhase, item, isTypingMode, userInput]);
 
   return (
-    <div className="mt-2 max-w-[1100px] rounded-2xl bg-gray-900/70 relative overflow-hidden h-100 md:h-110">
+    <div
+      className={cn(
+        "mt-2 max-w-[1100px] rounded-2xl bg-gray-900/70 relative overflow-hidden h-100 md:h-110",
+        !isTypingMode && "cursor-pointer"
+      )}
+    >
       <div
         className="flex flex-col items-center justify-center h-full p-2 md:p-4"
         onClick={handleFlipCard}

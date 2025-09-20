@@ -807,6 +807,7 @@ const FlashcardPageClient = ({
               });
             }}
             onSave={handleEditFlashcard}
+            userId={user?.id}
           />
 
           <div className={`h-[100vh] pt-3`}>

@@ -111,7 +111,6 @@ export default function FlashcardCreate() {
   const newCardRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Create Folder
-  // create folder on demand
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) {
       toast.warning("Folder name cannot be empty");
@@ -279,18 +278,25 @@ export default function FlashcardCreate() {
   };
 
   const parseFlashcardText = (text: string) => {
-    return text
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.includes("-"))
-      .map((line, index) => {
-        const [question, answer] = line.split("-").map((part) => part.trim());
-        return {
-          id: Date.now() + index,
-          question,
-          answer,
-        };
-      });
+    const lines = text.split("\n").map((line) => line.trim());
+    const flashcards = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("Question:")) {
+        const question = lines[i].replace("Question:", "").trim();
+        const answerLine = lines[i + 1] || "";
+        if (answerLine.startsWith("Answer:")) {
+          const answer = answerLine.replace("Answer:", "").trim();
+          flashcards.push({
+            id: Date.now() + i,
+            question,
+            answer,
+          });
+        }
+      }
+    }
+
+    return flashcards;
   };
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -413,19 +419,25 @@ export default function FlashcardCreate() {
               Upload Flashcard
             </DialogTitle>
             <DialogDescription>
-              <div className=" text-sm text-gray-400 mb-4">
+              <div className="text-sm text-gray-400 mb-4">
                 <p className="text-white text-left">File format should be:</p>
-                <p className="font-mono bg-gray-900 p-2 rounded mt-1">
-                  question - answer
-                </p>
-                <p className="mt-2 text-white text-left ">Example:</p>
+                <div className="font-mono bg-gray-900 p-2 rounded mt-1 ">
+                  <p>Question: ...</p>
+                  <p className="mr-3">Answer: ...</p>
+                </div>
+                <p className="mt-2 text-white text-left">Example:</p>
                 <div className="font-mono bg-gray-900 p-2 rounded text-left">
-                  <p>What is the capital of France? - Paris</p>
-                  <p>Largest planet in our solar system? - Jupiter</p>
+                  <p>Question: What is the capital of France?</p>
+                  <p>Answer: Paris</p>
+                  <p className="mt-2">
+                    Question: Largest planet in our solar system?
+                  </p>
+                  <p>Answer: Jupiter</p>
                 </div>
               </div>
             </DialogDescription>
           </DialogHeader>
+
           <div
             className={cn(
               "border-2 border-dashed rounded-lg p-3 text-center transition-colors",
@@ -531,7 +543,7 @@ export default function FlashcardCreate() {
           />
         </div>
 
-        <div className="w-full flex items-center gap-3">
+        <div className="w-full  flex items-center gap-3">
           <Label htmlFor="folder">Folder</Label>
 
           {!isCreatingFolder ? (
@@ -563,6 +575,7 @@ export default function FlashcardCreate() {
                             setSelectedFolder(current);
                             setOpenFolder(false);
                           }}
+                          className="cursor-pointer"
                         >
                           {folder.name}
                           <Check
@@ -581,6 +594,7 @@ export default function FlashcardCreate() {
                           setIsCreatingFolder(true);
                           setOpenFolder(false);
                         }}
+                        className="cursor-pointer"
                       >
                         Create new folder
                       </CommandItem>
@@ -590,13 +604,13 @@ export default function FlashcardCreate() {
               </PopoverContent>
             </Popover>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex gap-2 w-full max-w-[450px]">
               <Input
                 type="text"
                 placeholder="New folder name"
                 value={newFolderName}
                 onChange={(e) => setNewFolderName(e.target.value)}
-                className="input-glow !bg-gray-900 !border-0 flex-1"
+                className="input-glow !bg-gray-900 !border-0 flex-1  w-full max-w-[400px]"
               />
               <Button
                 onClick={handleCreateFolder}

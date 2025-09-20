@@ -426,11 +426,10 @@ const TypingFlashcards = () => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      deletePreviousWord();
-    }
-
+      if (e.key === "Backspace" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        deletePreviousWord();
+      }
     },
     [deletePreviousWord]
   );
@@ -559,18 +558,25 @@ const TypingFlashcards = () => {
   };
 
   const parseFlashcardText = (text: string) => {
-    return text
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.includes("-"))
-      .map((line, index) => {
-        const [question, answer] = line.split("-").map((part) => part.trim());
-        return {
-          id: Date.now() + index,
-          question,
-          answer,
-        };
-      });
+    const lines = text.split("\n").map((line) => line.trim());
+    const flashcards = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("Question:")) {
+        const question = lines[i].replace("Question:", "").trim();
+        const answerLine = lines[i + 1] || "";
+        if (answerLine.startsWith("Answer:")) {
+          const answer = answerLine.replace("Answer:", "").trim();
+          flashcards.push({
+            id: Date.now() + i,
+            question,
+            answer,
+          });
+        }
+      }
+    }
+
+    return flashcards;
   };
 
   const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
@@ -1005,73 +1011,90 @@ const TypingFlashcards = () => {
                   </Button>
                 </div>
               </TabsContent>
-<TabsContent value="upload" className="mt-4 bg-gray-950/90">
-  {!user && (
-    <div className="inset-0 flex items-center justify-center z-10 rounded-xl mb-4">
-      <h2 className="text-red-400">
-        Please <Link href="/signin" className="font-semibold text-blue-400 hover:underline">Sign in</Link> to upload a file
-      </h2>
-    </div>
-  )}
+              <TabsContent value="upload" className="mt-4 bg-gray-950/90">
+                {!user && (
+                  <div className="inset-0 flex items-center justify-center z-10 rounded-xl mb-4">
+                    <h2 className="text-red-400">
+                      Please{" "}
+                      <Link
+                        href="/signin"
+                        className="font-semibold text-blue-400 hover:underline"
+                      >
+                        Sign in
+                      </Link>{" "}
+                      to upload a file
+                    </h2>
+                  </div>
+                )}
 
-  <div className="text-sm text-gray-400 mb-4">
-    <p className="text-white">File format should be:</p>
-    <p className="font-mono bg-gray-900 p-2 rounded mt-1">
-      question - answer
-    </p>
-    <p className="mt-2 text-white">Example:</p>
-    <div className="font-mono bg-gray-900 p-2 rounded text-left">
-      <p>What is the capital of France? - Paris</p>
-      <p>Largest planet in our solar system? - Jupiter</p>
-    </div>
-  </div>
+                <div className="text-sm text-gray-400 mb-4">
+                  <p className="text-white">File format should be:</p>
+                  <div className="font-mono bg-gray-900 p-2 rounded mt-1">
+                    <p>Question: ...</p>
+                    <p>Answer: ...</p>
+                  </div>
+                  <p className="mt-2 text-white">Example:</p>
+                  <div className="font-mono bg-gray-900 p-2 rounded text-left">
+                    <p>Question: What is the capital of France?</p>
+                    <p>Answer: Paris</p>
+                    <p className="mt-2">
+                      Question: Largest planet in our solar system?
+                    </p>
+                    <p>Answer: Jupiter</p>
+                  </div>
+                </div>
 
-  <div
-    className={cn(
-      "border-2 border-dashed rounded-lg p-3 text-center transition-colors",
-      isDragging
-        ? "border-blue-400 bg-blue-900/20"
-        : "border-blue-300/60",
-      !user && "opacity-50 pointer-events-none"
-    )}
-    onDragEnter={!user ? undefined : handleDragEnter}
-    onDragLeave={!user ? undefined : handleDragLeave}
-    onDragOver={!user ? undefined : handleDragOver}
-    onDrop={!user ? undefined : handleDrop}
-  >
-    <div className="p-3 flex flex-col items-center justify-center gap-2">
-      <FileUp className="h-8 w-8 text-gray-400" />
-      {isDragging ? (
-        <p className="font-medium text-blue-400">Drop your file here</p>
-      ) : (
-        <>
-          <p className="font-medium">Drag and drop your file here</p>
-          <p className="text-gray-500">or</p>
-        </>
-      )}
+                <div
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-3 text-center transition-colors",
+                    isDragging
+                      ? "border-blue-400 bg-blue-900/20"
+                      : "border-blue-300/60",
+                    !user && "opacity-50 pointer-events-none"
+                  )}
+                  onDragEnter={!user ? undefined : handleDragEnter}
+                  onDragLeave={!user ? undefined : handleDragLeave}
+                  onDragOver={!user ? undefined : handleDragOver}
+                  onDrop={!user ? undefined : handleDrop}
+                >
+                  <div className="p-3 flex flex-col items-center justify-center gap-2">
+                    <FileUp className="h-8 w-8 text-gray-400" />
+                    {isDragging ? (
+                      <p className="font-medium text-blue-400">
+                        Drop your file here
+                      </p>
+                    ) : (
+                      <>
+                        <p className="font-medium">
+                          Drag and drop your file here
+                        </p>
+                        <p className="text-gray-500">or</p>
+                      </>
+                    )}
 
-      <label className={cn(
-        "mt-2 px-4 py-2 rounded-md cursor-pointer transition-colors",
-        user 
-          ? "bg-blue-900/30 text-blue-400 hover:bg-blue-900/50"
-          : "bg-gray-700 text-gray-500 cursor-not-allowed"
-      )}>
-        Select File
-        <input
-          type="file"
-          accept=".txt"
-          className="hidden"
-          onChange={user ? handleFileUpload : undefined}
-          disabled={!user}
-        />
-      </label>
-      <p className="text-xs text-gray-500 mt-2">
-        Supports .txt files only
-      </p>
-    </div>
-  </div>
-</TabsContent>
-
+                    <label
+                      className={cn(
+                        "mt-2 px-4 py-2 rounded-md cursor-pointer transition-colors",
+                        user
+                          ? "bg-blue-900/30 text-blue-400 hover:bg-blue-900/50"
+                          : "bg-gray-700 text-gray-500 cursor-not-allowed"
+                      )}
+                    >
+                      Select File
+                      <input
+                        type="file"
+                        accept=".txt"
+                        className="hidden"
+                        onChange={user ? handleFileUpload : undefined}
+                        disabled={!user}
+                      />
+                    </label>
+                    <p className="text-xs text-gray-500 mt-2">
+                      Supports .txt files only
+                    </p>
+                  </div>
+                </div>
+              </TabsContent>
             </Tabs>
           </DialogContent>
         </Dialog>
@@ -1148,8 +1171,8 @@ const TypingFlashcards = () => {
                             currentPhase === "question"
                               ? "bg-blue-600/20 text-blue-400"
                               : questionCompleted
-                                ? "bg-green-600/20 text-green-400"
-                                : "bg-gray-600/20 text-gray-400"
+                              ? "bg-green-600/20 text-green-400"
+                              : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {questionCompleted && (
@@ -1167,8 +1190,8 @@ const TypingFlashcards = () => {
                             currentPhase === "answer"
                               ? "bg-blue-600/20 text-blue-400"
                               : cardCompleted
-                                ? "bg-green-600/20 text-green-400"
-                                : "bg-gray-600/20 text-gray-400"
+                              ? "bg-green-600/20 text-green-400"
+                              : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {cardCompleted && <CheckCircle className="w-4 h-4" />}
@@ -1258,8 +1281,8 @@ const TypingFlashcards = () => {
                             currentPhase === "question"
                               ? "bg-blue-600/20 text-blue-400"
                               : questionCompleted
-                                ? "bg-green-600/20 text-green-400"
-                                : "bg-gray-600/20 text-gray-400"
+                              ? "bg-green-600/20 text-green-400"
+                              : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {questionCompleted && (
@@ -1277,8 +1300,8 @@ const TypingFlashcards = () => {
                             currentPhase === "answer"
                               ? "bg-blue-600/20 text-blue-400"
                               : cardCompleted
-                                ? "bg-green-600/20 text-green-400"
-                                : "bg-gray-600/20 text-gray-400"
+                              ? "bg-green-600/20 text-green-400"
+                              : "bg-gray-600/20 text-gray-400"
                           }`}
                         >
                           {cardCompleted && <CheckCircle className="w-4 h-4" />}
@@ -1500,18 +1523,18 @@ const TypingFlashcards = () => {
         </div>
       </Carousel>
       {/* Hidden input */}
-<input
-  ref={inputRef}
-  type="text"
-  value={userInput}
-  onChange={handleInputChange}
-  onKeyDown={handleKeyDown}
-  onFocus={handleInputFocus}
-  onBlur={handleInputBlur}
-  className="absolute opacity-0 w-1 h-1 top-0 left-0"
-  autoFocus
-  aria-hidden="true"
-/>
+      <input
+        ref={inputRef}
+        type="text"
+        value={userInput}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onFocus={handleInputFocus}
+        onBlur={handleInputBlur}
+        className="absolute opacity-0 w-1 h-1 top-0 left-0"
+        autoFocus
+        aria-hidden="true"
+      />
     </div>
   );
 };

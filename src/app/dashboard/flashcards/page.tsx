@@ -66,6 +66,17 @@ export default function HomePage() {
     fetchFlashcards();
   }, []);
 
+  const handleSearchFlashcard = (searchTerm: string) => {
+    if (!searchTerm) {
+      setFilteredFlashcards(flashcards);
+      return;
+    }
+    const filteredData = flashcards.filter((card) =>
+      card.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredFlashcards(filteredData);
+  };
+
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       handleSearchFlashcard(searchFlashcard);
@@ -135,17 +146,6 @@ export default function HomePage() {
       </div>
     );
   }
-
-  const handleSearchFlashcard = (searchTerm: string) => {
-    if (!searchTerm) {
-      setFilteredFlashcards(flashcards);
-      return;
-    }
-    const filteredData = flashcards.filter((card) =>
-      card.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredFlashcards(filteredData);
-  };
 
   const handleSortFlashcard = (value: string) => {
     setSortMethod(value);
