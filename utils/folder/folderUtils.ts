@@ -24,13 +24,16 @@ export async function getFolderById(userId: string, folderId: string) {
   return data || null;
 }
 
-export async function getAllFolders(userId: string) {
+export async function getAllFolders() {
   const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
     .from("folders")
     .select("id, name")
-    .eq("user_id", userId)
+    .eq("user_id", user?.id)
     .order("created_at", { ascending: true });
 
   if (error) {

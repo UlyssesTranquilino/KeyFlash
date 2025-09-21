@@ -11,6 +11,7 @@ import {
   Type,
   ChevronRight,
   SearchX,
+  Folder,
   X,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { getAllFolders } from "../../../../utils/folder/folderUtils";
 import { useEffect, useState } from "react";
 import { getAllFlashcards } from "../../../../utils/flashcard/flashcard";
 
@@ -40,6 +42,7 @@ export default function HomePage() {
   const router = useRouter();
   const { user, session } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
+  const [folders, setFolders] = useState<any[]>([]);
   const [filteredFlashcards, setFilteredFlashcards] = useState<any[]>([]);
   const [texts, setTexts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,8 +55,6 @@ export default function HomePage() {
     const fetchFlashcards = async () => {
       const data = await getAllFlashcards();
 
-      setLoading(false);
-
       if (Array.isArray(data)) {
         setFlashcards(data);
         setFilteredFlashcards(data);
@@ -62,8 +63,22 @@ export default function HomePage() {
         setFilteredFlashcards([]);
       }
     };
+
+    const fetchFolders = async () => {
+      const data = await getAllFolders();
+
+      setLoading(false);
+
+      if (Array.isArray(data)) {
+        setFolders(data);
+      } else {
+        setFolders([]);
+      }
+    };
+
     setLoading(true);
     fetchFlashcards();
+    fetchFolders();
   }, []);
 
   const handleSearchFlashcard = (searchTerm: string) => {
@@ -253,11 +268,75 @@ export default function HomePage() {
             </Select>
           </div>
         </div>
-        <div>
+
+        <div className="mt-12">
+          {/* Folders */}
+          {folders.length > 0 && (
+            <>
+              <h2 className="font-medium text-lg mb-3">Folders</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5 mb-8">
+                {folders.map((folder: any) => (
+                  <div
+                    key={folder.id}
+                    onClick={() =>
+                      router.push(`/dashboard/folders/${folder.slug}`)
+                    }
+                    className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
+                  >
+                    <div className="relative z-10 p-5 h-full flex flex-col">
+                      <h2 className="truncate font-semibold text-lg text-white group-hover:text-blue-400 transition-colors duration-300">
+                        {folder.name}
+                      </h2>
+                      <span className="text-sm text-gray-400 mt-auto group-hover:text-gray-300 transition-colors duration-300">
+                        {folder.flashcards_count || 0} flashcards
+                      </span>
+                    </div>
+
+                    {/* Decorative Graphic - Animated on Hover */}
+                    <div className="absolute right-10 bottom-8 opacity-70 group-hover:opacity-90 transition-opacity duration-300">
+                      <Folder
+                        stroke="#3B82F6"
+                        strokeWidth={0.6}
+                        className="size-20 transition-transform duration-500 ease-in-out group-hover:rotate-0 group-hover:translate-x-2 group-hover:translate-y-2 transform translate-x-8 translate-y-5 rotate-12"
+                      />
+                    </div>
+
+                    {/* Hover Gradient Overlay */}
+                    <div className="absolute  inset-0 bg-gradient-to-t from-blue-800/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                ))}
+
+                <div
+                  className="flex flex-col items-center justify-center gap-1 rounded-xl h-40 w-full 
+ bg-gray-950/20
+  border border-dashed border-gray-700 
+  hover:text-blue-400 hover:border-blue-500 
+  transition-all duration-300 cursor-pointer 
+  shadow-lg hover:shadow-blue-500/20"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <h1 className="font-semibold">Create</h1>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Flashcards (unsorted / all) */}
+          <h2 className="font-medium text-lg mb-3">Flashcards</h2>
           {flashcards.length > 0 ? (
             filteredFlashcards.length > 0 ? (
-              <div className="grid sm:grid-cols-2  lg:grid-cols-4 gap-3 lg:gap-5">
-                {/* Flashcard Item */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-5">
                 {filteredFlashcards.map((card: any) => (
                   <div
                     key={card.id}

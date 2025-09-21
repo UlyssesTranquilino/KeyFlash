@@ -97,7 +97,7 @@ export default function FlashcardCreate() {
   useEffect(() => {
     async function fetchFolders() {
       if (!user) return;
-      const data = await getAllFolders(user.id);
+      const data = await getAllFolders();
       setFolders(data || []);
     }
     fetchFolders();

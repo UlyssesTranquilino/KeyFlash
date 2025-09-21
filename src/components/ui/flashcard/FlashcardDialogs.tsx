@@ -238,7 +238,7 @@ export const EditFlashcardDialog = ({
   useEffect(() => {
     async function fetchFolders() {
       if (!userId) return;
-      const data = await getAllFolders(userId);
+      const data = await getAllFolders();
       setFolders(data || []);
 
       if (flashcardData?.folder_id) {
