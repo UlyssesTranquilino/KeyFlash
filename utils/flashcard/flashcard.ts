@@ -51,6 +51,37 @@ export async function getAllFlashcards() {
   }
 }
 
+export async function getFlashcardsWithFolderId(folderId: string) {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.error("User not authenticated");
+      return { error: "User not authenticated" };
+    }
+
+    const { data, error } = await supabase
+      .from("flashcards")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("folder_id", folderId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching flashcards: ", error);
+      return { error: error.message };
+    }
+
+    return data; // return array directly
+  } catch (error) {
+    console.error("Unexpected error getting all flashcards: ", error);
+    return { error: "Unexpected error occurred" };
+  }
+}
+
 export async function editFlashcard(flashcardData: flashcardDataType) {
   try {
     const supabase = createClient();

@@ -278,9 +278,10 @@ export default function HomePage() {
                 {folders.map((folder: any) => (
                   <div
                     key={folder.id}
-                    onClick={() =>
-                      router.push(`/dashboard/folders/${folder.slug}`)
-                    }
+                    onClick={() => {
+                      const slug = `${folder.id}-${slugify(folder.name)}`;
+                      router.push(`/dashboard/flashcards/folder/${slug}`);
+                    }}
                     className="relative group overflow-hidden rounded-xl h-40 w-full bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-950 hover:border-blue-500 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-blue-500/20"
                   >
                     <div className="relative z-10 p-5 h-full flex flex-col">
@@ -307,7 +308,7 @@ export default function HomePage() {
                 ))}
 
                 <div
-                  className="flex flex-col items-center justify-center gap-1 rounded-xl h-40 w-full 
+                  className="flex flex-col items-center justify-center gap-1 rounded-xl h-40 w-full text-gray-400
  bg-gray-950/20
   border border-dashed border-gray-700 
   hover:text-blue-400 hover:border-blue-500 
